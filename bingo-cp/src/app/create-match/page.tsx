@@ -132,7 +132,7 @@ export default function Home() {
 
     fetchPoll();
 
-    const interval = setInterval(fetchPoll, 15000);
+    const interval = setInterval(fetchPoll, 20000);
     return () => clearInterval(interval);
   }, [match?.id, match?.startTime, match?.durationMinutes]);
 
