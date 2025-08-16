@@ -485,11 +485,12 @@ export default function Home() {
         setLog(prev => {
         const problemList = w.keys.map(k => k.replace('-', '')).join(', '); // basic formatting
         const finalMsg = `${displayName} completed ${w.type === 'row' ? 'a row' : w.type === 'col' ? 'a column' : w.type === 'diag' ? 'the main diagonal' : 'the anti-diagonal'}`;
+        notifyBrowser(`${displayName} won!`, finalMsg);
         return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev].slice(0, 10);
         });
 
     }
-    }, [solved,problems , winner]);
+    }, [solved,problems , winner,positionOwners]);
 
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
@@ -502,7 +503,7 @@ export default function Home() {
     for (let i = 0; i < problemsArr.length; i++) {
         const r = Math.floor(i / size);
         const c = i % size;
-        ownerGrid[r][c] = solvedMap[i]?.team ?? null;
+        ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null; // changed this
     }
 
     // rows

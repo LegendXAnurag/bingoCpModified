@@ -23,6 +23,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({}) => {
   const [selectedMode, setSelectedMode] = useState<"classic" | "replace">("classic");
   const [selectedGridSize, setSelectedGridSize] = useState<number>(5);
   const [replaceIncrement, setReplaceIncrement] = useState<number>(100);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   
@@ -160,29 +161,38 @@ const handleSubmit = async (e: React.FormEvent) => {
     problems: [],
     solveLog: [],
   };
-  // console.time("matchCreation")
-  const res = await fetch("../../api/createMatch", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(matchData),
-  });
-  // console.timeEnd("matchCreation");
-  
-  if (!res.ok) {
-    const errorText = await res.text(); // Read the error body
-    console.error("Failed to create match:", errorText);
-    alert("Failed to create match: " + errorText);
-    return;
+  setIsSubmitting(true);
+  try {
+    // console.time("matchCreation")
+    const res = await fetch("../../api/createMatch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(matchData),
+    });
+    // console.timeEnd("matchCreation");
+    
+    if (!res.ok) {
+      const errorText = await res.text(); // Read the error body
+      console.error("Failed to create match:", errorText);
+      alert("Failed to create match: " + errorText);
+      setIsSubmitting(false);
+      return;
+    }
+    const created = await res.json();
+    const newMatchId = created?.id ?? created?.match?.id ?? created?.id;
+    if (!newMatchId) {
+      alert("Could not create match, no id returned");
+      setIsSubmitting(false);
+      return;
+    }
+    router.push(`/match/${newMatchId}`);
+  } catch(err) {
+    console.error("Error creating match", err);
+    alert("Error creating match");
+    setIsSubmitting(false);
   }
-  const created = await res.json();
-  const newMatchId = created?.id ?? created?.match?.id ?? created?.id;
-  if (!newMatchId) {
-    alert("Could not create match, no id returned");
-    return;
-  }
-  router.push(`/match/${newMatchId}`);
 };
 
 
@@ -288,8 +298,20 @@ const handleSubmit = async (e: React.FormEvent) => {
       {/* Submit button */}
       <button
         type="submit"
+        disabled={isSubmitting}
         className="cursor-pointer bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition mt-4 sm:mt-0"
       >
+        {isSubmitting ? (
+          <span className="flex items-center">
+            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            Creating...
+          </span>
+        ) : (
+          'Create Match'
+        )}
         Create Match
       </button>
     </form>
