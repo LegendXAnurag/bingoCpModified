@@ -312,7 +312,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         ) : (
           'Create Match'
         )}
-        Create Match
+        
       </button>
     </form>
     
