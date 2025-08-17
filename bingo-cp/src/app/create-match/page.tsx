@@ -85,7 +85,8 @@ export default function Home() {
         return;
       }
       try {
-        const pollRes = await fetch('/api/poll-submissions', {
+            const baseUrl = 'https://bingo-cp.vercel.app'; // UPDATE IT LATER
+        const pollRes = await fetch(`${baseUrl}/api/poll-submissions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ matchId: match.id }),
