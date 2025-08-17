@@ -24,8 +24,6 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({}) => {
   const [selectedGridSize, setSelectedGridSize] = useState<number>(5);
   const [replaceIncrement, setReplaceIncrement] = useState<number>(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-
   
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +51,17 @@ const handleSubmit = async (e: React.FormEvent) => {
     if (team.members.some(m => !m.trim())) {
       alert("All member handles must be filled.");
       return;
+    }
+    for(const member of team.members) {
+      const submissionsRes = await fetch(
+        `https://codeforces.com/api/user.info?handles=${member}`
+      )
+      const submissionsData = await submissionsRes.json()
+
+      if (submissionsData.status !== 'OK') {
+        alert("All member handles must be valid");
+        return;
+      }
     }
   }
   const allHandles = teams.flatMap((team) =>
