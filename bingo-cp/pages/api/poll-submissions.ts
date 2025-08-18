@@ -12,7 +12,7 @@ async function fetchReplacementProblem(exclude: string[], minRating?: number, ma
         maxRating: maxRating ?? 3500,
         userHandles: handles,
         count: 1,
-        exculde: exclude
+        exclude: exclude
       }),
     });
     if (!res.ok) return null;
@@ -56,7 +56,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         team: team.color,
       }))
     )
-    const matchStart = new Date(match.startTime);
     const claims = await checkSolvesLogic(problems, players)
     const newSolves: Array<{
       handle: string;

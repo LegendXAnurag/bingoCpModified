@@ -33,7 +33,8 @@ export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
         const existing = claims[key]
         if (
           !existing ||
-          sub.id < existing.id
+          sub.creationTimeSeconds > existing.time ||
+          (sub.creationTimeSeconds === existing.time && sub.id > existing.id)
         ) {
           claims[key] = {
             team: player.team,

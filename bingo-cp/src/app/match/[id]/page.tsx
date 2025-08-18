@@ -391,7 +391,7 @@ export default function Home() {
 
     fetchPoll();
 
-    const interval = setInterval(fetchPoll, 20000); // REMEMBER TO CHANGE TO 15S
+    const interval = setInterval(fetchPoll, 15000); // REMEMBER TO CHANGE TO 15S
     return () => clearInterval(interval);
     }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked]);
 
@@ -480,11 +480,9 @@ export default function Home() {
             t => t.color?.toLowerCase() === currentTeam?.toLowerCase() || t.name?.toLowerCase() === currentTeam?.toLowerCase()
         );
         const displayName = teamObj?.name ?? currentTeam;
-        const teamKey = teamObj?.color?.toLowerCase() ?? currentTeam?.toLowerCase?.() ?? 'unknown';
 
         setLog(prev => {
-        const problemList = w.keys.map(k => k.replace('-', '')).join(', '); // basic formatting
-        const finalMsg = `${displayName} completed ${w.type === 'row' ? 'a row' : w.type === 'col' ? 'a column' : w.type === 'diag' ? 'the main diagonal' : 'the anti-diagonal'}`;
+        const finalMsg = `${displayName} completed ${w.type === 'row' ? 'a row' : w.type === 'col' ? 'a column' : w.type === 'diag' ? 'the main diagonal' : 'the anti-diagonal'} and won the match!`;
         notifyBrowser(`${displayName} won!`, finalMsg);
         return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev].slice(0, 10);
         });
