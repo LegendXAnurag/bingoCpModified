@@ -476,10 +476,11 @@ export default function Home() {
         setWinner(w);
         setConfettiActive(true);
         setMatchLocked(true);
-        const teamObj = match?.teams?.find(
-            t => t.color?.toLowerCase() === currentTeam?.toLowerCase() || t.name?.toLowerCase() === currentTeam?.toLowerCase()
-        );
-        const displayName = teamObj?.name ?? currentTeam;
+         const teamKey = (w.team ?? '').toLowerCase();
+         const teamObj = match?.teams?.find(
+           t => (t.color ?? '').toLowerCase() === teamKey || (t.name ?? '').toLowerCase() === teamKey
+         );
+         const displayName = teamObj?.name ?? teamKey ?? 'Unknown';
 
         setLog(prev => {
         const finalMsg = `${displayName} completed ${w.type === 'row' ? 'a row' : w.type === 'col' ? 'a column' : w.type === 'diag' ? 'the main diagonal' : 'the anti-diagonal'} and won the match!`;
@@ -488,7 +489,7 @@ export default function Home() {
         });
 
     }
-    }, [solved,problems , winner,positionOwners]);
+    }, [solved,problems , winner,positionOwners, match, matchLocked]);
 
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
