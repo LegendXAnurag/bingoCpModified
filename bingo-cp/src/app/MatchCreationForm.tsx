@@ -221,7 +221,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           className="border p-2 rounded w-full"
         />
 
-        <label className="text-sm font-medium">Time (UTC+3)</label>
+        <label className="text-sm font-medium">Time </label>
         <input
           type="time"
           value={time}
