@@ -36,7 +36,7 @@ const links: Record<string, string> = {
   "Help": '/help',
 };
 
-type GridSize = 3 | 4 | 5 | 6; // Only these values are allowed
+type GridSize = 3 | 4 | 5 | 6;
 
 const gridClasses = {
   3: "grid-cols-3 gap-x-0 gap-y-4 justify-items-center mt-4 mx-130",
@@ -68,7 +68,7 @@ type Winner = {
   team: string;
   type: 'row' | 'col' | 'diag' | 'anti-diag';
   index: number;
-  keys: string[]; // list of problem keys that form the winning line, e.g. ["1234-A","1234-B",...]
+  keys: string[];
 } | null;
 function useWindowSize() {
   const isClient = typeof window !== 'undefined';
@@ -147,13 +147,13 @@ export default function Home() {
   const [match, setMatch] = useState<Match | null>(null);
   const [now, setNow] = useState(new Date());
   
-  // win / lock / confetti state
+  
   const [winner, setWinner] = useState<Winner>(null);
-  const [matchLocked, setMatchLocked] = useState(false); // prevents further marking/polling after win
+  const [matchLocked, setMatchLocked] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
   const [positionOwners, setPositionOwners] = useState<Record<number, string>>({});
 
-  // window size (use the local hook)
+
   const { width, height } = useWindowSize();
   const notifiedRef = useRef<Set<string>>(new Set());
 
@@ -278,7 +278,7 @@ export default function Home() {
 
 
   useEffect(() => {
-    if (matchLocked) return; // don't poll/merge updates after a win/lock
+    if (matchLocked) return; 
     if (!match?.id) return;
 
     const matchStart = new Date(match.startTime);
@@ -311,7 +311,7 @@ export default function Home() {
             const key = `${entry.contestId}-${entry.index}`;
             const { displayName, teamKey } = resolveTeamDisplayAndKey(entry.team, teamsFromServer);
             solvedMap[key] = {
-              team: teamKey, // store color key for UI
+              team: teamKey, 
             };
 
             if (entry.problem && typeof entry.problem.position === 'number') {
@@ -338,7 +338,7 @@ export default function Home() {
           });
 
           setSolved(solvedMap);
-          setPositionOwners(posOwners);  // <-- set state
+          setPositionOwners(posOwners);
 
           if (pollData.match?.problems && Array.isArray(pollData.match.problems)) {
             const normalized = normalizeProblemsFromServer(pollData.match.problems);
@@ -391,7 +391,7 @@ export default function Home() {
 
     fetchPoll();
 
-    const interval = setInterval(fetchPoll, 15000); // REMEMBER TO CHANGE TO 15S
+    const interval = setInterval(fetchPoll, 11000); // REMEMBER TO CHANGE TO 15S
     return () => clearInterval(interval);
     }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked]);
 
@@ -421,7 +421,7 @@ export default function Home() {
     else if(len === 16) setgridSize(4 as GridSize);
     else setgridSize(3 as GridSize);
     const normalized = normalizeProblemsFromServer(match.problems || []);
-    setProblems(normalized); // problems now have contestId, index, name, rating, position
+    setProblems(normalized);
     setLoading(false);
   }, [match]);
   function formatDuration(ms: number) {
@@ -502,7 +502,7 @@ export default function Home() {
     for (let i = 0; i < problemsArr.length; i++) {
         const r = Math.floor(i / size);
         const c = i % size;
-        ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null; // changed this
+        ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null;
     }
 
     // rows
@@ -576,7 +576,7 @@ export default function Home() {
   }
 
 
-  if (loading) return <Loading />;      // while fetching
+  if (loading) return <Loading />;
   if(!match) {
     return <main className="p-6">Match not found</main>;
   }

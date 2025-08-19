@@ -117,8 +117,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const newRatingTarget = Math.min(3500, (oldProblem.rating ?? 0) + increment);
           const allHandles = match.teams.flatMap((team) => team.members).flatMap((p) => p.handle);
           const replacementCandidate = await fetchReplacementProblem(
-            problems.map(p => String(p.contestId) + p.index), // optional excludes
-            newRatingTarget, // try to bias to the desired rating
+            problems.map(p => String(p.contestId) + p.index), 
+            newRatingTarget,
             newRatingTarget,
             allHandles,
           );

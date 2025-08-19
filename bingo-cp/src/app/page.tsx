@@ -26,7 +26,7 @@ export default function HomePage(): React.JSX.Element {
             >
               Create match
             </a>
-            {/* Join removed intentionally */}
+            
             <a
               href="/help"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:shadow-md text-sm"

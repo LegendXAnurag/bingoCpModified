@@ -8,7 +8,7 @@ export default function OIModeComingSoon(): React.JSX.Element {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 px-6 py-20">
       <div className="max-w-4xl w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-8 md:p-12">
         <div className="flex flex-col md:flex-row items-center gap-8">
-          {/* Illustration / badge */}
+          
           <motion.div
             initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -35,7 +35,7 @@ export default function OIModeComingSoon(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Text + CTA */}
+          
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

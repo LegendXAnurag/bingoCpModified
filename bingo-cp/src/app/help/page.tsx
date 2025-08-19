@@ -65,7 +65,7 @@ export default function HelpPage(): React.JSX.Element {
           >
             <h2 className="text-xl font-semibold mb-3">How problems are chosen</h2>
             <ul className="list-disc list-inside text-sm space-y-2 text-gray-700 dark:text-gray-300">
-              <li>We pull a large pool of problems from the configured judge (DMOJ or similar).</li>
+              <li>We pull a large pool of problems from the configured judge (Codeforces or similar).</li>
               <li>
                 Problems are filtered so that none of the players in the match have attempted or solved them before —
                 this keeps the match fair.
