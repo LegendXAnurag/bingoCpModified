@@ -81,80 +81,80 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           matchId: match.id,
         })
       }
-      if (newSolves.length === 0) {
-        const updatedMatch = await prisma.match.findUnique({
-          where: { id: matchId },
-          include: {
-            problems: { where: { active: true }, orderBy: { position: 'asc' } },
-            teams: { include: { members: true } },
-            solveLog: {include: {problem: true}},
-          },
-        });
-        return res.status(200).json({ updated: false, match: updatedMatch });
-      }
-      for (const s of newSolves) {
-        const { contestId, index, team } = s;
+    }
+    if (newSolves.length === 0) {
+      const updatedMatch = await prisma.match.findUnique({
+        where: { id: matchId },
+        include: {
+          problems: { where: { active: true }, orderBy: { position: 'asc' } },
+          teams: { include: { members: true } },
+          solveLog: {include: {problem: true}},
+        },
+      });
+      return res.status(200).json({ updated: false, match: updatedMatch });
+    }
+    for (const s of newSolves) {
+      const { contestId, index, team } = s;
 
-        const solvedRow = await prisma.problem.findFirst({
-          where: { contestId, index, matchId, active: true },
-        });
+      const solvedRow = await prisma.problem.findFirst({
+        where: { contestId, index, matchId, active: true },
+      });
 
-        const oldProblem = solvedRow ?? await prisma.problem.findUnique({
-          where: { contestId_index_matchId: { contestId, index, matchId } },
-        });
-        await prisma.solveLog.create({
-          data: {
-            handle: '',
-            team,
-            contestId,
-            index,
-            timestamp: new Date(),
-            matchId,
-          },
-        });
-        if (match.mode === 'replace' && oldProblem) {
-          const increment = match.replaceIncrement ?? 100;
-          const newRatingTarget = Math.min(3500, (oldProblem.rating ?? 0) + increment);
-          const allHandles = match.teams.flatMap((team) => team.members).flatMap((p) => p.handle);
-          const replacementCandidate = await fetchReplacementProblem(
-            problems.map(p => String(p.contestId) + p.index), 
-            newRatingTarget,
-            newRatingTarget,
-            allHandles,
-          );
-          await prisma.$transaction(async (tx) => {
-            await tx.problem.update({
-              where: { contestId_index_matchId: { contestId: oldProblem.contestId, index: oldProblem.index, matchId } },
-              data: { active: false },
-            });
-
-            if (replacementCandidate) {
-              await tx.problem.create({
-                data: {
-                  contestId: replacementCandidate.contestId ?? 0,
-                  index: replacementCandidate.index ?? String(Date.now()),
-                  matchId,
-                  rating: replacementCandidate?.rating ?? newRatingTarget,
-                  name: replacementCandidate.name ?? `Problem ${replacementCandidate.index}`,
-                  position: oldProblem.position,
-                  active: true,
-                },
-              });
-            } else {
-              await tx.problem.create({
-                data: {
-                  contestId: 0,
-                  index: String(Date.now()),
-                  matchId,
-                  rating: newRatingTarget,
-                  name: `Replacement (${newRatingTarget})`,
-                  position: oldProblem.position,
-                  active: true,
-                },
-              });
-            }
+      const oldProblem = solvedRow ?? await prisma.problem.findUnique({
+        where: { contestId_index_matchId: { contestId, index, matchId } },
+      });
+      await prisma.solveLog.create({
+        data: {
+          handle: '',
+          team,
+          contestId,
+          index,
+          timestamp: new Date(),
+          matchId,
+        },
+      });
+      if (match.mode === 'replace' && oldProblem) {
+        const increment = match.replaceIncrement ?? 100;
+        const newRatingTarget = Math.min(3500, (oldProblem.rating ?? 0) + increment);
+        const allHandles = match.teams.flatMap((team) => team.members).flatMap((p) => p.handle);
+        const replacementCandidate = await fetchReplacementProblem(
+          problems.map(p => String(p.contestId) + p.index), 
+          newRatingTarget,
+          newRatingTarget,
+          allHandles,
+        );
+        await prisma.$transaction(async (tx) => {
+          await tx.problem.update({
+            where: { contestId_index_matchId: { contestId: oldProblem.contestId, index: oldProblem.index, matchId } },
+            data: { active: false },
           });
-        }
+
+          if (replacementCandidate) {
+            await tx.problem.create({
+              data: {
+                contestId: replacementCandidate.contestId ?? 0,
+                index: replacementCandidate.index ?? String(Date.now()),
+                matchId,
+                rating: replacementCandidate?.rating ?? newRatingTarget,
+                name: replacementCandidate.name ?? `Problem ${replacementCandidate.index}`,
+                position: oldProblem.position,
+                active: true,
+              },
+            });
+          } else {
+            await tx.problem.create({
+              data: {
+                contestId: 0,
+                index: String(Date.now()),
+                matchId,
+                rating: newRatingTarget,
+                name: `Replacement (${newRatingTarget})`,
+                position: oldProblem.position,
+                active: true,
+              },
+            });
+          }
+        });
       }
     }
     const updatedMatch = await prisma.match.findUnique({
