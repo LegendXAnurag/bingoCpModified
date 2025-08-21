@@ -44,8 +44,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
     usedColors.add(team.color);
 
-    if (team.members.length < 1 || team.members.length > 4) {
-      alert("Each team must have 1 to 4 members.");
+    if (team.members.length < 1 || team.members.length > 8) {
+      alert("Each team must have 1 to 8 members.");
       return;
     }
     if (team.members.some(m => !m.trim())) {
