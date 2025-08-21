@@ -494,10 +494,16 @@ export default function Home() {
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
     const size = gSize;
-    // if (problemsArr.length !== size * size) {
-    //   console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
-    //   return null;
-    // }
+    const len = problemsArr.length ?? 0;
+    if(len === 36) setgridSize(6 as GridSize);
+    else if(len === 25) setgridSize(5 as GridSize);
+    else if(len === 16) setgridSize(4 as GridSize);
+    else setgridSize(3 as GridSize);
+    
+    if (problemsArr.length !== size * size) {
+      console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
+      return null;
+    }
     const ownerGrid: (string | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
     for (let i = 0; i < problemsArr.length; i++) {
         const r = Math.floor(i / size);
