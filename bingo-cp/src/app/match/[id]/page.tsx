@@ -494,10 +494,10 @@ export default function Home() {
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
     const size = gSize;
-    if (problemsArr.length !== size * size) {
-      console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
-      return null;
-    }
+    // if (problemsArr.length !== size * size) {
+    //   console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
+    //   return null;
+    // }
     const ownerGrid: (string | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
     for (let i = 0; i < problemsArr.length; i++) {
         const r = Math.floor(i / size);
