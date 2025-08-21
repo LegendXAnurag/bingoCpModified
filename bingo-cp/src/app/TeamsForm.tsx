@@ -81,7 +81,7 @@ type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "ye
 
   const addMember = (teamIndex: number) => {
     const newTeams = [...teams];
-    if (newTeams[teamIndex].members.length < 4) {
+    if (newTeams[teamIndex].members.length < 8) {
       newTeams[teamIndex].members.push("");
       updateTeams(newTeams);
     }
