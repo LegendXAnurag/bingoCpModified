@@ -154,7 +154,7 @@ type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "ye
             </div>
           ))}
 
-          {team.members.length < 4 && (
+          {team.members.length < 8 && (
             <button
               type="button"
               onClick={() => addMember(i)}
