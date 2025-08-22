@@ -30,6 +30,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { matchId } = req.body
     if (!matchId) return res.status(400).json({ error: 'matchId required' })
+      // const match = await prisma.match.findUnique({ where: { id: matchId } });
+
      const match = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
@@ -40,10 +42,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         solveLog: {include: {problem: true}}, // maybe change to entirely true later
       },
     })
-
+    
     if (!match) {
       return res.status(404).json({ error: 'Match not found' })
     }
+    const now = new Date();
+    const diff = (now.getTime() - match.lastPolledAt.getTime()) / 1000;
+
+    if (diff < 20) {
+      // too soon, just return current state
+      return res.json({ message: "Using cached state", match });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      tx.match.update({
+        where: {id: matchId},
+        data: {lastPolledAt: now}
+      });
+    });
+    
+
     const problems = match.problems
     .filter(p => p.active === true)
     .map(p => ({

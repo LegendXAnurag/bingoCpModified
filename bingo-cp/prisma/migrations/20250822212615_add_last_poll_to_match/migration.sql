@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "public"."Match" ADD COLUMN     "lastPolledAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

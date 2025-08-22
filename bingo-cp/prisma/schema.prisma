@@ -29,6 +29,7 @@ model Match {
   timeoutMinutes Int?       @default(0)
   replaceIncrement Int?     @default(100)
   gridSize        Int?     // 3 | 4 | 5 | 6
+  lastPolledAt  DateTime @default(now())
   minRating Int?   // optional: store min rating used when creating the match
   maxRating Int?   // optional: store max rating used when creating the match
 }
