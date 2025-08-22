@@ -95,68 +95,109 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     for (const s of newSolves) {
       const { contestId, index, team } = s;
+      let replacementCandidate = null;
+      let newRatingTarget: number | null = null;
+      if (match.mode === 'replace') {
+        const maybeOld = await prisma.problem.findFirst({
+          where: { contestId, index, matchId },
+        });
+        if (maybeOld) {
+          const increment = match.replaceIncrement ?? 100;
+          newRatingTarget = Math.min(3500, (maybeOld.rating ?? 0) + increment);
+          const allHandles = match.teams.flatMap(t => t.members).map(m => m.handle);
+          try {
+            const problemKeys = match.problems.filter(p => p.active).map(p => `${p.contestId}-${p.index}`);
+            replacementCandidate = await fetchReplacementProblem(
+              problemKeys,
+              newRatingTarget,
+              newRatingTarget,
+              allHandles
+            );
+          } catch (err) {
+            console.error('fetchReplacementProblem failed', err);
+            replacementCandidate = null;
+          }
+        }
+      }
+      await prisma.$transaction(async (tx) => {
+        const existing = await tx.solveLog.findFirst({
+          where: { matchId, contestId, index },
+        });
+        if (existing) {
+          return;
+        }
+        await tx.solveLog.create({
+          data: {
+            handle: '',
+            team,
+            contestId,
+            index,
+            timestamp: new Date(),
+            matchId,
+          },
+        });
+        const solvedRow = await tx.problem.findFirst({
+          where: { contestId, index, matchId, active: true },
+        });
 
-      const solvedRow = await prisma.problem.findFirst({
-        where: { contestId, index, matchId, active: true },
-      });
+        const oldProblem = solvedRow ?? await tx.problem.findUnique({
+          where: { contestId_index_matchId: { contestId, index, matchId } },
+        }); 
 
-      const oldProblem = solvedRow ?? await prisma.problem.findUnique({
-        where: { contestId_index_matchId: { contestId, index, matchId } },
-      });
-      await prisma.solveLog.create({
-        data: {
-          handle: '',
-          team,
-          contestId,
-          index,
-          timestamp: new Date(),
-          matchId,
-        },
-      });
-      if (match.mode === 'replace' && oldProblem) {
-        const increment = match.replaceIncrement ?? 100;
-        const newRatingTarget = Math.min(3500, (oldProblem.rating ?? 0) + increment);
-        const allHandles = match.teams.flatMap((team) => team.members).flatMap((p) => p.handle);
-        const replacementCandidate = await fetchReplacementProblem(
-          problems.map(p => String(p.contestId) + p.index), 
-          newRatingTarget,
-          newRatingTarget,
-          allHandles,
-        );
-        await prisma.$transaction(async (tx) => {
-          await tx.problem.update({
-            where: { contestId_index_matchId: { contestId: oldProblem.contestId, index: oldProblem.index, matchId } },
-            data: { active: false },
-          });
+        
+        if (match.mode === 'replace' && oldProblem) {
+          const increment = match.replaceIncrement ?? 100;
+          const newRatingTarget = Math.min(3500, (oldProblem.rating ?? 0) + increment);
+          const allHandles = match.teams.flatMap((team) => team.members).map((p) => p.handle);
+          // const replacementCandidate = await fetchReplacementProblem(
+          //   problems.map(p => `${p.contestId}-${p.index}`), 
+          //   newRatingTarget,
+          //   newRatingTarget,
+          //   allHandles,
+          // );
 
-          if (replacementCandidate) {
-            await tx.problem.create({
-              data: {
-                contestId: replacementCandidate.contestId ?? 0,
-                index: replacementCandidate.index ?? String(Date.now()),
-                matchId,
-                rating: replacementCandidate?.rating ?? newRatingTarget,
-                name: replacementCandidate.name ?? `Problem ${replacementCandidate.index}`,
-                position: oldProblem.position,
-                active: true,
-              },
+            const oldP = await tx.problem.findFirst({
+              where: { contestId: oldProblem.contestId, index: oldProblem.index, matchId, active: true },
             });
-          } else {
-            await tx.problem.create({
-              data: {
-                contestId: 0,
-                index: String(Date.now()),
-                matchId,
-                rating: newRatingTarget,
-                name: `Replacement (${newRatingTarget})`,
-                position: oldProblem.position,
-                active: true,
-              },
+            if (!oldP) return;
+            await tx.problem.update({
+              where: { contestId_index_matchId: { contestId: oldP.contestId, index: oldP.index, matchId } },
+              data: { active: false },
             });
+
+            if (replacementCandidate) {
+              const dup = await tx.problem.findFirst({
+                where: { contestId: replacementCandidate.contestId ?? 0, index: replacementCandidate.index ?? '', matchId }
+              });
+              if(!dup) {
+                await tx.problem.create({
+                  data: {
+                    contestId: replacementCandidate.contestId ?? 0,
+                    index: replacementCandidate.index ?? String(Date.now()),
+                    matchId,
+                    rating: replacementCandidate?.rating ?? newRatingTarget,
+                    name: replacementCandidate.name ?? `Problem ${replacementCandidate.index}`,
+                    position: oldP.position,
+                    active: true,
+                  },
+                });
+              }
+            } else {
+              await tx.problem.create({
+                data: {
+                  contestId: 0,
+                  index: String(Date.now()),
+                  matchId,
+                  rating: newRatingTarget,
+                  name: `Replacement (${newRatingTarget})`,
+                  position: oldP.position,
+                  active: true,
+                },
+              });
+            }
           }
         });
       }
-    }
     const updatedMatch = await prisma.match.findUnique({
       where: { id: matchId },
       include: {

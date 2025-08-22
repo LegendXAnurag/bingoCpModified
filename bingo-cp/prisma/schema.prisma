@@ -26,6 +26,7 @@ model Match {
   mode  MatchMode
   startTime DateTime
   durationMinutes Int
+  timeoutMinutes Int?       @default(0)
   replaceIncrement Int?     @default(100)
   minRating Int?   // optional: store min rating used when creating the match
   maxRating Int?   // optional: store max rating used when creating the match

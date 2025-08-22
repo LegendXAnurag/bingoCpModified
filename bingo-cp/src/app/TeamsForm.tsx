@@ -66,8 +66,8 @@ type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "ye
   };
 
   const addTeam = () => {
-    if (teams.length >= 8) {
-      alert("You can't add more than 8 teams.");
+    if (teams.length >= 17) {
+      alert("You can't add more than 16 teams.");
       return;
     }
     const newTeams = [...teams, { name: "", color: "", members: [""] }]; // use a color key
@@ -81,7 +81,7 @@ type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "ye
 
   const addMember = (teamIndex: number) => {
     const newTeams = [...teams];
-    if (newTeams[teamIndex].members.length < 8) {
+    if (newTeams[teamIndex].members.length < 16) {
       newTeams[teamIndex].members.push("");
       updateTeams(newTeams);
     }
@@ -154,7 +154,7 @@ type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "ye
             </div>
           ))}
 
-          {team.members.length < 8 && (
+          {team.members.length < 16 && (
             <button
               type="button"
               onClick={() => addMember(i)}

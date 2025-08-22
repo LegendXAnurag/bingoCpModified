@@ -8,6 +8,7 @@ export interface Match {
   teams: Team[];
   problems: ProblemCell[];
   solveLog: SolveEntry[];
+  timeoutMinutes?: number | null;
 }
 
 export interface Team {

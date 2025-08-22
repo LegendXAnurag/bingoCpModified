@@ -282,6 +282,8 @@ export default function Home() {
     if (!match?.id) return;
 
     const matchStart = new Date(match.startTime);
+    const durationMinutes = (match.timeoutMinutes ?? match.durationMinutes);
+    const timeStartWinner = new Date(matchStart.getTime() + durationMinutes * 60 * 1000);
     const matchEnd = new Date(matchStart.getTime() + match.durationMinutes * 60 * 1000);
 
     const fetchPoll = async () => {
@@ -470,6 +472,8 @@ export default function Home() {
   useEffect(() => {
     if (!problems || problems.length === 0) return;
     if (matchLocked) return; // already locked
+    const now = new Date();
+    if(timeStartWinner < now) return;
     // console.log("HHHEHEHE:")
     const w = findWinnerFromSolved(solved, problems, gridSize);
     if (w && !winner) {
@@ -493,12 +497,13 @@ export default function Home() {
 
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
-    const size = gSize;
+    
     const len = problemsArr.length ?? 0;
     if(len === 36) setgridSize(6 as GridSize);
     else if(len === 25) setgridSize(5 as GridSize);
     else if(len === 16) setgridSize(4 as GridSize);
     else setgridSize(3 as GridSize);
+    const size = gSize;
     
     if (problemsArr.length !== size * size) {
       console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
@@ -588,6 +593,8 @@ export default function Home() {
   }
 
   const matchStart = new Date(match.startTime);
+  const durationMinutes = (match.timeoutMinutes ?? 0);
+  const timeStartWinner = new Date(matchStart.getTime() + durationMinutes * 60 * 1000);
   const matchEnd = new Date(matchStart.getTime() + match.durationMinutes * 60 * 1000);
   const currentTime = new Date();
 

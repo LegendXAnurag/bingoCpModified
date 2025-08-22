@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     minRating,
     maxRating,
     replaceIncrement,
+    timeoutMinutes,
     mode,
     gridSize,
     teams,
@@ -30,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     minRating: number;
     maxRating: number;
     replaceIncrement: number;
+    timeoutMinutes?: number | null;
     mode: MatchMode;
     gridSize: number;
     teams: Array<{
@@ -71,6 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         mode: Cmode,
         startTime: new Date(startTime),
         durationMinutes,
+        timeoutMinutes: timeoutMinutes === undefined ? null : Math.floor(Number(timeoutMinutes)),
         replaceIncrement: Cmode === 'replace' ? Number(replaceIncrement ?? 100) : undefined, // maybe validate later
         minRating: minRating ?? undefined,
         maxRating: maxRating ?? undefined,

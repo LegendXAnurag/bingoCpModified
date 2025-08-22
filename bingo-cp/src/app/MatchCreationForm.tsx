@@ -24,6 +24,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({}) => {
   const [selectedGridSize, setSelectedGridSize] = useState<number>(5);
   const [replaceIncrement, setReplaceIncrement] = useState<number>(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeoutMinutes, setTimeoutMinutes] = useState("0:00");
   
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -44,8 +45,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
     usedColors.add(team.color);
 
-    if (team.members.length < 1 || team.members.length > 8) {
-      alert("Each team must have 1 to 8 members.");
+    if (team.members.length < 1 || team.members.length > 16) {
+      alert("Each team must have 1 to 16 members.");
       return;
     }
     if (team.members.some(m => !m.trim())) {
@@ -86,6 +87,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     alert("Invalid duration format. Please use hh:mm.");
     return;
   }
+  const [hoursT, minutesT] = timeoutMinutes.split(":").map(Number);
+  if (isNaN(hoursT) || isNaN(minutesT)) {
+    alert("Invalid timeout format. Please use hh:mm.");
+    return;
+  }
+  const timeoutMinutesValue = timeoutMinutes === '' ? null : (hoursT * 60 + minutesT);
   if(isNaN(minRating)) {
     alert("Invalid minimum Rating format.");
     return;
@@ -167,6 +174,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     gridSize: selectedGridSize,
     replaceIncrement: selectedMode == 'replace' ? replaceIncrement : undefined,
     teams: teams,
+    timeoutMinutes: timeoutMinutesValue,
     problems: [],
     solveLog: [],
   };
@@ -301,6 +309,16 @@ const handleSubmit = async (e: React.FormEvent) => {
               </option>
             ))}
           </select>
+          <label className="text-sm font-medium">Timeout (hh:mm)</label>
+          <input
+            type="text"
+            placeholder="e.g. 1:30"
+            value={timeoutMinutes}
+            onChange={(e) => setTimeoutMinutes(e.target.value)}
+            className="border p-2 rounded w-full"
+            pattern="^\d+:\d{2}$"
+            required
+          />
         </div>
         
 

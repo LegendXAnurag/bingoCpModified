@@ -123,7 +123,7 @@ export default function Home() {
               uniqueMap.set(entry.message, entry);
             }
           }
-          return Array.from(uniqueMap.values()).slice(0, 10);
+          return Array.from(uniqueMap.values());
         });
         }
       } catch (err) {
@@ -196,28 +196,28 @@ export default function Home() {
     setProblems(match.problems);
     setLoading(false);
   }, [match]);
-  function toggleSquare(i: number) {
-    const key = `${problems[i].contestId}-${problems[i].index}`;
-    if (solved[key]) return;
+  // function toggleSquare(i: number) {
+  //   const key = `${problems[i].contestId}-${problems[i].index}`;
+  //   if (solved[key]) return;
 
-    const time = new Date().toLocaleTimeString();
-    setSolved(prev => ({ ...prev, [key]: { team: currentTeam, timestamp: time } }));
-    setLog(prev => {
-      const newEntry = {
-        message: `${time} — ${currentTeam} solved ${problems[i].name}`,
-        team: currentTeam.toLowerCase(),
-      };
-      const combined = [newEntry, ...prev];
+  //   const time = new Date().toLocaleTimeString();
+  //   setSolved(prev => ({ ...prev, [key]: { team: currentTeam, timestamp: time } }));
+  //   setLog(prev => {
+  //     const newEntry = {
+  //       message: `${time} — ${currentTeam} solved ${problems[i].name}`,
+  //       team: currentTeam.toLowerCase(),
+  //     };
+  //     const combined = [newEntry, ...prev];
 
-      const uniqueMap = new Map<string, typeof newEntry>();
-      for (const entry of combined) {
-        if (!uniqueMap.has(entry.message)) {
-          uniqueMap.set(entry.message, entry);
-        }
-      }
-      return Array.from(uniqueMap.values()).slice(0, 10);
-    });
-  }
+  //     const uniqueMap = new Map<string, typeof newEntry>();
+  //     for (const entry of combined) {
+  //       if (!uniqueMap.has(entry.message)) {
+  //         uniqueMap.set(entry.message, entry);
+  //       }
+  //     }
+  //     return Array.from(uniqueMap.values());
+  //   });
+  // }
 
   if (!match) {
     return (
