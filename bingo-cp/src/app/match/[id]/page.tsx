@@ -245,6 +245,15 @@ export default function Home() {
 
     fetchMatch();
   }, [id]);
+  useEffect(() => {
+    if (!match) return;
+    const problems_length = match.problems.length;
+    if(problems_length === 36) setgridSize(6 as GridSize);
+    else if(problems_length === 25) setgridSize(5 as GridSize);
+    else if(problems_length === 16) setgridSize(4 as GridSize);
+    else setgridSize(3 as GridSize);
+    setLoading(false);
+  }, [match]);
 
   type Team = {
     name: string;
