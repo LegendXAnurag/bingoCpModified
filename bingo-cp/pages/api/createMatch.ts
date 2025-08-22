@@ -40,6 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       members: string[];
     }>;
   };
+  if (![3,4,5,6].includes(gridSize)) return res.status(400).json({ error: 'invalid gridSize' });
   const Cmode = mode;
 
   const allHandles = teams.flatMap((team) => team.members);
@@ -77,6 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         replaceIncrement: Cmode === 'replace' ? Number(replaceIncrement ?? 100) : undefined, // maybe validate later
         minRating: minRating ?? undefined,
         maxRating: maxRating ?? undefined,
+        gridSize,
       },
     });
     // console.timeEnd("match");

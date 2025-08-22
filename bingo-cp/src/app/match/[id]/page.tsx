@@ -246,32 +246,22 @@ export default function Home() {
     fetchMatch();
   }, [id]);
   useEffect(() => {
-  if (!match) {
-    console.warn("this is really bad.");
-    return;
-  }
+    if (!match) return;
 
-  const updateGrid = () => {
-    const len = match.problems.length;
-    if (len === 36) setgridSize(6 as GridSize);
-    else if (len === 9) setgridSize(3 as GridSize);
-    else if (len === 16) setgridSize(4 as GridSize);
-    else if(len == 25) setgridSize(5 as GridSize);
-    else {
-      console.warn(`wrong size ${len} expected another value.`);
+    // prefer DB value; fall back to computing from problems length
+    const dbGrid = (match as Match).gridSize; // typed properly if your Match type includes gridSize
+    if (typeof dbGrid === 'number' && [3,4,5,6].includes(dbGrid)) {
+      setgridSize(dbGrid as GridSize);
+    } else {
+      // compute if server didn't provide it (safety)
+      const len = match.problems?.length ?? problems.length ?? 25;
+      const computed = [3,4,5,6].find(n => n * n === len) ?? 5;
+      setgridSize(computed as GridSize);
     }
+    const normalized = normalizeProblemsFromServer(match.problems || []);
+    setProblems(normalized);
     setLoading(false);
-  };
-
-  // run right away
-  updateGrid();
-
-  // Type-safe interval id (browser)
-  const id = window.setInterval(updateGrid, 2000);
-
-  // cleanup on unmount or when `match` changes
-  return () => window.clearInterval(id);
-}, [match]); // include `match` so the interval resets when match changes
+  }, [match]);
 
   type Team = {
     name: string;
@@ -441,18 +431,18 @@ export default function Home() {
     }
   }, [match]);
 
-  useEffect(() => {
-    if (!match) return;
-    // console.log("for crying out loud: ", match.problems)
-    const len = match.problems?.length ?? 0;
-    if(len === 36) setgridSize(6 as GridSize);
-    else if(len === 25) setgridSize(5 as GridSize);
-    else if(len === 16) setgridSize(4 as GridSize);
-    else setgridSize(3 as GridSize);
-    const normalized = normalizeProblemsFromServer(match.problems || []);
-    setProblems(normalized);
-    setLoading(false);
-  }, [match]);
+  // useEffect(() => {
+  //   if (!match) return;
+  //   // console.log("for crying out loud: ", match.problems)
+  //   const len = match.problems?.length ?? 0;
+  //   if(len === 36) setgridSize(6 as GridSize);
+  //   else if(len === 25) setgridSize(5 as GridSize);
+  //   else if(len === 16) setgridSize(4 as GridSize);
+  //   else setgridSize(3 as GridSize);
+  //   const normalized = normalizeProblemsFromServer(match.problems || []);
+  //   setProblems(normalized);
+  //   setLoading(false);
+  // }, [match]);
   function formatDuration(ms: number) {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
@@ -549,11 +539,11 @@ export default function Home() {
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
     
-    const len = problemsArr.length ?? 0;
-    if(len === 36) setgridSize(6 as GridSize);
-    else if(len === 25) setgridSize(5 as GridSize);
-    else if(len === 16) setgridSize(4 as GridSize);
-    else setgridSize(3 as GridSize);
+    // const len = problemsArr.length ?? 0;
+    // if(len === 36) setgridSize(6 as GridSize);
+    // else if(len === 25) setgridSize(5 as GridSize);
+    // else if(len === 16) setgridSize(4 as GridSize);
+    // else setgridSize(3 as GridSize);
     const size = gSize;
     
     if (problemsArr.length !== size * size) {
