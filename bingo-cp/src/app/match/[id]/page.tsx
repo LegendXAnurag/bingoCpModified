@@ -5,7 +5,6 @@ import Loading from '../../Loading';
 import Confetti from 'react-confetti';
 import { useRef } from 'react';
 import {ProblemCell} from '../../types/match'
-import { prisma } from '../../lib/prisma';
 
 // import { MatchStatus } from "./MatchStatus";
 import MatchCreationForm from '../../MatchCreationForm';
@@ -508,17 +507,24 @@ export default function Home() {
         notifyBrowser(`${displayName} won!`, finalMsg);
         return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev].slice(0, 10);
         });
-        const checkWinner = async () => {
+        (async () => {
           try {
-            await prisma.match.update({
-              where: { id: match.id },
-              data: { durationMinutes: 1 },
+            const resp = await fetch('/api/match/setDuration', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ matchId: match.id, durationMinutes: 1 }),
             });
+            const data = await resp.json();
+            if (!resp.ok) {
+              console.error('Failed to update match duration on server:', data);
+            } else {
+              // optimistic local update so UI shows locked/timer immediately
+              setMatch(prev => prev ? { ...prev, durationMinutes: 1 } : prev);
+            }
           } catch (err) {
-            console.error('Failed to update match duration:', err);
+            console.error('Error calling set-duration API', err);
           }
-        }
-        checkWinner();
+        })();
     }
     }, [solved,problems , winner,positionOwners, match, matchLocked]);
 
