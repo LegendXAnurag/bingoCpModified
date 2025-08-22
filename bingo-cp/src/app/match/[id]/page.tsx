@@ -5,6 +5,7 @@ import Loading from '../../Loading';
 import Confetti from 'react-confetti';
 import { useRef } from 'react';
 import {ProblemCell} from '../../types/match'
+import { prisma } from '../../lib/prisma';
 
 // import { MatchStatus } from "./MatchStatus";
 import MatchCreationForm from '../../MatchCreationForm';
@@ -507,7 +508,17 @@ export default function Home() {
         notifyBrowser(`${displayName} won!`, finalMsg);
         return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev].slice(0, 10);
         });
-
+        const checkWinner = async () => {
+          try {
+            await prisma.match.update({
+              where: { id: match.id },
+              data: { durationMinutes: 1 },
+            });
+          } catch (err) {
+            console.error('Failed to update match duration:', err);
+          }
+        }
+        checkWinner();
     }
     }, [solved,problems , winner,positionOwners, match, matchLocked]);
 
