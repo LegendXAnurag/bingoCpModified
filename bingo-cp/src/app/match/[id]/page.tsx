@@ -256,7 +256,10 @@ export default function Home() {
     if (len === 36) setgridSize(6 as GridSize);
     else if (len === 9) setgridSize(3 as GridSize);
     else if (len === 16) setgridSize(4 as GridSize);
-    else setgridSize(5 as GridSize);
+    else if(len == 25) setgridSize(5 as GridSize);
+    else {
+      console.warn(`wrong size ${len} expected anothe value.`);
+    }
     setLoading(false);
   };
 
