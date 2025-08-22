@@ -473,7 +473,7 @@ export default function Home() {
     if (!problems || problems.length === 0) return;
     if (matchLocked) return; // already locked
     const now = new Date();
-    if(timeStartWinner < now) return;
+    if(timeStartWinner > now) return;
     // console.log("HHHEHEHE:")
     const w = findWinnerFromSolved(solved, problems, gridSize);
     if (w && !winner) {
