@@ -246,14 +246,17 @@ export default function Home() {
     fetchMatch();
   }, [id]);
   useEffect(() => {
-  if (!match) return;
+  if (!match) {
+    console.warn("this is really bad.");
+    return;
+  }
 
   const updateGrid = () => {
     const len = match.problems.length;
     if (len === 36) setgridSize(6 as GridSize);
-    else if (len === 25) setgridSize(5 as GridSize);
+    else if (len === 9) setgridSize(3 as GridSize);
     else if (len === 16) setgridSize(4 as GridSize);
-    else setgridSize(3 as GridSize);
+    else setgridSize(5 as GridSize);
     setLoading(false);
   };
 
