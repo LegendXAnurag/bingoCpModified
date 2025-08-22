@@ -472,8 +472,15 @@ export default function Home() {
   useEffect(() => {
     if (!problems || problems.length === 0) return;
     if (matchLocked) return; // already locked
-    const now = new Date();
-    if(timeStartWinner > now) return;
+    if(!match) {
+      console.warn(`match was not found. skipping winner detection`);
+      return;
+    }
+     const matchStart = new Date(match.startTime);
+      const timeout = match.timeoutMinutes ?? 0;
+      const timeStartWinner = new Date(matchStart.getTime() + timeout * 60 * 1000);
+      const now = new Date();
+    if (now < timeStartWinner) return;
     // console.log("HHHEHEHE:")
     const w = findWinnerFromSolved(solved, problems, gridSize);
     if (w && !winner) {
