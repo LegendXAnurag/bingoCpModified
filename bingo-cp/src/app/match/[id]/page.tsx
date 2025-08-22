@@ -246,14 +246,26 @@ export default function Home() {
     fetchMatch();
   }, [id]);
   useEffect(() => {
-    if (!match) return;
-    const problems_length = match.problems.length;
-    if(problems_length === 36) setgridSize(6 as GridSize);
-    else if(problems_length === 25) setgridSize(5 as GridSize);
-    else if(problems_length === 16) setgridSize(4 as GridSize);
+  if (!match) return;
+
+  const updateGrid = () => {
+    const len = match.problems.length;
+    if (len === 36) setgridSize(6 as GridSize);
+    else if (len === 25) setgridSize(5 as GridSize);
+    else if (len === 16) setgridSize(4 as GridSize);
     else setgridSize(3 as GridSize);
     setLoading(false);
-  }, [match]);
+  };
+
+  // run right away
+  updateGrid();
+
+  // Type-safe interval id (browser)
+  const id = window.setInterval(updateGrid, 2000);
+
+  // cleanup on unmount or when `match` changes
+  return () => window.clearInterval(id);
+}, [match]); // include `match` so the interval resets when match changes
 
   type Team = {
     name: string;
