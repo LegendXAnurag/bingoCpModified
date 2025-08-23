@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!match) {
       return res.status(404).json({ error: 'Match not found' })
     }
-    // await fetch("https://bingo-cp.vercel.app/api/poll-debug");
+    await fetch("https://bingo-cp.vercel.app/api/poll-debug");
     const problems = match.problems
     .filter(p => p.active === true)
     .map(p => ({
