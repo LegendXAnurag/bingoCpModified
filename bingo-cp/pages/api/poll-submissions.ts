@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!matchId) return res.status(400).json({ error: 'matchId required' })
       // const match = await prisma.match.findUnique({ where: { id: matchId } });
 
-     const match = await prisma.match.findUnique({
+     const old = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
         problems: true,
@@ -43,25 +43,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     })
     
-    if (!match) {
+    if (!old) {
       return res.status(404).json({ error: 'Match not found' })
     }
     const now = new Date();
-    const diff = (now.getTime() - match.lastPolledAt.getTime()) / 1000;
+    const cutoff = new Date(now.getTime() - 20 * 1000);
+    const updateResult = await prisma.match.updateMany({
+      where: {
+        id: matchId,
+        lastPolledAt: { lt: cutoff }, 
+      },
+      data: {
+        lastPolledAt: now,
+      },
+    });
 
-    if (diff < 20) {
-      // too soon, just return current state
-      return res.json({ message: "Using cached state", match });
+    if (updateResult.count === 0) {
+      const cachedMatch = await prisma.match.findUnique({
+        where: { id: matchId },
+        include: {
+          problems: { where: { active: true }, orderBy: { position: 'asc' } },
+          teams: { include: { members: true } },
+          solveLog: { include: { problem: true } },
+        },
+      });
+      return res.json({ message: "Using cached state", match: cachedMatch });
     }
 
-    await prisma.$transaction(async (tx) => {
-      tx.match.update({
-        where: {id: matchId},
-        data: {lastPolledAt: now}
-      });
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: {
+        problems: true,
+        teams: {
+          include: { members: true },
+        },
+        solveLog: { include: { problem: true } },
+      },
     });
-    
 
+    if (!match) {
+      return res.status(404).json({ error: 'Match not found' })
+    }
     const problems = match.problems
     .filter(p => p.active === true)
     .map(p => ({
