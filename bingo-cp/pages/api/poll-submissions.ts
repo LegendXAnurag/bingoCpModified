@@ -32,17 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!matchId) return res.status(400).json({ error: 'matchId required' })
       // const match = await prisma.match.findUnique({ where: { id: matchId } });
 
-     const old = await prisma.match.findUnique({
-      where: { id: matchId },
-      include: {
-        problems: true,
-        teams: {
-          include: { members: true },
-        },
-        solveLog: {include: {problem: true}}, // maybe change to entirely true later
-      },
-    })
-    
+     const old = await prisma.match.findUnique({ where: { id: matchId }, select: { id: true }});
     if (!old) {
       return res.status(404).json({ error: 'Match not found' })
     }
@@ -84,6 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!match) {
       return res.status(404).json({ error: 'Match not found' })
     }
+    await fetch("/api/poll-debug");
     const problems = match.problems
     .filter(p => p.active === true)
     .map(p => ({
