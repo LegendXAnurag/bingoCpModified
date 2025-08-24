@@ -314,9 +314,22 @@ export default function Home() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ matchId: match.id }),
         });
+        if (!pollRes.ok) {
+          console.error('Polling submissions returned non-OK', await pollRes.text());
+          return;
+        }
         const pollData = await pollRes.json();
+        const oldlength = Array.isArray(match?.problems) ? match!.problems!.length : 0;
+        const serverProblemsLen = Array.isArray(pollData.match?.problems) ? pollData.match.problems.length : 0;
+        const serverSolveLen = Array.isArray(pollData.match?.solveLog) ? pollData.match.solveLog.length : 0;
+        const localSolveLen = Array.isArray(match?.solveLog) ? match!.solveLog!.length : 0;
 
-        if (pollData.updated && pollData.match) {
+        const shouldApply =
+          Boolean(pollData.updated) ||
+          serverProblemsLen !== oldlength ||
+          serverSolveLen !== localSolveLen;
+          
+        if (pollData.match && shouldApply) {
           setMatch(pollData.match);
 
           const solvedMap: Record<string, SolvedInfo> = {};
