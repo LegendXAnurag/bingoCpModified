@@ -1,15 +1,21 @@
 // app/page.tsx
 "use client";
-import React from "react";
+import React, {useMemo} from "react";
 import { motion } from "framer-motion";
 
+function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 export default function HomePage(): React.JSX.Element {
-  const sampleGrid = Array.from({ length: 25 }).map((_, i) => ({
-    id: i + 1,
-    rating: [800, 900, 1000, 1200, 1500][i % 5],
-    label: String.fromCharCode(65 + (i % 5)),
-    name: `Problem ${i + 1}`,
-  }));
+  const sampleGrid = useMemo(() => {
+    return Array.from({ length: 25 }).map((_, i) => ({
+      id: i + 1,
+      rating: randomInt(8, 16) * 100,
+      label: String.fromCharCode(65 + randomInt(0, 4)),
+      name: `Problem ${i + 1}`,
+    }));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-300">
