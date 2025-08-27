@@ -10,6 +10,12 @@ export type Player = {
   team: string
 }
 
+export type Claim = {
+  team: string;
+  time: number; 
+  id: number
+}
+
 export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
   const problemKey = (p: Problem) => `${p.contestId}-${p.index}`
   const trackedProblems = new Set(problems.map(problemKey))
@@ -33,8 +39,8 @@ export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
         const existing = claims[key]
         if (
           !existing ||
-          sub.creationTimeSeconds > existing.time ||
-          (sub.creationTimeSeconds === existing.time && sub.id > existing.id)
+          sub.creationTimeSeconds < existing.time ||
+          (sub.creationTimeSeconds === existing.time && sub.id < existing.id)
         ) {
           claims[key] = {
             team: player.team,
@@ -47,9 +53,5 @@ export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
       console.error(`Error fetching for ${player.handle}`, err)
     }
   }
-  const result: Record<string, string> = {}
-  for (const [key, claim] of Object.entries(claims)) {
-    result[key] = claim.team
-  }
-  return result
+  return claims;
 }

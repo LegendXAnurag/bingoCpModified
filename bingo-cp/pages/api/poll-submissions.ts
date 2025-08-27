@@ -98,20 +98,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       matchId: string;
       score?: number | null;
     }> = []
+    const changed: Array<{
+      handle: string;
+      team: string;
+      contestId: number;
+      index: string;
+      timestamp: Date;
+      matchId: string;
+      score?: number | null;
+    }> = []
 
-    for (const [key, teamColor] of Object.entries(claims)) {
+    for (const [key, claim] of Object.entries(claims)) {
       const [contestIdStr, index] = key.split('-')
       const contestId = Number(contestIdStr)
 
       if (!match.solveLog.some(log => log.contestId === contestId && log.index === index)) {
         newSolves.push({
           handle: '',
-          team: teamColor,
+          team: claim.team,
           contestId,
           index,
-          timestamp: new Date(),
+          timestamp: new Date(claim.time * 1000),
           matchId: match.id,
         })
+      }
+      else {
+        for(const Solve of match.solveLog) {
+          const newTime = new Date(claim.time * 1000);  
+          if(Solve.contestId === contestId && Solve.index === index && Solve.team != claim.team) {
+            if(Solve.timestamp.getTime() > newTime.getTime()) {
+              changed.push({
+                handle: '',
+                team: claim.team,
+                contestId,
+                index,
+                timestamp: newTime,
+                matchId: match.id
+              });
+            }
+          }
+        }
+      }
+    }
+    if(changed.length > 0) {
+      for (const c of changed) {
+        try {
+          await prisma.$transaction(async (tx) => {
+            const existing = await tx.solveLog.findFirst({
+              where: { matchId: c.matchId, contestId: c.contestId, index: c.index },
+            });
+            if (!existing) return;
+            const existingTs = new Date(existing.timestamp).getTime();
+            // Only update if our discovered claim is earlier
+            if (isNaN(existingTs) || c.timestamp.getTime() < existingTs) {
+              await tx.solveLog.update({
+                where: { id: existing.id },
+                data: { handle: c.handle, team: c.team, timestamp: c.timestamp },
+              });
+            }
+          });
+        } catch (err) {
+          console.error('Failed to apply changed update for', c, err);
+        }
       }
     }
     if (newSolves.length === 0) {
@@ -164,7 +212,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             team,
             contestId,
             index,
-            timestamp: new Date(),
+            timestamp: s.timestamp,
             matchId,
           },
         });
