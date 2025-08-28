@@ -228,7 +228,7 @@ export default function Home() {
             for (const e of combined) {
               if (!uniqueMap.has(e.key)) uniqueMap.set(e.key, e);
             }
-          return Array.from(uniqueMap.values()).slice(0, 10);
+          return Array.from(uniqueMap.values());//.slice(0, 10);
         });
         setSolved(solvedMap);
 
@@ -401,7 +401,7 @@ export default function Home() {
             for (const entry of combined) {
               if (!uniqueMap.has(entry.key)) uniqueMap.set(entry.key, entry);
             }
-            const deduped = Array.from(uniqueMap.values()).slice(0, 10);
+            const deduped = Array.from(uniqueMap.values());//.slice(0, 10);
 
             const prevMessages = new Set(prevLog.map(x => x.message));
             newLogEntries.forEach(ne => {
@@ -526,7 +526,7 @@ export default function Home() {
         setLog(prev => {
         const finalMsg = `${displayName} completed ${w.type === 'row' ? 'a row' : w.type === 'col' ? 'a column' : w.type === 'diag' ? 'the main diagonal' : 'the anti-diagonal'} and won the match!`;
         notifyBrowser(`${displayName} won!`, finalMsg);
-        return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev].slice(0, 10);
+        return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev];//.slice(0, 10);
         });
         (async () => {
           try {
@@ -636,7 +636,7 @@ export default function Home() {
           uniqueMap.set(entry.key, entry);
         }
       }
-      return Array.from(uniqueMap.values()).slice(0, 10);
+      return Array.from(uniqueMap.values());//.slice(0, 10);
     });
   }
 
