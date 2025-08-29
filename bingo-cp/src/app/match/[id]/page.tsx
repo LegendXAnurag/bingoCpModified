@@ -16,6 +16,7 @@ type SolveLog = {
   index: string;
   team: string;
   problem: ProblemCell;
+  timestamp?: string | number;
 }
 
 const teamColors: Record<string, string> = {
@@ -129,6 +130,14 @@ function normalizeProblemsFromServer(raw: ProblemCell[]) {
   return result;
 }
 
+function formatTime(ts?: string | number) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return String(ts);
+  // show "1:00 PM" style time; change hour12 to false if you prefer 24h
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
 
 
 
@@ -214,9 +223,10 @@ export default function Home() {
 
             const problemName = entry.problem?.name ?? `Problem ${entry.index}`;
             const contestAndIndex = `${entry.contestId}${entry.index}`;
+            const solveTime = entry.timestamp;
             newLogEntries.push({
               key,
-              message: `${displayName} solved ${problemName} (${contestAndIndex})`,
+              message: `${displayName} solved ${problemName} (${contestAndIndex}) at ${formatTime(solveTime)}`,
               team: teamKey,
             });
         });
@@ -362,9 +372,10 @@ export default function Home() {
             
             const problemName = entry.problem?.name ?? `Problem ${entry.index}`;
             const contestAndIndex = `${entry.contestId}${entry.index}`;
+            const solveTime = entry.timestamp;
             newLogEntries.push({
               key,
-              message: `${displayName} solved ${problemName} (${contestAndIndex})`,
+              message: `${displayName} solved ${problemName} (${contestAndIndex}) at ${formatTime(solveTime)}`,
               team: teamKey,
             });
           });
@@ -623,7 +634,7 @@ export default function Home() {
     const teamKey = teamObj?.color?.toLowerCase() ?? currentTeam?.toLowerCase?.() ?? 'unknown';
     const newEntry = {
         key,
-        message: `${displayName} solved ${prob.name} (${problemId})`,
+        message: `${displayName} solved ${prob.name} (${problemId}) at ${formatTime(time)}`,
         team: teamKey,
     };
 
