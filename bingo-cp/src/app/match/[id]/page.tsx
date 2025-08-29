@@ -754,7 +754,7 @@ export default function Home() {
                     '_blank'
                   )
                 }
-                // onDoubleClick={() => { // DONT forget to remove it later
+                // onDoubleClick={() => { // DON'T forget to remove it later
                 // // double click will locally mark for testing (toggleSquare) but disabled after lock
                 // if (!matchLocked) toggleSquare(idx);
                 // }}
