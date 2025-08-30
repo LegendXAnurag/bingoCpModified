@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: {
           problems: { where: { active: true }, orderBy: { position: 'asc' } },
           teams: { include: { members: true } },
-          solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
+          solveLog: { include: { problem: true }, orderBy: { timestamp: 'asc' } },
         },
       });
       return res.json({ message: "Using cached state", match: cachedMatch });
@@ -67,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         teams: {
           include: { members: true },
         },
-        solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
+        solveLog: { include: { problem: true }, orderBy: { timestamp: 'asc' } },
       },
     });
 
@@ -168,7 +168,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: {
           problems: { where: { active: true }, orderBy: { position: 'asc' } },
           teams: { include: { members: true } },
-          solveLog: {include: {problem: true}, orderBy: { timestamp: 'desc' }},
+          solveLog: {include: {problem: true}, orderBy: { timestamp: 'asc' }},
         },
       });
       return res.status(200).json({ updated: false, match: updatedMatch });
@@ -283,7 +283,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       include: {
         problems: {where: {active: true}, orderBy: {position: 'asc'}},
         teams: { include: { members: true } },
-        solveLog: {include: {problem: true}, orderBy: { timestamp: 'desc' } },
+        solveLog: {include: {problem: true}, orderBy: { timestamp: 'asc' } },
       },
     });
     return res.status(200).json({ updated: true, match: updatedMatch });
