@@ -50,7 +50,6 @@ type LogEntry = {
   key: string;
   message: string;
   team: string;
-  timeISO?: string;
 }
 
 type Problem = {
@@ -63,7 +62,7 @@ type Problem = {
 };
 type SolvedInfo = {
   team: string;
-  timestamp?: string;
+  
 };
 
 type Winner = {

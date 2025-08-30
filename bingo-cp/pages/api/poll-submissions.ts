@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: {
           problems: { where: { active: true }, orderBy: { position: 'asc' } },
           teams: { include: { members: true } },
-          solveLog: { include: { problem: true } },
+          solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
         },
       });
       return res.json({ message: "Using cached state", match: cachedMatch });
