@@ -161,6 +161,7 @@ export default function Home() {
   const [matchLocked, setMatchLocked] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
   const [positionOwners, setPositionOwners] = useState<Record<number, string>>({});
+  const [showRatings, setShowRatings] = useState<boolean>(true);
 
 
   const { width, height } = useWindowSize();
@@ -173,6 +174,12 @@ export default function Home() {
     } catch {}
   }
 
+
+  useEffect(() => {
+    if (match && typeof match.showRatings === 'boolean') {
+      setShowRatings(Boolean(match.showRatings));
+    }
+  }, [match?.showRatings]);
   useEffect(() => {
     if (!match?.id) return;
     const key = `notified_${match.id}`;
@@ -767,12 +774,19 @@ export default function Home() {
                 className={`w-36 h-24 p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
                   ${teamColor} ${ownerTeam ? 'text-white' : ''} ${isWinningCell ? ' ring-4 ring-yellow-400 scale-[1.06]' : ''}`}
               >
-                <div className="text-sm font-semibold">
-                  {problem.rating} - {problem.index}
+                {showRatings ? (
+                    <div className="text-sm font-semibold">
+                      {problem.rating} - {problem.index}
+                    </div>
+                  ) : null}
+
+                  {showRatings ? (
+                    <div className="text-xs mt-1">{problem.name}</div>
+                  ) : (
+                    <div className="text-sm">{problem.name}</div>
+                  )}
                 </div>
-                <div className="text-xs mt-1">{problem.name}</div>
-              </div>
-            );
+              );
           })}
         </div>
         )

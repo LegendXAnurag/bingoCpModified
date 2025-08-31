@@ -25,6 +25,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({}) => {
   const [replaceIncrement, setReplaceIncrement] = useState<number>(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeoutMinutes, setTimeoutMinutes] = useState("0:00");
+  const [showRatings, setShowRatings] = useState<boolean>(true);
   
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -177,6 +178,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     timeoutMinutes: timeoutMinutesValue,
     problems: [],
     solveLog: [],
+    showRatings,
   };
   setIsSubmitting(true);
   try {
@@ -309,6 +311,24 @@ const handleSubmit = async (e: React.FormEvent) => {
               </option>
             ))}
           </select>
+        <label className="text-sm font-medium mb-1">Show problem ratings</label>
+        <div className="inline-flex rounded-md shadow-sm" role="group" aria-label="Show ratings">
+          <button
+            type="button"
+            onClick={() => setShowRatings(true)}
+            className={`px-3 py-2 text-sm rounded-l ${showRatings ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'}`}
+          >
+            Show
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowRatings(false)}
+            className={`px-3 py-2 text-sm rounded-r ${!showRatings ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'}`}
+          >
+            Hide
+          </button>
+        </div>
+
           <label className="text-sm font-medium">Timeout (hh:mm)</label>
           <input
             type="text"

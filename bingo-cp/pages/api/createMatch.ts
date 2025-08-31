@@ -25,6 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     mode,
     gridSize,
     teams,
+    showRatings = true,
   } = req.body as {
     startTime: string;
     durationMinutes: number;
@@ -34,6 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     timeoutMinutes?: number | null;
     mode: MatchMode;
     gridSize: number;
+    showRatings: boolean;
     teams: Array<{
       name: string;
       color: string;
@@ -79,6 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         minRating: minRating ?? undefined,
         maxRating: maxRating ?? undefined,
         gridSize,
+        showRatings: Boolean(showRatings),
       },
     });
     // console.timeEnd("match");

@@ -9,6 +9,7 @@ export interface Match {
   problems: ProblemCell[];
   solveLog: SolveEntry[];
   timeoutMinutes?: number | null;
+  showRatings?: boolean;
 }
 
 export interface Team {
