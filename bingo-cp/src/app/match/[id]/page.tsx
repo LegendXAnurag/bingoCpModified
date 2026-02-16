@@ -5,6 +5,7 @@ import Loading from '../../Loading';
 import Confetti from 'react-confetti';
 import { useRef } from 'react';
 import { ProblemCell } from '../../types/match'
+import NavBar from '../../components/NavBar';
 
 // import { MatchStatus } from "./MatchStatus";
 import MatchCreationForm from '../../MatchCreationForm';
@@ -31,12 +32,7 @@ const teamColors: Record<string, string> = {
   teal: 'bg-teal-500',
 };
 
-const links: Record<string, string> = {
-  "Home": '/home',
-  "Bingo": '/create-match',
-  "Tug of War": '/tug-mode',
-  "Help": '/help',
-};
+
 
 type GridSize = 3 | 4 | 5 | 6;
 
@@ -683,44 +679,7 @@ export default function Home() {
 
 
       {/* Header */}
-      <header className="w-full bg-gray-100 dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
-          <a href="/home">
-            <h1 className="text-2xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text tracking-wide">
-              Bingo CP
-            </h1>
-          </a>
-          <div className="flex items-center space-x-4 border-l pl-6 ml-4 dark:border-gray-600">
-            <a href={`${links['Home']}`}>
-              <button key={'Home'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'Home'}
-              </button>
-            </a>
-            <a href={`${links['ICPC Mode']}`}>
-              <button key={'ICPC Mode'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'ICPC Mode'}
-              </button>
-            </a>
-            <a href={`${links['IOI Mode']}`}>
-              <button key={'IOI Mode'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'IOI Mode'}
-              </button>
-            </a>
-            <a href={`${links['Help']}`}>
-              <button key={'Help'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'Help'}
-              </button>
-            </a>
-            {/* {['Home', 'ICPC Mode', 'IOI Mode', 'Help'].map(label => (
-                <a href={`${links[label]}`}>
-                  <button key={label} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                    {label}
-                  </button>
-                </a>
-              ))} */}
-          </div>
-        </div>
-      </header>
+      <NavBar />
 
       {/* Show time info */}
       <div className="text-center mt-4">
