@@ -19,7 +19,7 @@ export default function NavBar() {
                 <div className="flex items-center space-x-4 border-l pl-6 ml-4 dark:border-gray-600">
                     {Object.keys(links).map(label => (
                         <a key={label} href={links[label]}>
-                            <button className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
+                            <button className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-white-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
                                 {label}
                             </button>
                         </a>

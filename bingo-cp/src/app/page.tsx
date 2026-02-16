@@ -41,13 +41,13 @@ export default function HomePage(): React.JSX.Element {
                 href="/create-match"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
               >
-                🎯 Play Bingo Mode
+                Play Bingo Mode
               </a>
               <a
                 href="/tug-mode"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
               >
-                ⚔️ Play Tug of War
+                Play Tug of War
               </a>
               <a
                 href="#how"
