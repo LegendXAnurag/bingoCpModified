@@ -11,6 +11,7 @@ import MatchCreationForm from '../../MatchCreationForm';
 import TugOfWarDisplay from '../../TugOfWarDisplay';
 import { Match } from '../../types/match';
 import TeamsForm from '@/app/TeamsForm';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type SolveLog = {
   contestId: number;
@@ -36,10 +37,10 @@ const teamColors: Record<string, string> = {
 type GridSize = 3 | 4 | 5 | 6;
 
 const gridClasses = {
-  3: "grid-cols-3 gap-x-0 gap-y-4 justify-items-center mt-4 mx-130",
-  4: "grid-cols-4 gap-x-0 gap-y-4 justify-items-center mt-4 mx-110",
-  5: "grid-cols-5 gap-x-0 gap-y-4 justify-items-center mt-4 mx-90",
-  6: "grid-cols-6 gap-x-0 gap-y-4 justify-items-center mt-4 mx-70",
+  3: "grid-cols-3 gap-4 max-w-2xl mx-auto",
+  4: "grid-cols-4 gap-4 max-w-3xl mx-auto",
+  5: "grid-cols-5 gap-4 max-w-4xl mx-auto",
+  6: "grid-cols-6 gap-4 max-w-5xl mx-auto",
 };
 
 type LogEntry = {
@@ -48,18 +49,7 @@ type LogEntry = {
   team: string;
 }
 
-type Problem = {
-  // id: number;
-  name: string;
-  rating: number;
-  contestId: number;
-  index: string;
-  position?: number;
-};
-type SolvedInfo = {
-  team: string;
 
-};
 
 type Winner = {
   team: string;
@@ -144,7 +134,7 @@ export default function Home() {
 
   const [showLog, setShowLog] = useState(true);
   const [currentTeam, setCurrentTeam] = useState<string>('');
-  const [problems, setProblems] = useState<Problem[]>([]);
+  const [problems, setProblems] = useState<ProblemCell[]>([]);
   const [loading, setLoading] = useState(true);
   const [gridSize, setgridSize] = useState<GridSize>(5);
   const [solved, setSolved] = useState<Record<string, SolvedInfo>>({});
@@ -563,7 +553,7 @@ export default function Home() {
     }
   }, [solved, problems, winner, positionOwners, match, matchLocked]);
 
-  function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
+  function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: ProblemCell[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
 
     // const len = problemsArr.length ?? 0;
@@ -676,118 +666,115 @@ export default function Home() {
       {/* Confetti on winner */}
       {winner && confettiActive && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
-
-      {/* Show time info */}
-      <div className="text-center mt-4">
-        {!matchHasStarted && (
-          <CountdownToStart startTime={matchStart} />
-        )}
-        {matchHasEnded && (
-          <p className="text-red-500">Match has ended.</p>
-        )}
-        {matchOngoing && match && (
-          <p className="text-green-500">
-            Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
-          </p>
-        )}
-      </div>
-
-      {/* Show problem grid always during or after match */}
-      {matchHasStarted ? (
-        loading ? (
-          <Loading />
-        ) : match.mode === 'tug' ? (
-          <TugOfWarDisplay
-            match={match}
-            problems={problems}
-            solved={solved}
-            positionOwners={positionOwners}
-            showRatings={showRatings}
-            teamColors={teamColors}
-          />
-        ) : (
-          <div className={`grid ${gridClasses[gridSize]} gap-x-0 gap-y-4 justify-items-center mt-4 mx-70`}>
-            {problems.map((problem, idx) => {
-              const key = `${problem.contestId}-${problem.index}`;
-              const solvedInfo = solved[key];
-              const ownerTeam = solvedInfo?.team ?? positionOwners[problem.position ?? idx]; // fallback by position
-              const isWinningCell = winner?.keys?.includes(key);
-              // console.log('Rendering problem', key, 'solved by', solvedInfo?.team, 'teamColor:', teamColors[solvedInfo?.team]);
-              const teamColor = ownerTeam
-                ? (teamColors[ownerTeam] || 'bg-gray-500 text-white')
-                : 'bg-white hover:bg-blue-100 dark:bg-gray-800 dark:hover:bg-blue-900 text-gray-800 dark:text-gray-200';
-
-              return (
-                <div
-                  key={`${problem.contestId}-${problem.index}`}
-                  onClick={() =>
-                    window.open(
-                      `https://codeforces.com/contest/${problem.contestId}/problem/${problem.index}`,
-                      '_blank'
-                    )
-                  }
-                  // onDoubleClick={() => { // DON'T forget to remove it later
-                  // // double click will locally mark for testing (toggleSquare) but disabled after lock
-                  // if (!matchLocked) toggleSquare(idx);
-                  // }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.classList.add('scale-[1.04]', 'shadow-md');
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
-                  }}
-                  className={`w-36 h-24 p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
-                  ${teamColor} ${ownerTeam ? 'text-white' : ''} ${isWinningCell ? ' ring-4 ring-yellow-400 scale-[1.06]' : ''}`}
-                >
-                  {showRatings ? (
-                    <div className="text-sm font-semibold">
-                      {problem.rating} - {problem.index}
-                    </div>
-                  ) : null}
-
-                  {showRatings ? (
-                    <div className="text-xs mt-1">{problem.name}</div>
-                  ) : (
-                    <div className="text-sm">{problem.name}</div>
-                  )}
-                </div>
-              );
-            })}
+      <div className="flex flex-col lg:flex-row gap-6 px-4 pt-6 max-w-[1600px] mx-auto">
+        {/* Main Content Area (Grid or Tug) */}
+        <div className="flex-1 min-w-0">
+          {/* Show time info */}
+          <div className="text-center mt-4 mb-6">
+            {!matchHasStarted && (
+              <CountdownToStart startTime={matchStart} />
+            )}
+            {matchHasEnded && (
+              <p className="text-red-500">Match has ended.</p>
+            )}
+            {matchOngoing && match && (
+              <p className="text-green-500">
+                Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
+              </p>
+            )}
           </div>
-        )
-      ) : null}
 
-      {/* Log Panel */}
-      {showLog && (
-        <div className="fixed bottom-4 left-1 w-72 max-h-[80vh] overflow-y-auto border rounded p-3 bg-white dark:bg-gray-900 shadow z-30">
-          <h2 className="text-xl font-semibold mb-2">Solve Log</h2>
-          {log.length === 0 ? (
-            <p className="text-sm text-gray-500">No solves yet</p>
-          ) : (
-            <ul className="text-sm space-y-2">
-              {log.map((entry, idx) => {
-                const bgColor = teamColors[entry.team] || 'bg-gray-200 dark:bg-gray-700';
-                return (
-                  <li
-                    key={idx}
-                    className={`${bgColor} text-white px-3 py-2 rounded shadow-sm`}
-                  >
-                    {entry.message}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          {/* Show problem grid always during or after match */}
+          {matchHasStarted ? (
+            loading ? (
+              <Loading />
+            ) : match.mode === 'tug' ? (
+              <TugOfWarDisplay
+                match={match}
+                problems={problems}
+                solved={solved}
+                positionOwners={positionOwners}
+                showRatings={showRatings}
+                teamColors={teamColors}
+              />
+            ) : (
+              <div className={`grid ${gridClasses[gridSize]} px-2 sm:px-4 w-full`}>
+                {problems.map((problem, idx) => {
+                  const key = `${problem.contestId}-${problem.index}`;
+                  const solvedInfo = solved[key];
+                  const ownerTeam = solvedInfo?.team ?? positionOwners[problem.position ?? idx]; // fallback by position
+                  const isWinningCell = winner?.keys?.includes(key);
+
+                  const teamColor = ownerTeam
+                    ? (teamColors[ownerTeam] || 'bg-gray-500 text-white')
+                    : 'bg-white hover:bg-blue-100 dark:bg-gray-800 dark:hover:bg-blue-900 text-gray-800 dark:text-gray-200';
+
+                  return (
+                    <div
+                      key={`${problem.contestId}-${problem.index}`}
+                      onClick={() =>
+                        window.open(
+                          `https://codeforces.com/contest/${problem.contestId}/problem/${problem.index}`,
+                          '_blank'
+                        )
+                      }
+                      onMouseEnter={(e) => {
+                        e.currentTarget.classList.add('scale-[1.04]', 'shadow-md');
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
+                      }}
+                      className={`w-full aspect-[4/3] min-h-[5rem] p-1 sm:p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
+                      ${teamColor} ${ownerTeam ? 'text-white' : ''} ${isWinningCell ? ' ring-4 ring-yellow-400 scale-[1.06]' : ''}`}
+                    >
+                      {showRatings ? (
+                        <div className="text-sm font-semibold">
+                          {problem.rating} - {problem.index}
+                        </div>
+                      ) : null}
+
+                      {showRatings ? (
+                        <div className="text-xs mt-1">{problem.name}</div>
+                      ) : (
+                        <div className="text-sm">{problem.name}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : null}
         </div>
-      )}
 
-      {/* Toggle Button (above log) */}
-      <button
-        onClick={() => setShowLog(prev => !prev)}
-        className="cursor-pointer fixed bottom-[calc(4rem+76vh)] left-4 px-3 py-1 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600 transition z-40"
-      >
-        {showLog ? 'Hide Log' : 'Show Log'}
-      </button>
+        {/* Log Panel - Desktop (Right side), Mobile (Bottom) */}
+        <div className="w-full lg:w-80 shrink-0 mt-8 lg:mt-0">
+          <Card className="lg:sticky lg:top-24 h-96 lg:h-[calc(100vh-8rem)] flex flex-col">
+            <CardHeader className="border-b px-4 py-3">
+              <CardTitle className="text-xl font-semibold">Solve Log</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto p-3">
+              {log.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">No solves yet</p>
+              ) : (
+                <ul className="text-sm space-y-2">
+                  {log.map((entry, idx) => {
+                    const bgColor = teamColors[entry.team] || 'bg-gray-200 dark:bg-gray-700';
+                    return (
+                      <li
+                        key={idx}
+                        className={`${bgColor} text-white px-3 py-2 rounded shadow-sm`}
+                      >
+                        {entry.message}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </main>
   );
 }
+

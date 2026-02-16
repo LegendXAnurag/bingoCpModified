@@ -3,6 +3,10 @@ import type { Match, Team } from "./types/match";
 import { useState } from "react";
 import TeamsForm from "./TeamsForm";
 import { useRouter } from 'next/navigation';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 type MatchCreationFormProps = {
   onMatchCreated: (match: Match) => void;
@@ -217,153 +221,185 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
 
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-4">
-      <div className="flex flex-col gap-4 w-full max-w-md">
-        <TeamsForm onTeamsChange={setTeams} />
-      </div>
+    <Card className="w-full max-w-7xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">Create Bingo Match</CardTitle>
+        <CardDescription className="text-center">Configure teams and match settings</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} id="create-match-form">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Teams Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b pb-2">
+                <h3 className="text-xl font-semibold">Teams</h3>
+                <p className="text-sm text-muted-foreground">At least 2 teams required</p>
+              </div>
+              <TeamsForm onTeamsChange={setTeams} />
+            </div>
 
-      {/* Match options (right side on large screens) */}
-      <div className="flex flex-col gap-2 sm:ml-4">
-        <label className="text-sm font-medium">Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
+            {/* Match Options Section */}
+            <div className="space-y-6 border-l pl-12">
+              <div className="border-b pb-2">
+                <h3 className="text-xl font-semibold">Match Options</h3>
+              </div>
 
-        <label className="text-sm font-medium">Time </label>
-        <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="border p-2 rounded w-full"
-          step="60"
-        />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    step="60"
+                  />
+                </div>
+              </div>
 
-        <label className="text-sm font-medium">Duration (hh:mm)</label>
-        <input
-          type="text"
-          placeholder="e.g. 1:30"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          className="border p-2 rounded w-full"
-          pattern="^\d+:\d{2}$"
-          required
-        />
-        <label className="text-sm font-medium">Minimum Rating</label>
-        <input
-          type="text"
-          placeholder="e.g. 800"
-          value={minRating}
-          onChange={(e) => setMinRating(Number(e.target.value))}
-          className="border p-2 rounded w-full"
-          pattern="[0-9]+"
-          required
-        />
-        <label className="text-sm font-medium">Maximum Rating</label>
-        <input
-          type="text"
-          placeholder="e.g. 1600"
-          value={maxRating}
-          onChange={(e) => setMaxRating(Number(e.target.value))}
-          className="border p-2 rounded w-full"
-          pattern="[0-9]+"
-          required
-        />
+              <div className="space-y-2">
+                <Label>Duration (hh:mm)</Label>
+                <Input
+                  type="text"
+                  placeholder="e.g. 1:30"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  pattern="^\d+:\d{2}$"
+                  required
+                />
+              </div>
 
-        <label className="text-sm font-medium">Game Mode</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Min Rating</Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. 800"
+                    value={minRating}
+                    onChange={(e) => setMinRating(Number(e.target.value))}
+                    pattern="[0-9]+"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Max Rating</Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. 1600"
+                    value={maxRating}
+                    onChange={(e) => setMaxRating(Number(e.target.value))}
+                    pattern="[0-9]+"
+                    required
+                  />
+                </div>
+              </div>
 
-        <select
-          value={selectedMode}
-          onChange={(e) => setSelectedMode(e.target.value as "classic" | "replace")}
-          className="border p-2 rounded w-full"
+              <div className="space-y-2">
+                <Label>Game Mode</Label>
+                <select
+                  value={selectedMode}
+                  onChange={(e) => setSelectedMode(e.target.value as "classic" | "replace")}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="classic">Classic</option>
+                  <option value="replace">Replace</option>
+                </select>
+              </div>
+
+              {selectedMode === 'replace' && (
+                <div className="space-y-2">
+                  <Label>Replace increment</Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. 100"
+                    value={replaceIncrement}
+                    onChange={(e) => setReplaceIncrement(Number(e.target.value))}
+                    pattern="[0-9]+"
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Grid Size</Label>
+                <select
+                  value={selectedGridSize}
+                  onChange={(e) => setSelectedGridSize(parseInt(e.target.value))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {[3, 4, 5, 6].map((size) => (
+                    <option key={size} value={size}>
+                      {size} x {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="mb-1 block">Show problem ratings</Label>
+                <div className="inline-flex rounded-md shadow-sm" role="group">
+                  <Button
+                    type="button"
+                    variant={showRatings ? "default" : "outline"}
+                    onClick={() => setShowRatings(true)}
+                    className="rounded-r-none"
+                  >
+                    Show
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={!showRatings ? "default" : "outline"}
+                    onClick={() => setShowRatings(false)}
+                    className="rounded-l-none"
+                  >
+                    Hide
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Timeout (hh:mm)</Label>
+                <Input
+                  type="text"
+                  placeholder="e.g. 1:30"
+                  value={timeoutMinutes}
+                  onChange={(e) => setTimeoutMinutes(e.target.value)}
+                  pattern="^\d+:\d{2}$"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter className="flex justify-end pt-6">
+        <Button
+          type="submit"
+          form="create-match-form"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto"
         >
-          <option value="classic" className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            Classic
-          </option>
-          <option value="replace" className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            Replace
-          </option>
-        </select>
-        {selectedMode === 'replace' && (
-          <>
-            <label className="text-sm font-medium">Replace increment</label>
-            <input
-              type="text"
-              placeholder="e.g. 100"
-              value={replaceIncrement}
-              onChange={(e) => setReplaceIncrement(Number(e.target.value))}
-              className="border p-2 rounded w-full"
-              pattern="[0-9]+"
-              required
-            />
-          </>
-        )}
-        <label className="text-sm font-medium">Grid Size</label>
-        <select
-          value={selectedGridSize}
-          onChange={(e) => setSelectedGridSize(parseInt(e.target.value))}
-          className="border p-2 rounded w-full"
-        >
-          {[3, 4, 5, 6].map((size) => (
-            <option key={size} value={size} className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-              {size} x {size}
-            </option>
-          ))}
-        </select>
-        <label className="text-sm font-medium mb-1">Show problem ratings</label>
-        <div className="inline-flex rounded-md shadow-sm" role="group" aria-label="Show ratings">
-          <button
-            type="button"
-            onClick={() => setShowRatings(true)}
-            className={`px-3 py-2 text-sm rounded-l ${showRatings ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'}`}
-          >
-            Show
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowRatings(false)}
-            className={`px-3 py-2 text-sm rounded-r ${!showRatings ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'}`}
-          >
-            Hide
-          </button>
-        </div>
-
-        <label className="text-sm font-medium">Timeout (hh:mm)</label>
-        <input
-          type="text"
-          placeholder="e.g. 1:30"
-          value={timeoutMinutes}
-          onChange={(e) => setTimeoutMinutes(e.target.value)}
-          className="border p-2 rounded w-full"
-          pattern="^\d+:\d{2}$"
-          required
-        />
-      </div>
-
-
-      {/* Submit button */}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="cursor-pointer bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition mt-4 sm:mt-0"
-      >
-        {isSubmitting ? (
-          <span className="flex items-center">
-            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-            </svg>
-            Creating...
-          </span>
-        ) : (
-          'Create Match'
-        )}
-
-      </button>
-    </form>
-
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              Creating...
+            </span>
+          ) : (
+            'Create Match'
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

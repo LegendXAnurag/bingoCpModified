@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import TugMatchCreationForm from '../TugMatchCreationForm';
+import TugMatchCreationForm from './TugMatchCreationForm';
 import { Match } from '../types/match';
 
 export default function TugModePage() {
@@ -12,15 +12,8 @@ export default function TugModePage() {
     }
 
     return (
-        <main className="min-h-screen bg-white pt-8 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-
-            {/* Title */}
-            <div className="text-center mt-8">
-                <h2 className="text-3xl font-bold mb-6">Create Tug of War Match</h2>
-            </div>
-
-            {/* Match creation UI */}
-            <div className="flex justify-center mt-8">
+        <main className="min-h-screen bg-white pt-8 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 p-4">
+            <div className="flex justify-center">
                 <TugMatchCreationForm onMatchCreated={setMatch} />
             </div>
         </main>
