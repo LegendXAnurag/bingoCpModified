@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Loading from '../Loading';
 // import { MatchStatus } from "./MatchStatus";
-import MatchCreationForm from '../MatchCreationForm';
+import MatchCreationForm from './MatchCreationForm';
 import { Match, ProblemCell } from '../types/match';
 type solveLog = {
   id: number;
@@ -192,7 +192,6 @@ export default function Home() {
   // function toggleSquare(i: number) {
   //   const key = `${problems[i].contestId}-${problems[i].index}`;
   //   if (solved[key]) return;
-
   //   const time = new Date().toLocaleTimeString();
   //   setSolved(prev => ({ ...prev, [key]: { team: currentTeam, timestamp: time } }));
   //   setLog(prev => {
@@ -201,7 +200,6 @@ export default function Home() {
   //       team: currentTeam.toLowerCase(),
   //     };
   //     const combined = [newEntry, ...prev];
-
   //     const uniqueMap = new Map<string, typeof newEntry>();
   //     for (const entry of combined) {
   //       if (!uniqueMap.has(entry.message)) {

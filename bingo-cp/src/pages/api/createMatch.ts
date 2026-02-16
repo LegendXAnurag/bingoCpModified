@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../src/app/lib/prisma';
+import { prisma } from '@/app/lib/prisma';
 import { MatchMode } from '@prisma/client';
 
 type ProblemWithGrid = {

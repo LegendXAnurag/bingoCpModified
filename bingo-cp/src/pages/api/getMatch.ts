@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../src/app/lib/prisma';
+import { prisma } from '@/app/lib/prisma';
 
 export async function getServerMatch(id: string) {
   return prisma.match.findUnique({
     where: { id },
     include: {
-      problems: {where: {active: true}, orderBy: {position: 'asc'}},
+      problems: { where: { active: true }, orderBy: { position: 'asc' } },
       solveLog: {
         include: {
           problem: true

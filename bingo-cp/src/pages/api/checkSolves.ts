@@ -1,6 +1,6 @@
 // pages/api/checkSolves.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { checkSolvesLogic, Problem, Player } from './checkSolvesLogic'
+import { checkSolvesLogic, Problem, Player } from '@/lib/checkSolvesLogic'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {

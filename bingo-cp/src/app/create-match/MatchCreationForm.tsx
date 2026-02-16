@@ -1,7 +1,7 @@
 "use client";
-import type { Match, Team } from "./types/match";
+import type { Match, Team } from "../types/match";
 import { useState } from "react";
-import TeamsForm from "./TeamsForm";
+import TeamsForm from "../TeamsForm";
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

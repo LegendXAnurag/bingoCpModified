@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from "../../src/app/lib/prisma"
-import { checkSolvesLogic } from './checkSolvesLogic'
+import { prisma } from "@/app/lib/prisma"
+import { checkSolvesLogic, Problem, Player, Claim } from '@/lib/checkSolvesLogic'
 async function fetchReplacementProblem(exclude: string[], minRating?: number, maxRating?: number, handles?: string[]) {
   try {
     const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'; // Use localhost for development

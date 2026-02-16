@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Loading from '../../Loading';
 import Confetti from 'react-confetti';
@@ -7,10 +7,10 @@ import { useRef } from 'react';
 import { ProblemCell } from '../../types/match'
 
 // import { MatchStatus } from "./MatchStatus";
-import MatchCreationForm from '../../MatchCreationForm';
+// import MatchCreationForm from '../../MatchCreationForm';
 import TugOfWarDisplay from '../../TugOfWarDisplay';
 import { Match } from '../../types/match';
-import TeamsForm from '@/app/TeamsForm';
+// import TeamsForm from '@/app/TeamsForm';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type SolveLog = {
@@ -138,7 +138,7 @@ export default function Home() {
   const rawId = params?.id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId; // id is now string | undefined
 
-  const [showLog, setShowLog] = useState(true);
+  // const [showLog, setShowLog] = useState(true);
   const [currentTeam, setCurrentTeam] = useState<string>('');
   const [problems, setProblems] = useState<ProblemCell[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,19 +159,90 @@ export default function Home() {
   const { width, height } = useWindowSize();
   const notifiedRef = useRef<Set<string>>(new Set());
 
-  function persistNotified(matchId: string) {
+  const persistNotified = useCallback((matchId: string) => {
     const key = `notified_${matchId}`;
     try {
       localStorage.setItem(key, JSON.stringify(Array.from(notifiedRef.current)));
     } catch { }
+  }, []);
+
+  type Team = {
+    name: string;
+    color: string;
   }
+
+  const resolveTeamDisplayAndKey = useCallback((teamIdentifier: string | undefined, teamsListParam?: Team[]) => {
+    const teamsList = teamsListParam ?? (match?.teams ?? []);
+    if (!teamIdentifier) return { displayName: 'Unknown', teamKey: 'unknown' };
+
+    const search = teamIdentifier.toLowerCase();
+    const teamObj = teamsList.find(t =>
+      (t.color ?? '').toLowerCase() === search || (t.name ?? '').toLowerCase() === search
+    );
+
+    const displayName = teamObj?.name ?? teamIdentifier;
+    const teamKey = (teamObj?.color ?? teamIdentifier ?? 'unknown').toLowerCase();
+
+    return { displayName, teamKey };
+  }, [match?.teams]);
+
+  const findWinnerFromSolved = useCallback((solvedMap: Record<string, SolvedInfo>, problemsArr: ProblemCell[], gSize: number): Winner => {
+    if (!problemsArr || problemsArr.length === 0) return null;
+
+    const size = gSize;
+
+    if (problemsArr.length !== size * size) {
+      console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
+      return null;
+    }
+    const ownerGrid: (string | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
+    for (let i = 0; i < problemsArr.length; i++) {
+      const r = Math.floor(i / size);
+      const c = i % size;
+      ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null;
+    }
+
+    // rows
+    for (let r = 0; r < size; r++) {
+      const first = ownerGrid[r][0];
+      if (first && ownerGrid[r].every(cell => cell === first)) {
+        const keys = Array.from({ length: size }, (_, c) => `${problemsArr[r * size + c].contestId}-${problemsArr[r * size + c].index}`);
+        return { team: first, type: 'row', index: r, keys };
+      }
+    }
+
+    // columns
+    for (let c = 0; c < size; c++) {
+      const first = ownerGrid[0][c];
+      if (first && ownerGrid.every(row => row[c] === first)) {
+        const keys = Array.from({ length: size }, (_, r) => `${problemsArr[r * size + c].contestId}-${problemsArr[r * size + c].index}`);
+        return { team: first, type: 'col', index: c, keys };
+      }
+    }
+
+    // main diagonal
+    const firstDiag = ownerGrid[0][0];
+    if (firstDiag && ownerGrid.every((row, i) => row[i] === firstDiag)) {
+      const keys = Array.from({ length: size }, (_, i) => `${problemsArr[i * size + i].contestId}-${problemsArr[i * size + i].index}`);
+      return { team: firstDiag, type: 'diag', index: 0, keys };
+    }
+
+    // anti-diagonal
+    const firstAnti = ownerGrid[0][size - 1];
+    if (firstAnti && ownerGrid.every((row, i) => row[size - 1 - i] === firstAnti)) {
+      const keys = Array.from({ length: size }, (_, i) => `${problemsArr[i * size + (size - 1 - i)].contestId}-${problemsArr[i * size + (size - 1 - i)].index}`);
+      return { team: firstAnti, type: 'anti-diag', index: 1, keys };
+    }
+
+    return null;
+  }, [positionOwners]);
 
 
   useEffect(() => {
     if (match && typeof match.showRatings === 'boolean') {
       setShowRatings(Boolean(match.showRatings));
     }
-  }, [match?.showRatings]);
+  }, [match]); // match.showRatings is derived from match so implicit dependency on match is better or verify structure
   useEffect(() => {
     if (!match?.id) return;
     const key = `notified_${match.id}`;
@@ -253,7 +324,7 @@ export default function Home() {
     };
 
     fetchMatch();
-  }, [id]);
+  }, [id, resolveTeamDisplayAndKey]);
   useEffect(() => {
     if (!match) return;
 
@@ -270,28 +341,8 @@ export default function Home() {
     const normalized = normalizeProblemsFromServer(match.problems || []);
     setProblems(normalized);
     setLoading(false);
-  }, [match]);
+  }, [match, problems.length]);
 
-  type Team = {
-    name: string;
-    color: string;
-  }
-
-
-  function resolveTeamDisplayAndKey(teamIdentifier: string | undefined, teamsListParam?: Team[]) {
-    const teamsList = teamsListParam ?? (match?.teams ?? []);
-    if (!teamIdentifier) return { displayName: 'Unknown', teamKey: 'unknown' };
-
-    const search = teamIdentifier.toLowerCase();
-    const teamObj = teamsList.find(t =>
-      (t.color ?? '').toLowerCase() === search || (t.name ?? '').toLowerCase() === search
-    );
-
-    const displayName = teamObj?.name ?? teamIdentifier;
-    const teamKey = (teamObj?.color ?? teamIdentifier ?? 'unknown').toLowerCase();
-
-    return { displayName, teamKey };
-  }
 
 
 
@@ -300,7 +351,7 @@ export default function Home() {
     if (match?.teams?.length && !currentTeam) {
       setCurrentTeam(match.teams[0].color);
     }
-  }, [match]);
+  }, [match, currentTeam]);
 
 
   useEffect(() => {
@@ -308,8 +359,8 @@ export default function Home() {
     if (!match?.id) return;
 
     const matchStart = new Date(match.startTime);
-    const durationMinutes = (match.timeoutMinutes ?? match.durationMinutes);
-    const timeStartWinner = new Date(matchStart.getTime() + durationMinutes * 60 * 1000);
+    // const durationMinutes = (match.timeoutMinutes ?? match.durationMinutes);
+    // const timeStartWinner = new Date(matchStart.getTime() + durationMinutes * 60 * 1000); // Unused variable
     const matchEnd = new Date(matchStart.getTime() + match.durationMinutes * 60 * 1000);
 
     const fetchPoll = async () => {
@@ -435,7 +486,7 @@ export default function Home() {
 
     const interval = setInterval(fetchPoll, 20000); // REMEMBER TO CHANGE TO 15S
     return () => clearInterval(interval);
-  }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked]);
+  }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked, resolveTeamDisplayAndKey, match?.problems, match?.solveLog, persistNotified]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -473,14 +524,14 @@ export default function Home() {
     const seconds = String(totalSeconds % 60).padStart(2, "0");
     return `${hours}:${minutes}:${seconds}`;
   }
-  function formatCountdown(ms: number): string {
-    if (ms <= 0) return "00:00:00";
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
-    const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
-    const seconds = (totalSeconds % 60).toString().padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
-  }
+  // function formatCountdown(ms: number): string { // Unused
+  //   if (ms <= 0) return "00:00:00";
+  //   const totalSeconds = Math.floor(ms / 1000);
+  //   const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+  //   const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
+  //   const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  //   return `${hours}:${minutes}:${seconds}`;
+  // }
 
 
   function CountdownToStart({ startTime }: { startTime: Date }) {
@@ -498,8 +549,8 @@ export default function Home() {
       return <p>Match is starting now...</p>;
     }
 
-    const minutes = Math.floor(timeLeft / 60000);
-    const seconds = Math.floor((timeLeft % 60000) / 1000);
+    // const minutes = Math.floor(timeLeft / 60000); // Unused
+    // const seconds = Math.floor((timeLeft % 60000) / 1000); // Unused
 
     return (
       <p className="text-yellow-500">
@@ -557,98 +608,10 @@ export default function Home() {
         }
       })();
     }
-  }, [solved, problems, winner, positionOwners, match, matchLocked]);
+  }, [solved, problems, winner, positionOwners, match, matchLocked, findWinnerFromSolved, gridSize]);
 
-  function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: ProblemCell[], gSize: number): Winner {
-    if (!problemsArr || problemsArr.length === 0) return null;
+  // toggleSquare function refactored or removed as it was unused and had lint error
 
-    // const len = problemsArr.length ?? 0;
-    // if(len === 36) setgridSize(6 as GridSize);
-    // else if(len === 25) setgridSize(5 as GridSize);
-    // else if(len === 16) setgridSize(4 as GridSize);
-    // else setgridSize(3 as GridSize);
-    const size = gSize;
-
-    if (problemsArr.length !== size * size) {
-      console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
-      return null;
-    }
-    const ownerGrid: (string | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
-    for (let i = 0; i < problemsArr.length; i++) {
-      const r = Math.floor(i / size);
-      const c = i % size;
-      ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null;
-    }
-
-    // rows
-    for (let r = 0; r < size; r++) {
-      const first = ownerGrid[r][0];
-      if (first && ownerGrid[r].every(cell => cell === first)) {
-        const keys = Array.from({ length: size }, (_, c) => `${problemsArr[r * size + c].contestId}-${problemsArr[r * size + c].index}`);
-        return { team: first, type: 'row', index: r, keys };
-      }
-    }
-
-    // columns
-    for (let c = 0; c < size; c++) {
-      const first = ownerGrid[0][c];
-      if (first && ownerGrid.every(row => row[c] === first)) {
-        const keys = Array.from({ length: size }, (_, r) => `${problemsArr[r * size + c].contestId}-${problemsArr[r * size + c].index}`);
-        return { team: first, type: 'col', index: c, keys };
-      }
-    }
-
-    // main diagonal
-    const firstDiag = ownerGrid[0][0];
-    if (firstDiag && ownerGrid.every((row, i) => row[i] === firstDiag)) {
-      const keys = Array.from({ length: size }, (_, i) => `${problemsArr[i * size + i].contestId}-${problemsArr[i * size + i].index}`);
-      return { team: firstDiag, type: 'diag', index: 0, keys };
-    }
-
-    // anti-diagonal
-    const firstAnti = ownerGrid[0][size - 1];
-    if (firstAnti && ownerGrid.every((row, i) => row[size - 1 - i] === firstAnti)) {
-      const keys = Array.from({ length: size }, (_, i) => `${problemsArr[i * size + (size - 1 - i)].contestId}-${problemsArr[i * size + (size - 1 - i)].index}`);
-      return { team: firstAnti, type: 'anti-diag', index: 1, keys };
-    }
-
-    return null;
-  }
-
-
-  function toggleSquare(i: number) {
-    if (matchLocked) return;
-    const key = `${problems[i].contestId}-${problems[i].index}`;
-    if (solved[key]) return;
-
-    const time = new Date().toLocaleTimeString();
-    setSolved(prev => ({ ...prev, [key]: { team: currentTeam, timestamp: time } }));
-    const prob = problems[i];
-    const problemId = `${prob.contestId}${prob.index}`;
-    const teamObj = match?.teams?.find(
-      t => t.color?.toLowerCase() === currentTeam?.toLowerCase() || t.name?.toLowerCase() === currentTeam?.toLowerCase()
-    );
-
-    const displayName = teamObj?.name ?? currentTeam;
-    const teamKey = teamObj?.color?.toLowerCase() ?? currentTeam?.toLowerCase?.() ?? 'unknown';
-    const newEntry = {
-      key,
-      message: `${displayName} solved ${prob.name} (${problemId}) at ${formatTime(time)}`,
-      team: teamKey,
-    };
-
-    setLog(prev => {
-      const combined = [newEntry, ...prev];
-
-      const uniqueMap = new Map<string, typeof newEntry>();
-      for (const entry of combined) {
-        if (!uniqueMap.has(entry.key)) {
-          uniqueMap.set(entry.key, entry);
-        }
-      }
-      return Array.from(uniqueMap.values());//.slice(0, 10);
-    });
-  }
 
 
   if (loading) return <Loading />;
