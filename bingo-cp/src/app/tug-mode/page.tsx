@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import TugMatchCreationForm from '../TugMatchCreationForm';
 import { Match } from '../types/match';
-import NavBar from '../components/NavBar';
 
 export default function TugModePage() {
     const [match, setMatch] = useState<Match | null>(null);
@@ -13,8 +12,7 @@ export default function TugModePage() {
     }
 
     return (
-        <main className="min-h-screen bg-white dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-            <NavBar />
+        <main className="min-h-screen bg-white pt-8 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
             {/* Title */}
             <div className="text-center mt-8">

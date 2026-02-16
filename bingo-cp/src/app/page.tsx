@@ -20,34 +20,8 @@ export default function HomePage(): React.JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Hero */}
-      <header className="max-w-6xl mx-auto px-6 pt-12">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-500">
-            Bingo <span className="text-gray-900 dark:text-white">CP</span>
-          </h1>
-          <nav className="flex items-center gap-3">
-            <a
-              href="/create-match"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow text-sm"
-            >
-              Bingo
-            </a>
-            <a
-              href="/tug-mode"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-medium shadow text-sm"
-            >
-              Tug of War
-            </a>
-            <a
-              href="/help"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:shadow-md text-sm"
-            >
-              Help
-            </a>
-          </nav>
-        </div>
-
-        <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <header className="max-w-6xl mx-auto px-6 pt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

@@ -5,7 +5,6 @@ import Loading from '../../Loading';
 import Confetti from 'react-confetti';
 import { useRef } from 'react';
 import { ProblemCell } from '../../types/match'
-import NavBar from '../../components/NavBar';
 
 // import { MatchStatus } from "./MatchStatus";
 import MatchCreationForm from '../../MatchCreationForm';
@@ -677,9 +676,6 @@ export default function Home() {
       {/* Confetti on winner */}
       {winner && confettiActive && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
-
-      {/* Header */}
-      <NavBar />
 
       {/* Show time info */}
       <div className="text-center mt-4">
