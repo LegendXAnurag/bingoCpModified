@@ -1,6 +1,6 @@
 // app/page.tsx
 "use client";
-import React, {useMemo} from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 
 function randomInt(min: number, max: number) {
@@ -28,11 +28,16 @@ export default function HomePage(): React.JSX.Element {
           <nav className="flex items-center gap-3">
             <a
               href="/create-match"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow text-sm"
             >
-              Create match
+              Bingo
             </a>
-            
+            <a
+              href="/tug-mode"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-medium shadow text-sm"
+            >
+              Tug of War
+            </a>
             <a
               href="/help"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:shadow-md text-sm"
@@ -60,9 +65,15 @@ export default function HomePage(): React.JSX.Element {
             <div className="flex flex-wrap gap-3">
               <a
                 href="/create-match"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-green-500 to-teal-400 text-white font-semibold shadow-lg"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
               >
-                Create a Match
+                🎯 Play Bingo Mode
+              </a>
+              <a
+                href="/tug-mode"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
+              >
+                ⚔️ Play Tug of War
               </a>
               <a
                 href="#how"

@@ -3,8 +3,9 @@
 
 // schema.prisma
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -16,6 +17,7 @@ enum MatchMode {
   replace
   classic
   ioi
+  tug
 }
 
 model Match {
@@ -33,6 +35,9 @@ model Match {
   minRating Int?   // optional: store min rating used when creating the match
   maxRating Int?   // optional: store max rating used when creating the match
   showRatings Boolean @default(true)
+  tugThreshold Int?    // Tug of War: threshold to win (default 2000)
+  tugType String?      // Tug of War: "grid" or "single"
+  tugCount Int?        // Tug of War: current count (starts at 0)
 }
 
 model Problem {

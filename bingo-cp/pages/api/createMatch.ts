@@ -26,6 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     gridSize,
     teams,
     showRatings = true,
+    tugThreshold,
+    tugType,
   } = req.body as {
     startTime: string;
     durationMinutes: number;
@@ -36,18 +38,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     mode: MatchMode;
     gridSize: number;
     showRatings: boolean;
+    tugThreshold?: number;
+    tugType?: string;
     teams: Array<{
       name: string;
       color: string;
       members: string[];
     }>;
   };
-  if (![3,4,5,6].includes(gridSize)) return res.status(400).json({ error: 'invalid gridSize' });
+  // Validate gridSize for non-tug modes, or when tug mode is grid type
+  if (mode === 'tug' && tugType === 'single') {
+    // For tug single mode, we only need 1 problem
+  } else if (![3, 4, 5, 6].includes(gridSize)) {
+    return res.status(400).json({ error: 'invalid gridSize' });
+  }
+
+  // Tug mode requires exactly 2 teams
+  if (mode === 'tug' && teams.length !== 2) {
+    return res.status(400).json({ error: 'Tug of War mode requires exactly 2 teams' });
+  }
+
   const Cmode = mode;
 
   const allHandles = teams.flatMap((team) => team.members);
   try {
-    const baseUrl = 'https://bingo-cp.vercel.app'; // UPDATE IT LATER
+    const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'; // Use relative path in browser, localhost in server
+    // For tug single mode, fetch only 1 problem; otherwise fetch grid
+    const problemCount = (mode === 'tug' && tugType === 'single') ? 1 : gridSize * gridSize;
     const problemRes = await fetch(`${baseUrl}/api/getProblems`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -55,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         userHandles: allHandles,
         minRating,
         maxRating,
-        count: gridSize * gridSize,
+        count: problemCount,
       }),
     })
     if (!problemRes.ok) return res.status(500).json({ error: 'Failed to fetch problems' })
@@ -82,24 +99,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         maxRating: maxRating ?? undefined,
         gridSize,
         showRatings: Boolean(showRatings),
+        tugThreshold: Cmode === 'tug' ? Number(tugThreshold ?? 2000) : undefined,
+        tugType: Cmode === 'tug' ? (tugType ?? 'grid') : undefined,
+        tugCount: Cmode === 'tug' ? 0 : undefined,
       },
     });
     // console.timeEnd("match");
-      // console.time("createMany");
-      await prisma.problem.createMany({
-        data: problems.map((p) => ({
-          // console.log("P: ", p.contestId);
-          contestId: p.contestId ?? 1242,
-          index: p.index,
-          matchId: match.id,
-          rating: p.rating ?? 0,
-          name: p.name,
-          position: p.row * gridSize + p.col,
-          maxPoints: undefined,
-          active: true,
-        })),
-      });
-      // console.timeEnd("createMany");
+    // console.time("createMany");
+    await prisma.problem.createMany({
+      data: problems.map((p) => ({
+        // console.log("P: ", p.contestId);
+        contestId: p.contestId ?? 1242,
+        index: p.index,
+        matchId: match.id,
+        rating: p.rating ?? 0,
+        name: p.name,
+        position: p.row * gridSize + p.col,
+        maxPoints: undefined,
+        active: true,
+      })),
+    });
+    // console.timeEnd("createMany");
 
     for (const team of teams) {
       const createdTeam = await prisma.team.create({
@@ -118,7 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-  return res.status(200).json({id: match.id});
+    return res.status(200).json({ id: match.id });
   } catch (error) {
     console.error("Match creation failed", error);
     return res.status(500).json({ error: 'Match creation failed' });

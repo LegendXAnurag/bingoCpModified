@@ -4,6 +4,7 @@ import Loading from '../Loading';
 // import { MatchStatus } from "./MatchStatus";
 import MatchCreationForm from '../MatchCreationForm';
 import { Match, ProblemCell } from '../types/match';
+import NavBar from '../components/NavBar';
 type solveLog = {
   id: number;
   handle: string;
@@ -27,15 +28,8 @@ const teamColors: Record<string, string> = {
   teal: 'bg-teal-500',
 };
 
-const links: Record<string, string> = {
-  "Home": '/home',
-  "ICPC Mode": '/create-match',
-  "IOI Mode": '/oi_mode',
-  "Help": '/help',
-};
 
-
-type GridSize = 3 | 4 | 5 | 6; 
+type GridSize = 3 | 4 | 5 | 6;
 
 const gridClasses = {
   3: "grid-cols-3 gap-x-0 gap-y-4 justify-items-center mt-4 mx-130",
@@ -85,7 +79,7 @@ export default function Home() {
         return;
       }
       try {
-            const baseUrl = 'https://bingo-cp.vercel.app'; // UPDATE IT LATER
+        const baseUrl = 'https://bingo-cp.vercel.app'; // UPDATE IT LATER
         const pollRes = await fetch(`${baseUrl}/api/poll-submissions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -101,7 +95,7 @@ export default function Home() {
 
           pollData.match.solveLog.forEach((entry: solveLog) => {
             const key = `${entry.contestId}-${entry.index}`;
-            
+
             solvedMap[key] = {
               team: entry.team,
               timestamp: new Date(entry.timestamp).toLocaleTimeString(),
@@ -116,15 +110,15 @@ export default function Home() {
           setSolved(solvedMap);
 
           setLog(prevLog => {
-          const combined = [...newLogEntries, ...prevLog];
-          const uniqueMap = new Map<string, { message: string; team: string }>();
-          for (const entry of combined) {
-            if (!uniqueMap.has(entry.message)) {
-              uniqueMap.set(entry.message, entry);
+            const combined = [...newLogEntries, ...prevLog];
+            const uniqueMap = new Map<string, { message: string; team: string }>();
+            for (const entry of combined) {
+              if (!uniqueMap.has(entry.message)) {
+                uniqueMap.set(entry.message, entry);
+              }
             }
-          }
-          return Array.from(uniqueMap.values());
-        });
+            return Array.from(uniqueMap.values());
+          });
         }
       } catch (err) {
         console.error('Polling submissions failed', err);
@@ -189,9 +183,9 @@ export default function Home() {
   }
   useEffect(() => {
     if (!match) return;
-    if(match.problems.length == 36) setgridSize(6);
-    else if(match.problems.length == 25) setgridSize(5);
-    else if(match.problems.length == 16) setgridSize(4);
+    if (match.problems.length == 36) setgridSize(6);
+    else if (match.problems.length == 25) setgridSize(5);
+    else if (match.problems.length == 16) setgridSize(4);
     else setgridSize(3);
     setProblems(match.problems);
     setLoading(false);
@@ -223,44 +217,12 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-white dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
         {/* Header */}
-        <header className="w-full bg-gray-100 dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm sticky top-0 z-20">
-          <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
-            <a href="/home">
-              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text tracking-wide">
-                Bingo CP
-              </h1>
-            </a>
-            <div className="flex items-center space-x-4 border-l pl-6 ml-4 dark:border-gray-600">
-            <a href={`${links['Home']}`}>
-              <button key={'Home'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'Home'}
-              </button>
-            </a>
-            <a href={`${links['ICPC Mode']}`}>
-              <button key={'ICPC Mode'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'ICPC Mode'}
-              </button>
-            </a>
-            <a href={`${links['IOI Mode']}`}>
-              <button key={'IOI Mode'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'IOI Mode'}
-              </button>
-            </a>
-            <a href={`${links['Help']}`}>
-              <button key={'Help'} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                {'Help'}
-              </button>
-            </a>
-              {/* {['Home', 'ICPC Mode', 'IOI Mode', 'Help'].map(label => (
-                <a href={`${links[label]}`}>
-                  <button key={label} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
-                    {label}
-                  </button>
-                </a>
-              ))} */}
-            </div>
-          </div>
-        </header>
+        <NavBar />
+
+        {/* Title */}
+        <div className="text-center mt-8">
+          <h2 className="text-3xl font-bold mb-6">Create Bingo Match</h2>
+        </div>
 
         {/* Match creation UI */}
         <div className="flex justify-center mt-4">
@@ -306,53 +268,53 @@ export default function Home() {
           <p className="text-red-500">Match has ended.</p>
         )}
         {matchOngoing && match && (
-        <p className="text-green-500">
-          Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
-        </p>
-          )}
+          <p className="text-green-500">
+            Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
+          </p>
+        )}
       </div>
 
       {/* Show problem grid always during or after match */}
-      {matchHasStarted ? ( 
-      loading ? (
-        <Loading />
-      ) : (
-        <div className={`grid ${gridClasses[gridSize]} gap-x-0 gap-y-4 justify-items-center mt-4 mx-70`}>
-          {problems.map((problem) => {
-            const key = `${problem.contestId}-${problem.index}`;
-            const solvedInfo = solved[key];
-            const teamColor = solvedInfo
-              ? teamColors[solvedInfo.team] || 'bg-gray-500 text-white'
-              : 'bg-white hover:bg-blue-100 dark:bg-gray-800 dark:hover:bg-blue-900 text-gray-800 dark:text-gray-200';
+      {matchHasStarted ? (
+        loading ? (
+          <Loading />
+        ) : (
+          <div className={`grid ${gridClasses[gridSize]} gap-x-0 gap-y-4 justify-items-center mt-4 mx-70`}>
+            {problems.map((problem) => {
+              const key = `${problem.contestId}-${problem.index}`;
+              const solvedInfo = solved[key];
+              const teamColor = solvedInfo
+                ? teamColors[solvedInfo.team] || 'bg-gray-500 text-white'
+                : 'bg-white hover:bg-blue-100 dark:bg-gray-800 dark:hover:bg-blue-900 text-gray-800 dark:text-gray-200';
 
-            return (
-              <div
-                key={`${problem.contestId}-${problem.index}`}
-                onClick={() =>
-                  window.open(
-                    `https://codeforces.com/contest/${problem.contestId}/problem/${problem.index}`,
-                    '_blank'
-                  )
-                }
-                onMouseEnter={(e) => {
-                  e.currentTarget.classList.add('scale-[1.04]', 'shadow-md');
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
-                }}
-                className={`w-36 h-24 p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
+              return (
+                <div
+                  key={`${problem.contestId}-${problem.index}`}
+                  onClick={() =>
+                    window.open(
+                      `https://codeforces.com/contest/${problem.contestId}/problem/${problem.index}`,
+                      '_blank'
+                    )
+                  }
+                  onMouseEnter={(e) => {
+                    e.currentTarget.classList.add('scale-[1.04]', 'shadow-md');
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
+                  }}
+                  className={`w-36 h-24 p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
                   ${teamColor} ${solvedInfo ? 'text-white' : ''}`}
-              >
-                <div className="text-sm font-semibold">
-                  {problem.rating} - {problem.index}
+                >
+                  <div className="text-sm font-semibold">
+                    {problem.rating} - {problem.index}
+                  </div>
+                  <div className="text-xs mt-1">{problem.name}</div>
                 </div>
-                <div className="text-xs mt-1">{problem.name}</div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
         )
-      ): null}
+      ) : null}
 
       {/* Log Panel */}
       {showLog && (

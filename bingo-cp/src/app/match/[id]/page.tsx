@@ -4,10 +4,11 @@ import { useParams } from 'next/navigation';
 import Loading from '../../Loading';
 import Confetti from 'react-confetti';
 import { useRef } from 'react';
-import {ProblemCell} from '../../types/match'
+import { ProblemCell } from '../../types/match'
 
 // import { MatchStatus } from "./MatchStatus";
 import MatchCreationForm from '../../MatchCreationForm';
+import TugOfWarDisplay from '../../TugOfWarDisplay';
 import { Match } from '../../types/match';
 import TeamsForm from '@/app/TeamsForm';
 
@@ -32,8 +33,8 @@ const teamColors: Record<string, string> = {
 
 const links: Record<string, string> = {
   "Home": '/home',
-  "ICPC Mode": '/create-match',
-  "IOI Mode": '/oi_mode',
+  "Bingo": '/create-match',
+  "Tug of War": '/tug-mode',
   "Help": '/help',
 };
 
@@ -62,7 +63,7 @@ type Problem = {
 };
 type SolvedInfo = {
   team: string;
-  
+
 };
 
 type Winner = {
@@ -95,7 +96,7 @@ function notifyBrowser(title: string, body?: string) {
   if (Notification.permission !== 'denied') {
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
-        try { new Notification(title, { body }); } catch (e) {}
+        try { new Notification(title, { body }); } catch (e) { }
       }
     });
   }
@@ -143,9 +144,9 @@ function formatTime(ts?: string | number) {
 
 export default function Home() {
   const params = useParams();
-    const rawId = params?.id;
-    const id = Array.isArray(rawId) ? rawId[0] : rawId; // id is now string | undefined
-  
+  const rawId = params?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId; // id is now string | undefined
+
   const [showLog, setShowLog] = useState(true);
   const [currentTeam, setCurrentTeam] = useState<string>('');
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -155,8 +156,8 @@ export default function Home() {
   const [log, setLog] = useState<LogEntry[]>([]);
   const [match, setMatch] = useState<Match | null>(null);
   const [now, setNow] = useState(new Date());
-  
-  
+
+
   const [winner, setWinner] = useState<Winner>(null);
   const [matchLocked, setMatchLocked] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
@@ -171,7 +172,7 @@ export default function Home() {
     const key = `notified_${matchId}`;
     try {
       localStorage.setItem(key, JSON.stringify(Array.from(notifiedRef.current)));
-    } catch {}
+    } catch { }
   }
 
 
@@ -192,7 +193,7 @@ export default function Home() {
     }
   }, [match?.id]);
 
-  
+
 
 
   useEffect(() => {
@@ -211,14 +212,14 @@ export default function Home() {
         const data = await res.json();
         const matchObj = data.match ?? data;
         setMatch(matchObj);
-      try {
-        const solvedMap: Record<number, SolvedInfo> = {};
-        const newLogEntries: LogEntry[] = [];
-        const posOwners: Record<number, string> = {};
+        try {
+          const solvedMap: Record<number, SolvedInfo> = {};
+          const newLogEntries: LogEntry[] = [];
+          const posOwners: Record<number, string> = {};
 
-        const teamsFromServer = matchObj.teams ?? [];
+          const teamsFromServer = matchObj.teams ?? [];
 
-        (matchObj.solveLog ?? []).forEach((entry: SolveLog) => {
+          (matchObj.solveLog ?? []).forEach((entry: SolveLog) => {
             const key = `${entry.contestId}-${entry.index}`;
             const { displayName, teamKey } = resolveTeamDisplayAndKey(entry.team, teamsFromServer);
             solvedMap[entry.problem.position] = {
@@ -236,21 +237,21 @@ export default function Home() {
               message: `${displayName} solved ${problemName} (${contestAndIndex}) at ${formatTime(solveTime)}`,
               team: teamKey,
             });
-        });
-        setPositionOwners(posOwners);  // <-- set state
+          });
+          setPositionOwners(posOwners);  // <-- set state
 
-        setLog(prev => {
+          setLog(prev => {
             const combined = [...newLogEntries, ...prev];
             const uniqueMap = new Map<string, LogEntry>();
             for (const e of combined) {
               if (!uniqueMap.has(e.key)) uniqueMap.set(e.key, e);
             }
-          return Array.from(uniqueMap.values());//.slice(0, 10);
-        });
-        setSolved(solvedMap);
+            return Array.from(uniqueMap.values());//.slice(0, 10);
+          });
+          setSolved(solvedMap);
 
         } catch (e) {
-        console.warn('Could not build solved/log from matchObj.solveLog', e);
+          console.warn('Could not build solved/log from matchObj.solveLog', e);
         }
 
       } catch (err) {
@@ -267,12 +268,12 @@ export default function Home() {
 
     // prefer DB value; fall back to computing from problems length
     const dbGrid = (match as Match).gridSize; // typed properly if your Match type includes gridSize
-    if (typeof dbGrid === 'number' && [3,4,5,6].includes(dbGrid)) {
+    if (typeof dbGrid === 'number' && [3, 4, 5, 6].includes(dbGrid)) {
       setgridSize(dbGrid as GridSize);
     } else {
       // compute if server didn't provide it (safety)
       const len = match.problems?.length ?? problems.length ?? 25;
-      const computed = [3,4,5,6].find(n => n * n === len) ?? 5;
+      const computed = [3, 4, 5, 6].find(n => n * n === len) ?? 5;
       setgridSize(computed as GridSize);
     }
     const normalized = normalizeProblemsFromServer(match.problems || []);
@@ -306,13 +307,13 @@ export default function Home() {
 
   useEffect(() => {
     if (match?.teams?.length && !currentTeam) {
-        setCurrentTeam(match.teams[0].color); 
+      setCurrentTeam(match.teams[0].color);
     }
-    }, [match]);
+  }, [match]);
 
 
   useEffect(() => {
-    if (matchLocked) return; 
+    if (matchLocked) return;
     if (!match?.id) return;
 
     const matchStart = new Date(match.startTime);
@@ -345,7 +346,7 @@ export default function Home() {
           Boolean(pollData.updated) ||
           serverProblemsLen !== oldlength ||
           serverSolveLen !== localSolveLen;
-          
+
         if (pollData.match && shouldApply) {
           setMatch(pollData.match);
 
@@ -353,14 +354,14 @@ export default function Home() {
           const newLogEntries: LogEntry[] = [];
           const posOwners: Record<number, string> = {};
 
-          const problemUpdates: Record<string, { name?: string; rating?: number; contestId?: number; index?:string }> = {};
+          const problemUpdates: Record<string, { name?: string; rating?: number; contestId?: number; index?: string }> = {};
 
           const teamsFromServer = pollData.match?.teams ?? [];
           pollData.match.solveLog.forEach((entry: SolveLog) => {
             const key = `${entry.contestId}-${entry.index}`;
             const { displayName, teamKey } = resolveTeamDisplayAndKey(entry.team, teamsFromServer);
             solvedMap[key] = {
-              team: teamKey, 
+              team: teamKey,
             };
 
             if (entry.problem && typeof entry.problem.position === 'number') {
@@ -376,7 +377,7 @@ export default function Home() {
               };
             }
 
-            
+
             const problemName = entry.problem?.name ?? `Problem ${entry.index}`;
             const contestAndIndex = `${entry.contestId}${entry.index}`;
             const solveTime = entry.timestamp;
@@ -443,7 +444,7 @@ export default function Home() {
 
     const interval = setInterval(fetchPoll, 20000); // REMEMBER TO CHANGE TO 15S
     return () => clearInterval(interval);
-    }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked]);
+  }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -458,7 +459,7 @@ export default function Home() {
     const now = new Date();
 
     if (now >= end) {
-        setMatchLocked(true);
+      setMatchLocked(true);
     }
   }, [match]);
 
@@ -520,108 +521,108 @@ export default function Home() {
   useEffect(() => {
     if (!problems || problems.length === 0) return;
     if (matchLocked) return; // already locked
-    if(!match) {
+    if (!match) {
       console.warn(`match was not found. skipping winner detection`);
       return;
     }
-     const matchStart = new Date(match.startTime);
-      const timeout = match.timeoutMinutes ?? 0;
-      const timeStartWinner = new Date(matchStart.getTime() + timeout * 60 * 1000);
-      const now = new Date();
+    const matchStart = new Date(match.startTime);
+    const timeout = match.timeoutMinutes ?? 0;
+    const timeStartWinner = new Date(matchStart.getTime() + timeout * 60 * 1000);
+    const now = new Date();
     if (now < timeStartWinner) return;
     // console.log("HHHEHEHE:")
     const w = findWinnerFromSolved(solved, problems, gridSize);
     if (w && !winner) {
-        setWinner(w);
-        setConfettiActive(true);
-        setMatchLocked(true);
-         const teamKey = (w.team ?? '').toLowerCase();
-         const teamObj = match?.teams?.find(
-           t => (t.color ?? '').toLowerCase() === teamKey || (t.name ?? '').toLowerCase() === teamKey
-         );
-         const displayName = teamObj?.name ?? teamKey ?? 'Unknown';
+      setWinner(w);
+      setConfettiActive(true);
+      setMatchLocked(true);
+      const teamKey = (w.team ?? '').toLowerCase();
+      const teamObj = match?.teams?.find(
+        t => (t.color ?? '').toLowerCase() === teamKey || (t.name ?? '').toLowerCase() === teamKey
+      );
+      const displayName = teamObj?.name ?? teamKey ?? 'Unknown';
 
-        setLog(prev => {
+      setLog(prev => {
         const finalMsg = `${displayName} completed ${w.type === 'row' ? 'a row' : w.type === 'col' ? 'a column' : w.type === 'diag' ? 'the main diagonal' : 'the anti-diagonal'} and won the match!`;
         notifyBrowser(`${displayName} won!`, finalMsg);
         return [{ message: finalMsg, team: w.team.toLowerCase(), key: "" }, ...prev];//.slice(0, 10);
-        });
-        (async () => {
-          try {
-            const resp = await fetch('/api/match/setDuration', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ matchId: match.id, durationMinutes: 1 }),
-            });
-            const data = await resp.json();
-            if (!resp.ok) {
-              console.error('Failed to update match duration on server:', data);
-            } else {
-              // optimistic local update so UI shows locked/timer immediately
-              setMatch(prev => prev ? { ...prev, durationMinutes: 1 } : prev);
-            }
-          } catch (err) {
-            console.error('Error calling set-duration API', err);
+      });
+      (async () => {
+        try {
+          const resp = await fetch('/api/match/setDuration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matchId: match.id, durationMinutes: 1 }),
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            console.error('Failed to update match duration on server:', data);
+          } else {
+            // optimistic local update so UI shows locked/timer immediately
+            setMatch(prev => prev ? { ...prev, durationMinutes: 1 } : prev);
           }
-        })();
+        } catch (err) {
+          console.error('Error calling set-duration API', err);
+        }
+      })();
     }
-    }, [solved,problems , winner,positionOwners, match, matchLocked]);
+  }, [solved, problems, winner, positionOwners, match, matchLocked]);
 
   function findWinnerFromSolved(solvedMap: Record<string, SolvedInfo>, problemsArr: Problem[], gSize: number): Winner {
     if (!problemsArr || problemsArr.length === 0) return null;
-    
+
     // const len = problemsArr.length ?? 0;
     // if(len === 36) setgridSize(6 as GridSize);
     // else if(len === 25) setgridSize(5 as GridSize);
     // else if(len === 16) setgridSize(4 as GridSize);
     // else setgridSize(3 as GridSize);
     const size = gSize;
-    
+
     if (problemsArr.length !== size * size) {
       console.warn(`findWinnerFromSolved: mismatch problems.length (${problemsArr.length}) vs expected (${size * size}). Skipping winner detection.`);
       return null;
     }
     const ownerGrid: (string | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
     for (let i = 0; i < problemsArr.length; i++) {
-        const r = Math.floor(i / size);
-        const c = i % size;
-        ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null;
+      const r = Math.floor(i / size);
+      const c = i % size;
+      ownerGrid[r][c] = solvedMap[i]?.team ?? positionOwners[i] ?? null;
     }
 
     // rows
     for (let r = 0; r < size; r++) {
-        const first = ownerGrid[r][0];
-        if (first && ownerGrid[r].every(cell => cell === first)) {
-        const keys = Array.from({length: size}, (_, c) => `${problemsArr[r*size + c].contestId}-${problemsArr[r*size + c].index}`);
+      const first = ownerGrid[r][0];
+      if (first && ownerGrid[r].every(cell => cell === first)) {
+        const keys = Array.from({ length: size }, (_, c) => `${problemsArr[r * size + c].contestId}-${problemsArr[r * size + c].index}`);
         return { team: first, type: 'row', index: r, keys };
-        }
+      }
     }
 
     // columns
     for (let c = 0; c < size; c++) {
-        const first = ownerGrid[0][c];
-        if (first && ownerGrid.every(row => row[c] === first)) {
-        const keys = Array.from({length: size}, (_, r) => `${problemsArr[r*size + c].contestId}-${problemsArr[r*size + c].index}`);
+      const first = ownerGrid[0][c];
+      if (first && ownerGrid.every(row => row[c] === first)) {
+        const keys = Array.from({ length: size }, (_, r) => `${problemsArr[r * size + c].contestId}-${problemsArr[r * size + c].index}`);
         return { team: first, type: 'col', index: c, keys };
-        }
+      }
     }
 
     // main diagonal
     const firstDiag = ownerGrid[0][0];
     if (firstDiag && ownerGrid.every((row, i) => row[i] === firstDiag)) {
-        const keys = Array.from({length: size}, (_, i) => `${problemsArr[i*size + i].contestId}-${problemsArr[i*size + i].index}`);
-        return { team: firstDiag, type: 'diag', index: 0, keys };
+      const keys = Array.from({ length: size }, (_, i) => `${problemsArr[i * size + i].contestId}-${problemsArr[i * size + i].index}`);
+      return { team: firstDiag, type: 'diag', index: 0, keys };
     }
 
     // anti-diagonal
     const firstAnti = ownerGrid[0][size - 1];
     if (firstAnti && ownerGrid.every((row, i) => row[size - 1 - i] === firstAnti)) {
-        const keys = Array.from({length: size}, (_, i) => `${problemsArr[i*size + (size - 1 - i)].contestId}-${problemsArr[i*size + (size - 1 - i)].index}`);
-        return { team: firstAnti, type: 'anti-diag', index: 1, keys };
+      const keys = Array.from({ length: size }, (_, i) => `${problemsArr[i * size + (size - 1 - i)].contestId}-${problemsArr[i * size + (size - 1 - i)].index}`);
+      return { team: firstAnti, type: 'anti-diag', index: 1, keys };
     }
 
     return null;
-    }
+  }
 
 
   function toggleSquare(i: number) {
@@ -634,15 +635,15 @@ export default function Home() {
     const prob = problems[i];
     const problemId = `${prob.contestId}${prob.index}`;
     const teamObj = match?.teams?.find(
-        t => t.color?.toLowerCase() === currentTeam?.toLowerCase() || t.name?.toLowerCase() === currentTeam?.toLowerCase()
+      t => t.color?.toLowerCase() === currentTeam?.toLowerCase() || t.name?.toLowerCase() === currentTeam?.toLowerCase()
     );
-    
+
     const displayName = teamObj?.name ?? currentTeam;
     const teamKey = teamObj?.color?.toLowerCase() ?? currentTeam?.toLowerCase?.() ?? 'unknown';
     const newEntry = {
-        key,
-        message: `${displayName} solved ${prob.name} (${problemId}) at ${formatTime(time)}`,
-        team: teamKey,
+      key,
+      message: `${displayName} solved ${prob.name} (${problemId}) at ${formatTime(time)}`,
+      team: teamKey,
     };
 
     setLog(prev => {
@@ -660,7 +661,7 @@ export default function Home() {
 
 
   if (loading) return <Loading />;
-  if(!match) {
+  if (!match) {
     return <main className="p-6">Match not found</main>;
   }
 
@@ -677,8 +678,8 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
-            {/* Confetti on winner */}
-            {winner && confettiActive && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
+      {/* Confetti on winner */}
+      {winner && confettiActive && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
 
       {/* Header */}
@@ -710,7 +711,7 @@ export default function Home() {
                 {'Help'}
               </button>
             </a>
-              {/* {['Home', 'ICPC Mode', 'IOI Mode', 'Help'].map(label => (
+            {/* {['Home', 'ICPC Mode', 'IOI Mode', 'Help'].map(label => (
                 <a href={`${links[label]}`}>
                   <button key={label} className="cursor-pointer px-4 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
                     {label}
@@ -730,51 +731,60 @@ export default function Home() {
           <p className="text-red-500">Match has ended.</p>
         )}
         {matchOngoing && match && (
-        <p className="text-green-500">
-          Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
-        </p>
-          )}
+          <p className="text-green-500">
+            Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
+          </p>
+        )}
       </div>
 
       {/* Show problem grid always during or after match */}
-      {matchHasStarted ? ( 
-      loading ? (
-        <Loading />
-      ) : (
-        <div className={`grid ${gridClasses[gridSize]} gap-x-0 gap-y-4 justify-items-center mt-4 mx-70`}>
-          {problems.map((problem, idx) => {
-            const key = `${problem.contestId}-${problem.index}`;
-            const solvedInfo = solved[key];
-            const ownerTeam = solvedInfo?.team ?? positionOwners[problem.position ?? idx]; // fallback by position
-            const isWinningCell = winner?.keys?.includes(key);
-            // console.log('Rendering problem', key, 'solved by', solvedInfo?.team, 'teamColor:', teamColors[solvedInfo?.team]);
-            const teamColor = ownerTeam
-              ? (teamColors[ownerTeam] || 'bg-gray-500 text-white')
-              : 'bg-white hover:bg-blue-100 dark:bg-gray-800 dark:hover:bg-blue-900 text-gray-800 dark:text-gray-200';
+      {matchHasStarted ? (
+        loading ? (
+          <Loading />
+        ) : match.mode === 'tug' ? (
+          <TugOfWarDisplay
+            match={match}
+            problems={problems}
+            solved={solved}
+            positionOwners={positionOwners}
+            showRatings={showRatings}
+            teamColors={teamColors}
+          />
+        ) : (
+          <div className={`grid ${gridClasses[gridSize]} gap-x-0 gap-y-4 justify-items-center mt-4 mx-70`}>
+            {problems.map((problem, idx) => {
+              const key = `${problem.contestId}-${problem.index}`;
+              const solvedInfo = solved[key];
+              const ownerTeam = solvedInfo?.team ?? positionOwners[problem.position ?? idx]; // fallback by position
+              const isWinningCell = winner?.keys?.includes(key);
+              // console.log('Rendering problem', key, 'solved by', solvedInfo?.team, 'teamColor:', teamColors[solvedInfo?.team]);
+              const teamColor = ownerTeam
+                ? (teamColors[ownerTeam] || 'bg-gray-500 text-white')
+                : 'bg-white hover:bg-blue-100 dark:bg-gray-800 dark:hover:bg-blue-900 text-gray-800 dark:text-gray-200';
 
-            return (
-              <div
-                key={`${problem.contestId}-${problem.index}`}
-                onClick={() =>
-                  window.open(
-                    `https://codeforces.com/contest/${problem.contestId}/problem/${problem.index}`,
-                    '_blank'
-                  )
-                }
-                // onDoubleClick={() => { // DON'T forget to remove it later
-                // // double click will locally mark for testing (toggleSquare) but disabled after lock
-                // if (!matchLocked) toggleSquare(idx);
-                // }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.classList.add('scale-[1.04]', 'shadow-md');
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
-                }}
-                className={`w-36 h-24 p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
+              return (
+                <div
+                  key={`${problem.contestId}-${problem.index}`}
+                  onClick={() =>
+                    window.open(
+                      `https://codeforces.com/contest/${problem.contestId}/problem/${problem.index}`,
+                      '_blank'
+                    )
+                  }
+                  // onDoubleClick={() => { // DON'T forget to remove it later
+                  // // double click will locally mark for testing (toggleSquare) but disabled after lock
+                  // if (!matchLocked) toggleSquare(idx);
+                  // }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.classList.add('scale-[1.04]', 'shadow-md');
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
+                  }}
+                  className={`w-36 h-24 p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
                   ${teamColor} ${ownerTeam ? 'text-white' : ''} ${isWinningCell ? ' ring-4 ring-yellow-400 scale-[1.06]' : ''}`}
-              >
-                {showRatings ? (
+                >
+                  {showRatings ? (
                     <div className="text-sm font-semibold">
                       {problem.rating} - {problem.index}
                     </div>
@@ -787,10 +797,10 @@ export default function Home() {
                   )}
                 </div>
               );
-          })}
-        </div>
+            })}
+          </div>
         )
-      ): null}
+      ) : null}
 
       {/* Log Panel */}
       {showLog && (

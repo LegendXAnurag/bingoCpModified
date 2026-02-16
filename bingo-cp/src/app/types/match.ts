@@ -2,7 +2,7 @@ export interface Match {
   id: string;
   startTime: string;
   durationMinutes: number;
-  mode: "classic" | "replace";
+  mode: "classic" | "replace" | "tug";
   replaceIncrement: number;
   gridSize: number;
   teams: Team[];
@@ -10,6 +10,9 @@ export interface Match {
   solveLog: SolveEntry[];
   timeoutMinutes?: number | null;
   showRatings?: boolean;
+  tugThreshold?: number;
+  tugType?: string;
+  tugCount?: number;
 }
 
 export interface Team {
