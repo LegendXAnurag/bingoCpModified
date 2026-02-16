@@ -57,10 +57,6 @@ export default function HomePage(): React.JSX.Element {
               </a>
             </div>
 
-            <div className="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded-md">
-              <strong>Note:</strong> IOI-style mode is coming soon — placeholder shown on the match
-              creation page.
-            </div>
           </motion.div>
 
           <motion.div
