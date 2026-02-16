@@ -1,0 +1,1516 @@
+{
+    "mapId": "usa_v1",
+    "name": "United States",
+    "viewBox": "0 0 1000 600",
+    "cities": [
+        {
+            "id": "vancouver",
+            "name": "Vancouver",
+            "x": 110,
+            "y": 140,
+            "size": "medium"
+        },
+        {
+            "id": "seattle",
+            "name": "Seattle",
+            "x": 110,
+            "y": 180,
+            "size": "large"
+        },
+        {
+            "id": "portland",
+            "name": "Portland",
+            "x": 90,
+            "y": 260,
+            "size": "medium"
+        },
+        {
+            "id": "san_francisco",
+            "name": "San Francisco",
+            "x": 50,
+            "y": 380,
+            "size": "large"
+        },
+        {
+            "id": "los_angeles",
+            "name": "Los Angeles",
+            "x": 80,
+            "y": 520,
+            "size": "large"
+        },
+        {
+            "id": "phoenix",
+            "name": "Phoenix",
+            "x": 200,
+            "y": 520,
+            "size": "medium"
+        },
+        {
+            "id": "el_paso",
+            "name": "El Paso",
+            "x": 280,
+            "y": 540,
+            "size": "small"
+        },
+        {
+            "id": "santa_fe",
+            "name": "Santa Fe",
+            "x": 280,
+            "y": 480,
+            "size": "small"
+        },
+        {
+            "id": "denver",
+            "name": "Denver",
+            "x": 320,
+            "y": 400,
+            "size": "large"
+        },
+        {
+            "id": "helena",
+            "name": "Helena",
+            "x": 280,
+            "y": 240,
+            "size": "small"
+        },
+        {
+            "id": "salt_lake_city",
+            "name": "Salt Lake City",
+            "x": 220,
+            "y": 340,
+            "size": "medium"
+        },
+        {
+            "id": "las_vegas",
+            "name": "Las Vegas",
+            "x": 150,
+            "y": 450,
+            "size": "medium"
+        },
+        {
+            "id": "calgary",
+            "name": "Calgary",
+            "x": 260,
+            "y": 120,
+            "size": "small"
+        },
+        {
+            "id": "winnipeg",
+            "name": "Winnipeg",
+            "x": 420,
+            "y": 140,
+            "size": "medium"
+        },
+        {
+            "id": "duluth",
+            "name": "Duluth",
+            "x": 520,
+            "y": 220,
+            "size": "medium"
+        },
+        {
+            "id": "omaha",
+            "name": "Omaha",
+            "x": 460,
+            "y": 340,
+            "size": "medium"
+        },
+        {
+            "id": "kansas_city",
+            "name": "Kansas City",
+            "x": 500,
+            "y": 380,
+            "size": "medium"
+        },
+        {
+            "id": "oklahoma_city",
+            "name": "Oklahoma City",
+            "x": 460,
+            "y": 460,
+            "size": "small"
+        },
+        {
+            "id": "dallas",
+            "name": "Dallas",
+            "x": 500,
+            "y": 520,
+            "size": "medium"
+        },
+        {
+            "id": "houston",
+            "name": "Houston",
+            "x": 560,
+            "y": 560,
+            "size": "medium"
+        },
+        {
+            "id": "little_rock",
+            "name": "Little Rock",
+            "x": 580,
+            "y": 460,
+            "size": "small"
+        },
+        {
+            "id": "new_orleans",
+            "name": "New Orleans",
+            "x": 640,
+            "y": 540,
+            "size": "medium"
+        },
+        {
+            "id": "sault_st_marie",
+            "name": "Sault St. Marie",
+            "x": 640,
+            "y": 180,
+            "size": "small"
+        },
+        {
+            "id": "chicago",
+            "name": "Chicago",
+            "x": 600,
+            "y": 300,
+            "size": "large"
+        },
+        {
+            "id": "saint_louis",
+            "name": "Saint Louis",
+            "x": 560,
+            "y": 380,
+            "size": "medium"
+        },
+        {
+            "id": "nashville",
+            "name": "Nashville",
+            "x": 640,
+            "y": 400,
+            "size": "small"
+        },
+        {
+            "id": "atlanta",
+            "name": "Atlanta",
+            "x": 700,
+            "y": 460,
+            "size": "medium"
+        },
+        {
+            "id": "miami",
+            "name": "Miami",
+            "x": 780,
+            "y": 580,
+            "size": "medium"
+        },
+        {
+            "id": "charleston",
+            "name": "Charleston",
+            "x": 760,
+            "y": 480,
+            "size": "small"
+        },
+        {
+            "id": "raleigh",
+            "name": "Raleigh",
+            "x": 780,
+            "y": 420,
+            "size": "small"
+        },
+        {
+            "id": "washington",
+            "name": "Washington",
+            "x": 820,
+            "y": 360,
+            "size": "large"
+        },
+        {
+            "id": "pittsburgh",
+            "name": "Pittsburgh",
+            "x": 760,
+            "y": 320,
+            "size": "medium"
+        },
+        {
+            "id": "toronto",
+            "name": "Toronto",
+            "x": 720,
+            "y": 240,
+            "size": "medium"
+        },
+        {
+            "id": "new_york",
+            "name": "New York",
+            "x": 860,
+            "y": 300,
+            "size": "large"
+        },
+        {
+            "id": "montreal",
+            "name": "Montreal",
+            "x": 820,
+            "y": 200,
+            "size": "medium"
+        },
+        {
+            "id": "boston",
+            "name": "Boston",
+            "x": 900,
+            "y": 260,
+            "size": "large"
+        }
+    ],
+    "tracks": [
+        {
+            "id": "vancouver_seattle",
+            "cityA": "vancouver",
+            "cityB": "seattle",
+            "length": 1,
+            "controlPoints": []
+        },
+        {
+            "id": "vancouver_calgary",
+            "cityA": "vancouver",
+            "cityB": "calgary",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 185,
+                    "y": 130
+                }
+            ]
+        },
+        {
+            "id": "seattle_portland",
+            "cityA": "seattle",
+            "cityB": "portland",
+            "length": 1,
+            "controlPoints": []
+        },
+        {
+            "id": "seattle_helena",
+            "cityA": "seattle",
+            "cityB": "helena",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 195,
+                    "y": 210
+                }
+            ]
+        },
+        {
+            "id": "seattle_calgary",
+            "cityA": "seattle",
+            "cityB": "calgary",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 185,
+                    "y": 160
+                }
+            ]
+        },
+        {
+            "id": "portland_sf_1",
+            "cityA": "portland",
+            "cityB": "san_francisco",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 60,
+                    "y": 320
+                }
+            ]
+        },
+        {
+            "id": "portland_sf_2",
+            "cityA": "portland",
+            "cityB": "san_francisco",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 80,
+                    "y": 320
+                }
+            ]
+        },
+        {
+            "id": "portland_slc",
+            "cityA": "portland",
+            "cityB": "salt_lake_city",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 155,
+                    "y": 300
+                }
+            ]
+        },
+        {
+            "id": "sf_la_1",
+            "cityA": "san_francisco",
+            "cityB": "los_angeles",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 50,
+                    "y": 450
+                }
+            ]
+        },
+        {
+            "id": "sf_la_2",
+            "cityA": "san_francisco",
+            "cityB": "los_angeles",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 70,
+                    "y": 450
+                }
+            ]
+        },
+        {
+            "id": "sf_slc",
+            "cityA": "san_francisco",
+            "cityB": "salt_lake_city",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 135,
+                    "y": 360
+                }
+            ]
+        },
+        {
+            "id": "la_phoenix",
+            "cityA": "los_angeles",
+            "cityB": "phoenix",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 140,
+                    "y": 520
+                }
+            ]
+        },
+        {
+            "id": "la_vegas",
+            "cityA": "los_angeles",
+            "cityB": "las_vegas",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 115,
+                    "y": 485
+                }
+            ]
+        },
+        {
+            "id": "la_el_paso",
+            "cityA": "los_angeles",
+            "cityB": "el_paso",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 180,
+                    "y": 530
+                }
+            ]
+        },
+        {
+            "id": "phoenix_denver",
+            "cityA": "phoenix",
+            "cityB": "denver",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 260,
+                    "y": 460
+                }
+            ]
+        },
+        {
+            "id": "phoenix_santa_fe",
+            "cityA": "phoenix",
+            "cityB": "santa_fe",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 240,
+                    "y": 500
+                }
+            ]
+        },
+        {
+            "id": "phoenix_el_paso",
+            "cityA": "phoenix",
+            "cityB": "el_paso",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 240,
+                    "y": 530
+                }
+            ]
+        },
+        {
+            "id": "el_paso_dallas",
+            "cityA": "el_paso",
+            "cityB": "dallas",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 390,
+                    "y": 530
+                }
+            ]
+        },
+        {
+            "id": "el_paso_santa_fe",
+            "cityA": "el_paso",
+            "cityB": "santa_fe",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 280,
+                    "y": 510
+                }
+            ]
+        },
+        {
+            "id": "el_paso_houston",
+            "cityA": "el_paso",
+            "cityB": "houston",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 420,
+                    "y": 550
+                }
+            ]
+        },
+        {
+            "id": "el_paso_oklahoma",
+            "cityA": "el_paso",
+            "cityB": "oklahoma_city",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 370,
+                    "y": 500
+                }
+            ]
+        },
+        {
+            "id": "santa_fe_denver",
+            "cityA": "santa_fe",
+            "cityB": "denver",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 300,
+                    "y": 440
+                }
+            ]
+        },
+        {
+            "id": "santa_fe_oklahoma",
+            "cityA": "santa_fe",
+            "cityB": "oklahoma_city",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 370,
+                    "y": 470
+                }
+            ]
+        },
+        {
+            "id": "denver_helena",
+            "cityA": "denver",
+            "cityB": "helena",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 300,
+                    "y": 320
+                }
+            ]
+        },
+        {
+            "id": "denver_slc",
+            "cityA": "denver",
+            "cityB": "salt_lake_city",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 270,
+                    "y": 370
+                }
+            ]
+        },
+        {
+            "id": "denver_omaha_1",
+            "cityA": "denver",
+            "cityB": "omaha",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 390,
+                    "y": 370
+                }
+            ]
+        },
+        {
+            "id": "denver_omaha_2",
+            "cityA": "denver",
+            "cityB": "omaha",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 390,
+                    "y": 350
+                }
+            ]
+        },
+        {
+            "id": "denver_kansas",
+            "cityA": "denver",
+            "cityB": "kansas_city",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 410,
+                    "y": 390
+                }
+            ]
+        },
+        {
+            "id": "denver_oklahoma",
+            "cityA": "denver",
+            "cityB": "oklahoma_city",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 390,
+                    "y": 430
+                }
+            ]
+        },
+        {
+            "id": "helena_slc",
+            "cityA": "helena",
+            "cityB": "salt_lake_city",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 250,
+                    "y": 290
+                }
+            ]
+        },
+        {
+            "id": "helena_winnipeg",
+            "cityA": "helena",
+            "cityB": "winnipeg",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 350,
+                    "y": 190
+                }
+            ]
+        },
+        {
+            "id": "helena_duluth",
+            "cityA": "helena",
+            "cityB": "duluth",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 400,
+                    "y": 230
+                }
+            ]
+        },
+        {
+            "id": "helena_omaha",
+            "cityA": "helena",
+            "cityB": "omaha",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 370,
+                    "y": 290
+                }
+            ]
+        },
+        {
+            "id": "helena_calgary",
+            "cityA": "helena",
+            "cityB": "calgary",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 270,
+                    "y": 180
+                }
+            ]
+        },
+        {
+            "id": "slc_vegas",
+            "cityA": "salt_lake_city",
+            "cityB": "las_vegas",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 185,
+                    "y": 395
+                }
+            ]
+        },
+        {
+            "id": "vegas_phoenix",
+            "cityA": "las_vegas",
+            "cityB": "phoenix",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 175,
+                    "y": 485
+                }
+            ]
+        },
+        {
+            "id": "calgary_winnipeg",
+            "cityA": "calgary",
+            "cityB": "winnipeg",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 340,
+                    "y": 130
+                }
+            ]
+        },
+        {
+            "id": "winnipeg_duluth",
+            "cityA": "winnipeg",
+            "cityB": "duluth",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 470,
+                    "y": 180
+                }
+            ]
+        },
+        {
+            "id": "winnipeg_sault",
+            "cityA": "winnipeg",
+            "cityB": "sault_st_marie",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 530,
+                    "y": 160
+                }
+            ]
+        },
+        {
+            "id": "duluth_sault",
+            "cityA": "duluth",
+            "cityB": "sault_st_marie",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 580,
+                    "y": 200
+                }
+            ]
+        },
+        {
+            "id": "duluth_omaha",
+            "cityA": "duluth",
+            "cityB": "omaha",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 490,
+                    "y": 280
+                }
+            ]
+        },
+        {
+            "id": "duluth_chicago_1",
+            "cityA": "duluth",
+            "cityB": "chicago",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 560,
+                    "y": 260
+                }
+            ]
+        },
+        {
+            "id": "duluth_chicago_2",
+            "cityA": "duluth",
+            "cityB": "chicago",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 540,
+                    "y": 270
+                }
+            ]
+        },
+        {
+            "id": "duluth_toronto",
+            "cityA": "duluth",
+            "cityB": "toronto",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 620,
+                    "y": 210
+                }
+            ]
+        },
+        {
+            "id": "omaha_kansas",
+            "cityA": "omaha",
+            "cityB": "kansas_city",
+            "length": 1,
+            "controlPoints": []
+        },
+        {
+            "id": "omaha_chicago",
+            "cityA": "omaha",
+            "cityB": "chicago",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 530,
+                    "y": 320
+                }
+            ]
+        },
+        {
+            "id": "kansas_oklahoma",
+            "cityA": "kansas_city",
+            "cityB": "oklahoma_city",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 480,
+                    "y": 420
+                }
+            ]
+        },
+        {
+            "id": "kansas_stlouis_1",
+            "cityA": "kansas_city",
+            "cityB": "saint_louis",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 530,
+                    "y": 360
+                }
+            ]
+        },
+        {
+            "id": "kansas_stlouis_2",
+            "cityA": "kansas_city",
+            "cityB": "saint_louis",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 530,
+                    "y": 390
+                }
+            ]
+        },
+        {
+            "id": "oklahoma_dallas",
+            "cityA": "oklahoma_city",
+            "cityB": "dallas",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 480,
+                    "y": 490
+                }
+            ]
+        },
+        {
+            "id": "oklahoma_littlerock",
+            "cityA": "oklahoma_city",
+            "cityB": "little_rock",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 520,
+                    "y": 460
+                }
+            ]
+        },
+        {
+            "id": "dallas_houston",
+            "cityA": "dallas",
+            "cityB": "houston",
+            "length": 1,
+            "controlPoints": []
+        },
+        {
+            "id": "dallas_littlerock",
+            "cityA": "dallas",
+            "cityB": "little_rock",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 540,
+                    "y": 490
+                }
+            ]
+        },
+        {
+            "id": "houston_neworleans",
+            "cityA": "houston",
+            "cityB": "new_orleans",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 600,
+                    "y": 550
+                }
+            ]
+        },
+        {
+            "id": "littlerock_stlouis",
+            "cityA": "little_rock",
+            "cityB": "saint_louis",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 570,
+                    "y": 420
+                }
+            ]
+        },
+        {
+            "id": "littlerock_nashville",
+            "cityA": "little_rock",
+            "cityB": "nashville",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 610,
+                    "y": 430
+                }
+            ]
+        },
+        {
+            "id": "littlerock_neworleans",
+            "cityA": "little_rock",
+            "cityB": "new_orleans",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 610,
+                    "y": 500
+                }
+            ]
+        },
+        {
+            "id": "neworleans_atlanta",
+            "cityA": "new_orleans",
+            "cityB": "atlanta",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 670,
+                    "y": 500
+                }
+            ]
+        },
+        {
+            "id": "neworleans_miami",
+            "cityA": "new_orleans",
+            "cityB": "miami",
+            "length": 6,
+            "controlPoints": [
+                {
+                    "x": 710,
+                    "y": 560
+                }
+            ]
+        },
+        {
+            "id": "sault_montreal",
+            "cityA": "sault_st_marie",
+            "cityB": "montreal",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 730,
+                    "y": 190
+                }
+            ]
+        },
+        {
+            "id": "sault_toronto",
+            "cityA": "sault_st_marie",
+            "cityB": "toronto",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 680,
+                    "y": 210
+                }
+            ]
+        },
+        {
+            "id": "chicago_stlouis",
+            "cityA": "chicago",
+            "cityB": "saint_louis",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 580,
+                    "y": 340
+                }
+            ]
+        },
+        {
+            "id": "chicago_pittsburgh",
+            "cityA": "chicago",
+            "cityB": "pittsburgh",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 680,
+                    "y": 310
+                }
+            ]
+        },
+        {
+            "id": "chicago_toronto",
+            "cityA": "chicago",
+            "cityB": "toronto",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 660,
+                    "y": 270
+                }
+            ]
+        },
+        {
+            "id": "stlouis_nashville",
+            "cityA": "saint_louis",
+            "cityB": "nashville",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 600,
+                    "y": 390
+                }
+            ]
+        },
+        {
+            "id": "stlouis_pittsburgh",
+            "cityA": "saint_louis",
+            "cityB": "pittsburgh",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 660,
+                    "y": 350
+                }
+            ]
+        },
+        {
+            "id": "nashville_atlanta",
+            "cityA": "nashville",
+            "cityB": "atlanta",
+            "length": 1,
+            "controlPoints": []
+        },
+        {
+            "id": "nashville_raleigh",
+            "cityA": "nashville",
+            "cityB": "raleigh",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 710,
+                    "y": 410
+                }
+            ]
+        },
+        {
+            "id": "nashville_pittsburgh",
+            "cityA": "nashville",
+            "cityB": "pittsburgh",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 700,
+                    "y": 360
+                }
+            ]
+        },
+        {
+            "id": "atlanta_charleston",
+            "cityA": "atlanta",
+            "cityB": "charleston",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 730,
+                    "y": 470
+                }
+            ]
+        },
+        {
+            "id": "atlanta_raleigh",
+            "cityA": "atlanta",
+            "cityB": "raleigh",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 740,
+                    "y": 440
+                }
+            ]
+        },
+        {
+            "id": "atlanta_miami",
+            "cityA": "atlanta",
+            "cityB": "miami",
+            "length": 5,
+            "controlPoints": [
+                {
+                    "x": 740,
+                    "y": 520
+                }
+            ]
+        },
+        {
+            "id": "miami_charleston",
+            "cityA": "miami",
+            "cityB": "charleston",
+            "length": 4,
+            "controlPoints": [
+                {
+                    "x": 770,
+                    "y": 530
+                }
+            ]
+        },
+        {
+            "id": "charleston_raleigh",
+            "cityA": "charleston",
+            "cityB": "raleigh",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 770,
+                    "y": 450
+                }
+            ]
+        },
+        {
+            "id": "raleigh_washington",
+            "cityA": "raleigh",
+            "cityB": "washington",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 800,
+                    "y": 390
+                }
+            ]
+        },
+        {
+            "id": "raleigh_pittsburgh",
+            "cityA": "raleigh",
+            "cityB": "pittsburgh",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 770,
+                    "y": 370
+                }
+            ]
+        },
+        {
+            "id": "washington_pittsburgh",
+            "cityA": "washington",
+            "cityB": "pittsburgh",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 790,
+                    "y": 340
+                }
+            ]
+        },
+        {
+            "id": "washington_ny",
+            "cityA": "washington",
+            "cityB": "new_york",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 840,
+                    "y": 330
+                }
+            ]
+        },
+        {
+            "id": "pittsburgh_toronto",
+            "cityA": "pittsburgh",
+            "cityB": "toronto",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 740,
+                    "y": 280
+                }
+            ]
+        },
+        {
+            "id": "pittsburgh_ny",
+            "cityA": "pittsburgh",
+            "cityB": "new_york",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 810,
+                    "y": 310
+                }
+            ]
+        },
+        {
+            "id": "toronto_montreal",
+            "cityA": "toronto",
+            "cityB": "montreal",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 770,
+                    "y": 220
+                }
+            ]
+        },
+        {
+            "id": "ny_montreal",
+            "cityA": "new_york",
+            "cityB": "montreal",
+            "length": 3,
+            "controlPoints": [
+                {
+                    "x": 840,
+                    "y": 250
+                }
+            ]
+        },
+        {
+            "id": "ny_boston",
+            "cityA": "new_york",
+            "cityB": "boston",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 880,
+                    "y": 280
+                }
+            ]
+        },
+        {
+            "id": "boston_montreal",
+            "cityA": "boston",
+            "cityB": "montreal",
+            "length": 2,
+            "controlPoints": [
+                {
+                    "x": 860,
+                    "y": 230
+                }
+            ]
+        }
+    ],
+    "routeCards": {
+        "long": [
+            {
+                "id": "la_ny",
+                "cityA": "los_angeles",
+                "cityB": "new_york",
+                "points": 21,
+                "type": "long"
+            },
+            {
+                "id": "seattle_miami",
+                "cityA": "seattle",
+                "cityB": "miami",
+                "points": 20,
+                "type": "long"
+            },
+            {
+                "id": "vancouver_montreal",
+                "cityA": "vancouver",
+                "cityB": "montreal",
+                "points": 20,
+                "type": "long"
+            },
+            {
+                "id": "seattle_ny",
+                "cityA": "seattle",
+                "cityB": "new_york",
+                "points": 22,
+                "type": "long"
+            },
+            {
+                "id": "la_miami",
+                "cityA": "los_angeles",
+                "cityB": "miami",
+                "points": 20,
+                "type": "long"
+            },
+            {
+                "id": "portland_nashville",
+                "cityA": "portland",
+                "cityB": "nashville",
+                "points": 17,
+                "type": "long"
+            },
+            {
+                "id": "vancouver_santa_fe",
+                "cityA": "vancouver",
+                "cityB": "santa_fe",
+                "points": 13,
+                "type": "long"
+            },
+            {
+                "id": "calgary_phoenix",
+                "cityA": "calgary",
+                "cityB": "phoenix",
+                "points": 13,
+                "type": "long"
+            },
+            {
+                "id": "calgary_slc",
+                "cityA": "calgary",
+                "cityB": "salt_lake_city",
+                "points": 7,
+                "type": "long"
+            },
+            {
+                "id": "helena_la",
+                "cityA": "helena",
+                "cityB": "los_angeles",
+                "points": 8,
+                "type": "long"
+            },
+            {
+                "id": "duluth_houston",
+                "cityA": "duluth",
+                "cityB": "houston",
+                "points": 8,
+                "type": "long"
+            },
+            {
+                "id": "sault_nashville",
+                "cityA": "sault_st_marie",
+                "cityB": "nashville",
+                "points": 8,
+                "type": "long"
+            },
+            {
+                "id": "sault_oklahoma",
+                "cityA": "sault_st_marie",
+                "cityB": "oklahoma_city",
+                "points": 9,
+                "type": "long"
+            },
+            {
+                "id": "montreal_atlanta",
+                "cityA": "montreal",
+                "cityB": "atlanta",
+                "points": 9,
+                "type": "long"
+            },
+            {
+                "id": "montreal_neworleans",
+                "cityA": "montreal",
+                "cityB": "new_orleans",
+                "points": 13,
+                "type": "long"
+            },
+            {
+                "id": "winnipeg_littlerock",
+                "cityA": "winnipeg",
+                "cityB": "little_rock",
+                "points": 11,
+                "type": "long"
+            },
+            {
+                "id": "winnipeg_houston",
+                "cityA": "winnipeg",
+                "cityB": "houston",
+                "points": 12,
+                "type": "long"
+            }
+        ],
+        "short": [
+            {
+                "id": "seattle_portland",
+                "cityA": "seattle",
+                "cityB": "portland",
+                "points": 1,
+                "type": "short"
+            },
+            {
+                "id": "denver_el_paso",
+                "cityA": "denver",
+                "cityB": "el_paso",
+                "points": 4,
+                "type": "short"
+            },
+            {
+                "id": "denver_pittsburgh",
+                "cityA": "denver",
+                "cityB": "pittsburgh",
+                "points": 11,
+                "type": "short"
+            },
+            {
+                "id": "chicago_santa_fe",
+                "cityA": "chicago",
+                "cityB": "santa_fe",
+                "points": 9,
+                "type": "short"
+            },
+            {
+                "id": "chicago_neworleans",
+                "cityA": "chicago",
+                "cityB": "new_orleans",
+                "points": 7,
+                "type": "short"
+            },
+            {
+                "id": "dallas_ny",
+                "cityA": "dallas",
+                "cityB": "new_york",
+                "points": 11,
+                "type": "short"
+            },
+            {
+                "id": "kansas_houston",
+                "cityA": "kansas_city",
+                "cityB": "houston",
+                "points": 5,
+                "type": "short"
+            },
+            {
+                "id": "sf_atlanta",
+                "cityA": "san_francisco",
+                "cityB": "atlanta",
+                "points": 17,
+                "type": "short"
+            },
+            {
+                "id": "portland_phoenix",
+                "cityA": "portland",
+                "cityB": "phoenix",
+                "points": 11,
+                "type": "short"
+            },
+            {
+                "id": "boston_miami",
+                "cityA": "boston",
+                "cityB": "miami",
+                "points": 12,
+                "type": "short"
+            },
+            {
+                "id": "toronto_miami",
+                "cityA": "toronto",
+                "cityB": "miami",
+                "points": 10,
+                "type": "short"
+            },
+            {
+                "id": "ny_atlanta",
+                "cityA": "new_york",
+                "cityB": "atlanta",
+                "points": 6,
+                "type": "short"
+            },
+            {
+                "id": "helena_seattle",
+                "cityA": "helena",
+                "cityB": "seattle",
+                "points": 6,
+                "type": "short"
+            },
+            {
+                "id": "duluth_el_paso",
+                "cityA": "duluth",
+                "cityB": "el_paso",
+                "points": 10,
+                "type": "short"
+            },
+            {
+                "id": "omaha_duluth",
+                "cityA": "omaha",
+                "cityB": "duluth",
+                "points": 2,
+                "type": "short"
+            },
+            {
+                "id": "pittsburgh_nashville",
+                "cityA": "pittsburgh",
+                "cityB": "nashville",
+                "points": 4,
+                "type": "short"
+            },
+            {
+                "id": "la_chicago",
+                "cityA": "los_angeles",
+                "cityB": "chicago",
+                "points": 16,
+                "type": "short"
+            },
+            {
+                "id": "la_neworleans",
+                "cityA": "los_angeles",
+                "cityB": "new_orleans",
+                "points": 13,
+                "type": "short"
+            },
+            {
+                "id": "phoenix_atlanta",
+                "cityA": "phoenix",
+                "cityB": "atlanta",
+                "points": 13,
+                "type": "short"
+            },
+            {
+                "id": "boston_washington",
+                "cityA": "boston",
+                "cityB": "washington",
+                "points": 2,
+                "type": "short"
+            },
+            {
+                "id": "washington_miami",
+                "cityA": "washington",
+                "cityB": "miami",
+                "points": 6,
+                "type": "short"
+            }
+        ]
+    }
+}

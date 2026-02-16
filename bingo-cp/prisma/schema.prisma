@@ -18,6 +18,7 @@ enum MatchMode {
   classic
   ioi
   tug
+  ticket_ride
 }
 
 model Match {
@@ -38,6 +39,13 @@ model Match {
   tugThreshold Int?    // Tug of War: threshold to win (default 2000)
   tugType String?      // Tug of War: "grid" or "single"
   tugCount Int?        // Tug of War: current count (starts at 0)
+  
+  // Ticket to Ride specific fields
+  mapType String?      // "usa" | "europe"
+  problemLevels Json?  // ProblemLevel[] configuration
+  tracksData Json?     // Track[] with claimed states
+  stationsData Json?   // Station[] placements
+  routeCards Json?     // RouteCard assignments per team
 }
 
 model Problem {
@@ -64,6 +72,12 @@ model Team {
   members Member[]
   match   Match?   @relation("MatchTeams", fields: [matchId], references: [id])
   matchId String?
+  
+  // Ticket to Ride specific fields
+  coins Int? @default(0)
+  tracksUsed Int? @default(0)
+  stationsUsed Int? @default(0)
+  trackPoints Int? @default(0)
 }
 
 model Member {

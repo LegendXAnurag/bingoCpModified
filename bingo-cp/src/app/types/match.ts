@@ -2,7 +2,7 @@ export interface Match {
   id: string;
   startTime: string;
   durationMinutes: number;
-  mode: "classic" | "replace" | "tug";
+  mode: "classic" | "replace" | "tug" | "ticket_ride";
   replaceIncrement: number;
   gridSize: number;
   teams: Team[];
@@ -13,12 +13,25 @@ export interface Match {
   tugThreshold?: number;
   tugType?: string;
   tugCount?: number;
+
+  // Ticket to Ride specific fields
+  mapType?: string; // "usa" | "europe"
+  problemLevels?: any; // ProblemLevel[] (JSON)
+  tracksData?: any; // Track[] (JSON)
+  stationsData?: any; // Station[] (JSON)
+  routeCards?: any; // RouteCard assignments per team (JSON)
 }
 
 export interface Team {
   name: string;
   color: string;
   members: string[];
+
+  // Ticket to Ride specific fields
+  coins?: number;
+  tracksUsed?: number;
+  stationsUsed?: number;
+  trackPoints?: number;
 }
 
 export interface ProblemCell {

@@ -50,6 +50,12 @@ export default function HomePage(): React.JSX.Element {
                 ⚔️ Play Tug of War
               </a>
               <a
+                href="/ticket-ride-mode"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
+              >
+                🚂 Play Ticket to Ride
+              </a>
+              <a
                 href="#how"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
               >
