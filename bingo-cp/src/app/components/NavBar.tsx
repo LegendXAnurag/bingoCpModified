@@ -1,7 +1,7 @@
 'use client';
 
 const links: Record<string, string> = {
-    "Home": '/home',
+    "Home": '/',
     "Bingo": '/create-match',
     "Tug of War": '/tug-mode',
     "Help": '/help',
@@ -11,7 +11,7 @@ export default function NavBar() {
     return (
         <header className="w-full bg-gray-100 dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm sticky top-0 z-20">
             <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
-                <a href="/home">
+                <a href="/">
                     <h1 className="text-2xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text tracking-wide">
                         Bingo CP
                     </h1>
