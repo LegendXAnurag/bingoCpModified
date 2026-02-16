@@ -51,6 +51,12 @@ type LogEntry = {
 
 
 
+
+type SolvedInfo = {
+  team: string;
+
+};
+
 type Winner = {
   team: string;
   type: 'row' | 'col' | 'diag' | 'anti-diag';
