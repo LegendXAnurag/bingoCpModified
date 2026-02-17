@@ -16,26 +16,34 @@ export type Claim = {
     id: number
 }
 
+import { fetchUserSubmissions } from '@/app/lib/codeforces'
+
+// ... existing types ...
+
 export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
     const problemKey = (p: Problem) => `${p.contestId}-${p.index}`
     const trackedProblems = new Set(problems.map(problemKey))
     const claims: Record<string, { team: string; time: number; id: number }> = {}
-    for (const player of players) {
+
+    // Process players in parallel to take advantage of our new coalescing/throttling
+    await Promise.all(players.map(async (player) => {
         try {
-            const res = await fetch(`https://codeforces.com/api/user.status?handle=${player.handle}&from=1&count=10`)
-            const data = await res.json()
-            if (data.status !== 'OK') continue
-            const submissions = data.result as Array<{
+            const submissions = await fetchUserSubmissions(player.handle) as Array<{
                 id: number,
                 creationTimeSeconds: number,
                 problem: { contestId: number; index: string },
                 verdict: string
-            }>
+            }>;
+
+            if (!submissions || !Array.isArray(submissions)) return;
+            console.log(`[CheckSolves] Processing ${submissions.length} submissions for ${player.handle}`);
 
             for (const sub of submissions) {
                 if (sub.verdict !== 'OK') continue
                 const key = `${sub.problem.contestId}-${sub.problem.index}`
+                // console.log(`[CheckSolves] Checking ${key} for ${player.handle}`);
                 if (!trackedProblems.has(key)) continue
+                console.log(`[CheckSolves] Match found for ${key} by ${player.handle}`);
                 const existing = claims[key]
                 if (
                     !existing ||
@@ -50,8 +58,9 @@ export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
                 }
             }
         } catch (err) {
-            console.error(`Error fetching for ${player.handle}`, err)
+            console.error(`Error processing ${player.handle}`, err)
         }
-    }
+    }));
+
     return claims;
 }

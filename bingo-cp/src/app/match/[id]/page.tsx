@@ -482,7 +482,8 @@ export default function Home() {
       }
     };
 
-    const interval = setInterval(fetchPoll, 60000);
+    const pollInterval = Number(process.env.NEXT_PUBLIC_POLL_INTERVAL_MS) || 15000;
+    const interval = setInterval(fetchPoll, pollInterval);
     return () => clearInterval(interval);
   }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked, resolveTeamDisplayAndKey, match?.problems, match?.solveLog, persistNotified]);
 

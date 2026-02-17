@@ -1,4 +1,4 @@
-import { type NextApiRequest, type NextApiResponse } from 'next';
+import { fetchUserSubmissions } from '@/app/lib/codeforces';
 
 export type Problem = {
     contestId: number;
@@ -50,16 +50,15 @@ export async function fetchAndFilterProblems(options: GetProblemsOptions): Promi
 
         const solvedSet = new Set<string>();
 
-        for (const handle of userHandles) {
+        // Fetch submissions in parallel using our optimized client
+        await Promise.all(userHandles.map(async (handle) => {
             try {
-                const submissionsRes = await fetch(
-                    `https://codeforces.com/api/user.status?handle=${handle}&from=1&count=10000`
-                );
-                const submissionsData = await submissionsRes.json();
+                const submissions = await fetchUserSubmissions(handle) as Array<{
+                    problem: { contestId: number; index: string },
+                    verdict: string
+                }>;
 
-                if (submissionsData.status !== 'OK') continue;
-
-                const submissions: Submission[] = submissionsData.result;
+                if (!submissions || !Array.isArray(submissions)) return;
 
                 for (const sub of submissions) {
                     if (sub.verdict === 'OK') {
@@ -68,36 +67,17 @@ export async function fetchAndFilterProblems(options: GetProblemsOptions): Promi
                 }
             } catch (err) {
                 console.error(`Error fetching submissions for ${handle}`, err);
-                // Continue even if one user fails
             }
-        }
+        }));
 
         const unsolved = problems.filter(
             (p) => !solvedSet.has(`${p.contestId}-${p.index}`) && !exclude.includes(`${p.contestId}-${p.index}`)
         );
 
-        // Fill up to count if needed by reusing problems (circularly) - logic from original code
-        // Original logic:
-        // let idx = 0;
-        // if(unsolved.length < count) {
-        //   while(unsolved.length < count) {
-        //     unsolved.push(problems[idx]);
-        //     idx += 1;
-        //   }
-        // }
-        // However, original code used `problems` (all filtered problems, including solved ones?)
-        // Line 71: unsolved.push(problems[idx]);
-        // This seems to add from the filtered pool (rating constrained), not excluding solved.
-        // I will preserve this behavior.
-
         let idx = 0;
         const finalPool = [...unsolved];
 
         if (finalPool.length < count) {
-            // Create a pool to pick from if we run out of unsolved problems
-            // Original code used `problems` which is the filtered list based on rating/tags
-            // It did NOT filter out solved problems for the backfill
-
             while (finalPool.length < count) {
                 if (idx >= problems.length) idx = 0; // wrapping safety
                 finalPool.push(problems[idx]);
