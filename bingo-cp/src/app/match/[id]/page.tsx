@@ -171,8 +171,8 @@ export default function Home() {
     color: string;
   }
 
-  const resolveTeamDisplayAndKey = useCallback((teamIdentifier: string | undefined, teamsListParam?: Team[]) => {
-    const teamsList = teamsListParam ?? (match?.teams ?? []);
+  const resolveTeamDisplayAndKey = useCallback((teamIdentifier: string | undefined, teamsListParam: Team[] = []) => {
+    const teamsList = teamsListParam;
     if (!teamIdentifier) return { displayName: 'Unknown', teamKey: 'unknown' };
 
     const search = teamIdentifier.toLowerCase();
@@ -184,7 +184,7 @@ export default function Home() {
     const teamKey = (teamObj?.color ?? teamIdentifier ?? 'unknown').toLowerCase();
 
     return { displayName, teamKey };
-  }, [match?.teams]);
+  }, []);
 
   const findWinnerFromSolved = useCallback((solvedMap: Record<string, SolvedInfo>, problemsArr: ProblemCell[], gSize: number): Winner => {
     if (!problemsArr || problemsArr.length === 0) return null;
@@ -482,9 +482,7 @@ export default function Home() {
       }
     };
 
-    fetchPoll();
-
-    const interval = setInterval(fetchPoll, 20000); // REMEMBER TO CHANGE TO 15S
+    const interval = setInterval(fetchPoll, 60000);
     return () => clearInterval(interval);
   }, [match?.id, match?.startTime, match?.durationMinutes, matchLocked, resolveTeamDisplayAndKey, match?.problems, match?.solveLog, persistNotified]);
 

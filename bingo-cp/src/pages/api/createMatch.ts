@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/app/lib/prisma';
+import { fetchAndFilterProblems } from '@/app/lib/problems';
 import { MatchMode } from '@prisma/client';
 
 type ProblemWithGrid = {
@@ -62,29 +63,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const allHandles = teams.flatMap((team) => team.members);
   try {
-    const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'; // Use relative path in browser, localhost in server
     // For tug single mode, fetch only 1 problem; otherwise fetch grid
     const problemCount = (mode === 'tug' && tugType === 'single') ? 1 : gridSize * gridSize;
-    const problemRes = await fetch(`${baseUrl}/api/getProblems`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userHandles: allHandles,
-        minRating,
-        maxRating,
-        count: problemCount,
-      }),
-    })
-    if (!problemRes.ok) return res.status(500).json({ error: 'Failed to fetch problems' })
-    const problemData = await problemRes.json();
-    const problems: ProblemWithGrid[] = problemData.problems.map(
-      (p: { contestId: number; index: string, rating: number, name: string }, idx: number) => ({
+
+    const selectedProblems = await fetchAndFilterProblems({
+      userHandles: allHandles,
+      minRating,
+      maxRating,
+      count: problemCount,
+    });
+
+    const problems: ProblemWithGrid[] = selectedProblems.map(
+      (p, idx) => ({
         contestId: p.contestId,
         index: p.index,
         row: Math.floor(idx / gridSize),
         col: idx % gridSize,
-        rating: p.rating,
+        rating: p.rating ?? 0,
         name: p.name,
+        maxPoints: 0, // maxPoints is missing in ProblemWithGrid definition in original file? waiting for view_file
       })
     );
     // console.time("match");

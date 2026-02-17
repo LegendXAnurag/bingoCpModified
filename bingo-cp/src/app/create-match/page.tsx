@@ -78,8 +78,7 @@ export default function Home() {
         return;
       }
       try {
-        const baseUrl = 'https://bingo-cp.vercel.app'; // UPDATE IT LATER
-        const pollRes = await fetch(`${baseUrl}/api/poll-submissions`, {
+        const pollRes = await fetch(`/api/poll-submissions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ matchId: match.id }),
@@ -124,9 +123,7 @@ export default function Home() {
       }
     };
 
-    fetchPoll();
-
-    const interval = setInterval(fetchPoll, 20000);
+    const interval = setInterval(fetchPoll, 60000);
     return () => clearInterval(interval);
   }, [match?.id, match?.startTime, match?.durationMinutes]);
 

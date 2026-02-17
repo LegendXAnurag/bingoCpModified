@@ -1,23 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from "@/app/lib/prisma"
 import { checkSolvesLogic, Problem, Player, Claim } from '@/lib/checkSolvesLogic'
+import { fetchAndFilterProblems } from '@/app/lib/problems';
+
 async function fetchReplacementProblem(exclude: string[], minRating?: number, maxRating?: number, handles?: string[]) {
   try {
-    const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'; // Use localhost for development
-    const res = await fetch(`${baseUrl}/api/getProblems`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        minRating: minRating ?? 800,
-        maxRating: maxRating ?? 3500,
-        userHandles: handles,
-        count: 1,
-        exclude: exclude
-      }),
+    const problems = await fetchAndFilterProblems({
+      minRating: minRating ?? 800,
+      maxRating: maxRating ?? 3500,
+      userHandles: handles,
+      count: 1,
+      exclude: exclude
     });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return (data.problems && data.problems[0]) ?? null;
+    return problems[0] ?? null;
   } catch (err) {
     console.error('fetchReplacementProblem error', err);
     return null;
@@ -37,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Match not found' })
     }
     const now = new Date();
-    const cutoff = new Date(now.getTime() - 20 * 1000);
+    const cutoff = new Date(now.getTime() - 60 * 1000);
     const updateResult = await prisma.match.updateMany({
       where: {
         id: matchId,
@@ -74,8 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!match) {
       return res.status(404).json({ error: 'Match not found' })
     }
-    // await fetch(`https://bingo-cp.vercel.app/api/poll-debug?matchId=${matchId}`);
-    // await fetch("https://bingo-cp.vercel.app/api/poll-debug");
+
     const problems = match.problems
       .filter(p => p.active === true)
       .map(p => ({
