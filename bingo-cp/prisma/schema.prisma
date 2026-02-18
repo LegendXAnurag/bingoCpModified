@@ -89,3 +89,13 @@ model SolveLog {
   problem   Problem  @relation(fields: [contestId, index, matchId], references: [contestId, index, matchId])
 
 }
+
+model TtrMap {
+  id        String   @id @default(cuid())
+  name      String
+  data      Json
+  width     Int      @default(800)
+  height    Int      @default(600)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
