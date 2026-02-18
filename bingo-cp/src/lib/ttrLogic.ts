@@ -2,27 +2,32 @@ import { TTRState, TTRPlayerState, Track, City } from '@/app/types/match';
 import { TRACKS } from './ttrData';
 
 export function getTrackCost(track: Track): number {
-    // 1 coin per length segment?
-    // User said: "to build a track, you need to spend coins... length of track = cost"
     return track.length;
 }
 
 export function getTrackPoints(track: Track): number {
-    // Standard TTR points:
-    // 1: 1, 2: 2, 3: 4, 4: 7, 5: 10, 6: 15
     const lengths = [0, 1, 2, 4, 7, 10, 15, 18, 21]; // up to 8
     return lengths[track.length] || track.length;
 }
 
-export function canBuildTrack(state: TTRState, player: TTRPlayerState, trackId: string, track: Track): { possible: boolean; reason?: string } {
+// Helper to find track in state (dynamic) or static
+export function findTrack(state: TTRState, trackId: string): Track | undefined {
+    if (state.mapData) {
+        return state.mapData.tracks.find(t => t.id === trackId);
+    }
+    return TRACKS.find(t => t.id === trackId);
+}
+
+export function canBuildTrack(state: TTRState, player: TTRPlayerState, trackId: string): { possible: boolean; reason?: string } {
     if (!player) return { possible: false, reason: "Player not found" };
+
+    const track = findTrack(state, trackId);
+    if (!track) return { possible: false, reason: "Track invalid" };
 
     const trackState = state.tracks[trackId];
     if (trackState && trackState.claimedBy) {
         return { possible: false, reason: "Track already claimed" };
     }
-
-    // Check double route rules (if less than 4-5 players in standard, double routes might be single only, but we ignore for now)
 
     // Check cost
     const cost = getTrackCost(track);
@@ -41,10 +46,10 @@ export function buildTrack(state: TTRState, teamColor: string, trackId: string):
     const player = state.players[teamColor];
     if (!player) return null;
 
-    const track = TRACKS.find(t => t.id === trackId);
+    const track = findTrack(state, trackId);
     if (!track) return null;
 
-    const check = canBuildTrack(state, player, trackId, track);
+    const check = canBuildTrack(state, player, trackId);
     if (!check.possible) return null;
 
     // Deduct cost

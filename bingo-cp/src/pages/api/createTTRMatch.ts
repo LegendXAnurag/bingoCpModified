@@ -70,20 +70,107 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             };
         });
 
+        // Initialize collections
+        let _tracks: any[] = TRACKS;
+        let _cities: any[] = []; // Default doesn't need cities in state, only custom
+        let _tickets: any[] = TICKETS;
+        let mapData = undefined;
+
+        if (ttrParams.mapId) {
+            const map = await prisma.ttrMap.findUnique({
+                where: { id: ttrParams.mapId }
+            });
+            if (!map) {
+                return res.status(400).json({ message: 'Map not found' });
+            }
+
+            // map.data is Json from Prisma, cast it
+            const data = map.data as any; // TtrMapData
+
+            // Normalize tracks from map editor format (cityA/cityB) to logic format (city1/city2)
+            // and include units/color
+            _tracks = data.tracks.map((t: any) => ({
+                id: t.id,
+                city1: t.cityA, // Map editor uses cityA
+                city2: t.cityB, // Map editor uses cityB
+                length: t.length,
+                color: t.color,
+                double: false, // Map editor currently doesn't seem to flag double routes explicitly in same way, or maybe it does? 
+                // Assuming simple track for now or we need to infer double from duplicate city pairs? 
+                // For now, take as is.
+                units: t.units
+            }));
+
+            _cities = data.cities;
+
+            if (data.tickets && data.tickets.length > 0) {
+                _tickets = data.tickets.map((t: any) => ({
+                    id: t.id,
+                    city1: t.cityA || t.city1,
+                    city2: t.cityB || t.city2,
+                    points: t.points || 0,
+                    type: t.type || (t.points >= 20 ? 'long' : 'short') // Fallback if type missing
+                }));
+            } else {
+                _tickets = [];
+            }
+
+            mapData = {
+                cities: _cities,
+                tracks: _tracks,
+                imageUrl: data.imageUrl || map.imageUrl || "",
+                width: map.width,
+                height: map.height,
+                tickets: _tickets
+            };
+        }
+
         const tracks: Record<string, TTRTrackState> = {};
-        TRACKS.forEach(t => {
+        _tracks.forEach(t => {
             tracks[t.id] = {
                 id: t.id,
                 claimedBy: null
             };
         });
 
-        const ticketDeck = [...TICKETS.map(t => t.id)];
-        // Shuffle deck
-        for (let i = ticketDeck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [ticketDeck[i], ticketDeck[j]] = [ticketDeck[j], ticketDeck[i]];
-        }
+        // Separate tickets
+        const longTickets = _tickets.filter(t => t.type === 'long');
+        const shortTickets = _tickets.filter(t => t.type !== 'long'); // short or undefined
+
+        // Shuffle helper
+        const shuffle = (array: any[]) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        };
+
+        shuffle(longTickets);
+        shuffle(shortTickets);
+
+        // Deal tickets to players
+        Object.keys(players).forEach(teamColor => {
+            const playerDes: string[] = [];
+
+            // Deal 1 long if available
+            if (longTickets.length > 0) {
+                const t = longTickets.pop();
+                playerDes.push(t.id);
+            }
+
+            // Deal 3 short if available
+            for (let k = 0; k < 3; k++) {
+                if (shortTickets.length > 0) {
+                    const t = shortTickets.pop();
+                    playerDes.push(t.id);
+                }
+            }
+            players[teamColor].destinations = playerDes;
+        });
+
+        // Remaining deck (though not used for drawing anymore)
+        const ticketDeck = [...longTickets, ...shortTickets].map(t => t.id);
+        shuffle(ticketDeck);
 
         const ttrState: TTRState = {
             players,
@@ -91,7 +178,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             stations: {},
             market: marketProblems,
             allProbs: allProbs,
-            ticketDeck
+            ticketDeck,
+            mapData
         };
 
         const match = await prisma.match.create({

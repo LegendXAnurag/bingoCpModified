@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        await prisma.$transaction(async (tx) => {
+        const updatedState = await prisma.$transaction(async (tx) => {
             const match = await tx.match.findUnique({
                 where: { id: matchId },
                 select: { ttrState: true, mode: true }
@@ -40,11 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 data: { ttrState: newState as any }
             });
 
-            finalNewState = newState; // Assign the new state to the variable
+            return newState;
         });
 
         // Return the NEW state after the transaction
-        res.status(200).json({ success: true, newState: finalNewState });
+        res.status(200).json({ success: true, newState: updatedState });
     } catch (error: any) {
         console.error('Error in buildStation:', error);
         res.status(500).json({ message: error.message || 'Internal Server Error' });

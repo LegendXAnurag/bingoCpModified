@@ -62,6 +62,14 @@ export interface TTRState {
   market: ProblemCell[];
   allProbs: ProblemCell[];
   ticketDeck: string[]; // IDs of tickets remaining in deck
+  mapData?: {
+    cities: City[];
+    tracks: Track[];
+    imageUrl: string;
+    width: number;
+    height: number;
+    tickets: Ticket[];
+  };
 }
 
 export interface TTRPlayerState {
@@ -93,6 +101,7 @@ export interface Track {
   length: number;
   color?: string;
   double?: boolean;
+  units?: any[]; // For custom map track segments
 }
 
 export interface Ticket {
@@ -100,4 +109,5 @@ export interface Ticket {
   city1: string;
   city2: string;
   points: number;
+  type?: 'long' | 'short';
 }

@@ -24,10 +24,17 @@ export default function CoinMarketplace({ state }: CoinMarketplaceProps) {
     // 3 -> 5 coins
     const coinsReward = [2, 3, 4, 5];
 
+    const levelColors = [
+        "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700", // Level 1 (2 coins)
+        "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700",     // Level 2 (3 coins)
+        "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-700", // Level 3 (4 coins)
+        "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-700"        // Level 4 (5 coins)
+    ];
+
     return (
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {byLevel.map(({ level, problems }) => (
-                <Card key={level} className="bg-white/50 dark:bg-gray-800/50 backdrop-blur">
+                <Card key={level} className={`backdrop-blur border-2 ${levelColors[level]}`}>
                     <CardContent className="p-4">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg">Level {level + 1}</h3>
@@ -50,7 +57,7 @@ export default function CoinMarketplace({ state }: CoinMarketplaceProps) {
                                         <span className="font-mono text-sm">{p.index}</span>
                                         <span className="text-xs text-gray-500">{p.rating}</span>
                                     </div>
-                                    <div className="font-medium truncate mt-1" title={p.name}>{p.name}</div>
+                                    <div className="font-medium mt-1 leading-tight" title={p.name}>{p.name}</div>
                                 </a>
                             ))}
                         </div>

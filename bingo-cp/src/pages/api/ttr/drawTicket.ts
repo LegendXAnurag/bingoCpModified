@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        await prisma.$transaction(async (tx) => {
+        const updatedState = await prisma.$transaction(async (tx) => {
             const match = await tx.match.findUnique({
                 where: { id: matchId },
                 select: { ttrState: true, mode: true }
@@ -45,9 +45,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 where: { id: matchId },
                 data: { ttrState: state as any }
             });
+            return state;
         });
 
-        res.status(200).json({ success: true, newState: state });
+        res.status(200).json({ success: true, newState: updatedState });
     } catch (error: any) {
         console.error('Error drawing ticket:', error);
         res.status(500).json({ message: error.message || 'Internal Server Error' });

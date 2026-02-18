@@ -32,7 +32,7 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
         const player = state.players[currentTeam];
         if (!player) return;
 
-        const check = canBuildTrack(state, player, track.id, track);
+        const check = canBuildTrack(state, player, track.id);
         if (!check.possible) {
             alert(check.reason); // Could ideally replace this with toast
             return;
@@ -115,14 +115,14 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                     const availableHeight = parent.clientHeight;
 
                     // Map generic size
-                    const mapW = 1200;
-                    const mapH = 800;
+                    const mapW = state.mapData ? state.mapData.width : 1200;
+                    const mapH = state.mapData ? state.mapData.height : 800;
 
                     const scaleW = availableWidth / mapW;
                     const scaleH = availableHeight / mapH;
 
                     // Fit 'contain'
-                    const newScale = Math.min(scaleW, scaleH, 1); // limiting max scale to 1 for crispness? or allow zoom? let's limit to 1.5 maybe
+                    const newScale = Math.min(scaleW, scaleH, 1);
                     setScale(Math.min(scaleW, scaleH) * 0.95); // 95% to leave some margin
                 }
             }
@@ -143,34 +143,64 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                 ref={containerRef}
                 className="relative bg-white shadow-xl origin-center transition-transform duration-200"
                 style={{
-                    width: '1200px',
-                    height: '800px',
-                    minWidth: '1200px',
-                    minHeight: '800px',
+                    width: state.mapData ? `${state.mapData.width}px` : '1200px',
+                    height: state.mapData ? `${state.mapData.height}px` : '800px',
                     transform: `scale(${scale})`
                 }}
             >
                 <img
-                    src="/europe.jpeg"
-                    alt="Europe Map"
+                    src={state.mapData?.imageUrl || "/europe.jpeg"}
+                    alt="Map Background"
                     className="absolute inset-0 w-full h-full object-fill opacity-80"
                     style={{ pointerEvents: 'none' }}
                 />
 
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                    {TRACKS.map(track => {
-                        const c1 = CITIES.find(c => c.id === track.city1);
-                        const c2 = CITIES.find(c => c.id === track.city2);
+                    {(state.mapData ? state.mapData.tracks : TRACKS).map(track => {
+                        const cities = state.mapData ? state.mapData.cities : CITIES;
+                        const c1 = cities.find(c => c.id === (state.mapData ? track.city1 : track.city1));
+                        const c2 = cities.find(c => c.id === (state.mapData ? track.city2 : track.city2));
+
+                        // For custom maps, track might use cityA/cityB if we didn't normalize it, 
+                        // but logic expects city1/city2. We should ensure normalization in backend.
+                        // Assuming track has city1/city2.
+
                         if (!c1 || !c2) return null;
 
                         const trackState = state.tracks[track.id];
                         const isClaimed = !!trackState?.claimedBy;
                         const ownerColor = trackState?.claimedBy || 'gray';
 
-                        const x1 = (c1.x / 100) * 1200;
-                        const y1 = (c1.y / 100) * 800;
-                        const x2 = (c2.x / 100) * 1200;
-                        const y2 = (c2.y / 100) * 800;
+                        // Custom Map Rendering with Units
+                        if (track.units && track.units.length > 0) {
+                            return (
+                                <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto cursor-pointer group`}>
+                                    {track.units.map((unit: any, idx: number) => (
+                                        <rect
+                                            key={idx}
+                                            x={unit.x - (unit.width || 20) / 2}
+                                            y={unit.y - (unit.height || 8) / 2}
+                                            width={unit.width || 20}
+                                            height={unit.height || 8}
+                                            fill={isClaimed ? ownerColor : (track.color || 'gray')}
+                                            stroke="black"
+                                            strokeWidth="1"
+                                            transform={`rotate(${unit.rotation}, ${unit.x}, ${unit.y})`}
+                                            className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''}`}
+                                        />
+                                    ))}
+                                    {/* Helper click area for units? simplified to just clicking units for now */}
+                                </g>
+                            );
+                        }
+
+                        // Legacy Rendering (Straight Lines)
+                        const mapW = 1200; // Legacy width
+                        const mapH = 800;  // Legacy height
+                        const x1 = (c1.x / 100) * mapW;
+                        const y1 = (c1.y / 100) * mapH;
+                        const x2 = (c2.x / 100) * mapW;
+                        const y2 = (c2.y / 100) * mapH;
 
                         let offsetX = 0;
                         let offsetY = 0;
@@ -192,7 +222,6 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
 
                         return (
                             <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto cursor-pointer group`}>
-                                {/* Invisible wide stroke for easier clicking */}
                                 <line
                                     x1={x1 + offsetX}
                                     y1={y1 + offsetY}
@@ -201,7 +230,6 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                                     stroke="transparent"
                                     strokeWidth="20"
                                 />
-                                {/* Visible track line */}
                                 <line
                                     x1={x1 + offsetX}
                                     y1={y1 + offsetY}
@@ -215,64 +243,91 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                             </g>
                         );
                     })}
+                    {(state.mapData ? state.mapData.cities : CITIES).map(city => {
+                        const stationOwner = state.stations[city.id];
+                        // Use raw coordinates if mapData exists (Editor uses raw). 
+                        // If legacy, we might need to convert % to px if we move to SVG?
+                        // Legacy cities have x, y in % (0-100).
+                        // Legacy width 1200, height 800.
+
+                        let cx = city.x;
+                        let cy = city.y;
+
+                        if (!state.mapData) {
+                            // Legacy conversion
+                            cx = (city.x / 100) * 1200;
+                            cy = (city.y / 100) * 800;
+                        }
+
+                        return (
+                            <g
+                                key={city.id}
+                                transform={`translate(${cx}, ${cy})`}
+                                onClick={() => handleCityClick(city)}
+                                className="cursor-pointer group pointer-events-auto"
+                            >
+                                {/* City Marker */}
+                                <circle
+                                    r={6}
+                                    fill={stationOwner ? stationOwner : (state.mapData ? "red" : "#333")}
+                                    stroke="white"
+                                    strokeWidth="2"
+                                    className="transition-transform group-hover:scale-125"
+                                />
+
+                                {/* Station Indicator */}
+                                {stationOwner && (
+                                    <circle r={3} fill="white" stroke="gray" strokeWidth="1" />
+                                )}
+
+                                {/* City Name */}
+                                <text
+                                    y={-15}
+                                    textAnchor="middle"
+                                    className="text-xs font-bold pointer-events-none select-none fill-black transition-all group-hover:font-extrabold"
+                                    style={{ textShadow: "0px 0px 2px white" }} // Outline for readability
+                                >
+                                    {city.name}
+                                </text>
+                            </g>
+                        );
+                    })}
                 </svg>
 
-                {CITIES.map(city => {
-                    const stationOwner = state.stations[city.id];
+                <AlertDialog open={!!confirmTrack} onOpenChange={(o) => !o && setConfirmTrack(null)}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Claim Track?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to claim the track from {confirmTrack && CITIES.find(c => c.id === confirmTrack.city1)?.name} to {confirmTrack && CITIES.find(c => c.id === confirmTrack.city2)?.name}?
+                                <br />
+                                Cost: <strong>{confirmTrack ? getTrackCost(confirmTrack) : 0} coins</strong>
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmBuildTrack}>Build Track</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
-                    return (
-                        <div
-                            key={city.id}
-                            className={`absolute w-6 h-6 rounded-full border-2 border-white transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer hover:scale-125 transition-transform`}
-                            style={{
-                                left: `${city.x}%`,
-                                top: `${city.y}%`,
-                                backgroundColor: stationOwner ? stationOwner : '#333'
-                            }}
-                            title={city.name}
-                            onClick={() => handleCityClick(city)}
-                        >
-                            {stationOwner && (
-                                <div className="w-3 h-3 rounded-full bg-white border border-gray-500" />
-                            )}
-                        </div>
-                    );
-                })}
+                <AlertDialog open={!!confirmCity} onOpenChange={(o) => !o && setConfirmCity(null)}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Build Station?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Build a station in {confirmCity?.name}?
+                                <br />
+                                Cost: <strong>{state.players[currentTeam] ? 4 - state.players[currentTeam].stationsLeft : 0} coins</strong>
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmBuildStation}>Build Station</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
-
-            <AlertDialog open={!!confirmTrack} onOpenChange={(o) => !o && setConfirmTrack(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Claim Track?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to claim the track from {confirmTrack && CITIES.find(c => c.id === confirmTrack.city1)?.name} to {confirmTrack && CITIES.find(c => c.id === confirmTrack.city2)?.name}?
-                            <br />
-                            Cost: <strong>{confirmTrack ? getTrackCost(confirmTrack) : 0} coins</strong>
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmBuildTrack}>Build Track</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-            <AlertDialog open={!!confirmCity} onOpenChange={(o) => !o && setConfirmCity(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Build Station?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Build a station in {confirmCity?.name}?
-                            <br />
-                            Cost: <strong>{state.players[currentTeam] ? 4 - state.players[currentTeam].stationsLeft : 0} coins</strong>
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmBuildStation}>Build Station</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 }

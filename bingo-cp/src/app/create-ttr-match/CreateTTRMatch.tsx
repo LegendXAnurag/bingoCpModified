@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,6 +26,27 @@ export default function CreateTTRMatch() {
     const [level4, setLevel4] = useState({ min: 1500, max: 3500, count: 5 });
 
     const [teams, setTeams] = useState<any[]>([]);
+    const [maps, setMaps] = useState<any[]>([]);
+    const [selectedMapId, setSelectedMapId] = useState<string>("");
+
+    useEffect(() => {
+        console.log("Fetching maps in CreateTTRMatch...");
+        fetch('/api/ttr/maps')
+            .then(res => res.json())
+            .then(data => {
+                console.log("Maps fetched:", data);
+                if (Array.isArray(data)) {
+                    setMaps(data);
+                } else if (data && Array.isArray(data.data)) {
+                    // Handle case where API returns { data: [...] }
+                    setMaps(data.data);
+                } else {
+                    console.error("Maps data is not an array:", data);
+                    setMaps([]); // Fallback to empty
+                }
+            })
+            .catch(err => console.error("Error fetching maps:", err));
+    }, []);
 
     const handleSubmit = async () => {
         if (!date || !time) {
@@ -48,11 +69,11 @@ export default function CreateTTRMatch() {
                 startTime,
                 ttrParams: {
                     gameDurationMinutes: parseInt(gameDuration),
-                    level1, level2, level3, level4
+                    level1, level2, level3, level4,
+                    mapId: selectedMapId || undefined
                 },
                 teams
             };
-
             const res = await fetch('/api/createTTRMatch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -122,6 +143,19 @@ export default function CreateTTRMatch() {
                                         onChange={(e) => setTime(e.target.value)}
                                     />
                                 </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Map</Label>
+                                <select
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={selectedMapId}
+                                    onChange={(e) => setSelectedMapId(e.target.value)}
+                                >
+                                    <option value="">Default (Europe)</option>
+                                    {maps.map(m => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="space-y-2">
                                 <Label>Duration (Minutes)</Label>
@@ -199,6 +233,6 @@ export default function CreateTTRMatch() {
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Match
             </Button>
-        </div>
+        </div >
     );
 }

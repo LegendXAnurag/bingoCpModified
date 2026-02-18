@@ -155,6 +155,7 @@ export default function Home() {
   const [confettiActive, setConfettiActive] = useState(false);
   const [positionOwners, setPositionOwners] = useState<Record<number, string>>({});
   const [showRatings, setShowRatings] = useState<boolean>(true);
+  const [logCollapsed, setLogCollapsed] = useState(false);
 
 
   const { width, height } = useWindowSize();
@@ -718,30 +719,45 @@ export default function Home() {
         </div>
 
         {/* Log Panel - Desktop (Right side), Mobile (Bottom) */}
-        <div className="w-full lg:w-80 shrink-0 mt-8 lg:mt-0">
-          <Card className="lg:sticky lg:top-24 h-96 lg:h-[calc(100vh-8rem)] flex flex-col">
-            <CardHeader className="border-b px-4 py-3">
-              <CardTitle className="text-xl font-semibold">Solve Log</CardTitle>
+        <div className={`shrink-0 mt-8 lg:mt-0 transition-all duration-300 ease-in-out ${logCollapsed ? 'w-full lg:w-12 bg-gray-100 dark:bg-gray-800' : 'w-full lg:w-80'}`}>
+          <Card className={`lg:sticky lg:top-24 flex flex-col transition-all duration-300 ${logCollapsed ? 'h-auto bg-transparent border-0 shadow-none' : 'h-96 lg:h-[calc(100vh-8rem)]'}`}>
+            <CardHeader
+              className={`border-b px-4 py-3 flex flex-row items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${logCollapsed ? 'p-2 justify-center border-0' : ''}`}
+              onClick={() => setLogCollapsed(!logCollapsed)}
+              title={logCollapsed ? "Show Log" : "Hide Log"}
+            >
+              {!logCollapsed && <CardTitle className="text-xl font-semibold">Solve Log</CardTitle>}
+              <div className={`${logCollapsed ? '' : 'text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'}`}>
+                {logCollapsed ? (
+                  <div className="flex flex-col items-center gap-2 py-4 h-full justify-center group">
+                    <div className="w-1 h-12 bg-gray-300 dark:bg-gray-600 rounded-full group-hover:bg-blue-500 transition-colors"></div>
+                    <span className="writing-vertical-lr text-sm font-bold uppercase tracking-wider text-gray-400 transform rotate-180 group-hover:text-blue-500 transition-colors whitespace-nowrap">Show Log</span>
+                    <div className="w-1 h-12 bg-gray-300 dark:bg-gray-600 rounded-full group-hover:bg-blue-500 transition-colors"></div>
+                  </div>
+                ) : "Hide"}
+              </div>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto p-3">
-              {log.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">No solves yet</p>
-              ) : (
-                <ul className="text-sm space-y-2">
-                  {log.map((entry, idx) => {
-                    const bgColor = teamColors[entry.team] || 'bg-gray-200 dark:bg-gray-700';
-                    return (
-                      <li
-                        key={idx}
-                        className={`${bgColor} text-white px-3 py-2 rounded shadow-sm`}
-                      >
-                        {entry.message}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </CardContent>
+            {!logCollapsed && (
+              <CardContent className="flex-1 overflow-y-auto p-3">
+                {log.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">No solves yet</p>
+                ) : (
+                  <ul className="text-sm space-y-2">
+                    {log.map((entry, idx) => {
+                      const bgColor = teamColors[entry.team] || 'bg-gray-200 dark:bg-gray-700';
+                      return (
+                        <li
+                          key={idx}
+                          className={`${bgColor} text-white px-3 py-2 rounded shadow-sm`}
+                        >
+                          {entry.message}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </CardContent>
+            )}
           </Card>
         </div>
       </div>

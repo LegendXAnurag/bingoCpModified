@@ -12,7 +12,7 @@ export default function PlayerStats({ state }: PlayerStatsProps) {
     const players = Object.values(state.players);
 
     return (
-        <div className="p-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-2 grid grid-cols-2 lg:grid-cols-4 gap-4 min-w-max">
             {players.map(player => (
                 <Card key={player.team} className={`border-l-4 border-l-${player.team}-500 overflow-hidden`}>
                     <div className={`h-2 bg-${player.team}-500 w-full mb-2`} style={{ backgroundColor: player.team }} />

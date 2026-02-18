@@ -4,9 +4,11 @@ import { prisma } from '@/app/lib/prisma';
 
 export async function GET() {
     try {
+        console.log("Fetching maps...");
         const maps = await prisma.ttrMap.findMany({
             orderBy: { updatedAt: 'desc' },
         });
+        console.log(`Fetched ${maps.length} maps`);
         return NextResponse.json(maps);
     } catch (error) {
         console.error('Error fetching maps:', error);
