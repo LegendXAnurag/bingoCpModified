@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from "@/app/lib/prisma"
 import { checkSolvesLogic, Problem, Player, Claim } from '@/lib/checkSolvesLogic'
 import { fetchAndFilterProblems } from '@/app/lib/problems';
+import { TTRParams, TTRState } from '@/app/types/match';
 
 async function fetchReplacementProblem(exclude: string[], minRating?: number, maxRating?: number, handles?: string[]) {
   try {
@@ -365,6 +366,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Win condition: time ends OR all grid problems solved
       // Team with positive count wins, or Team A if count is exactly 0
       // The TugOfWarDisplay will show this state
+    }
+
+    // TTR MODE: Award coins and replenish market
+    if (match.mode === 'ttr' && newSolves.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        const currentMatch = await tx.match.findUnique({
+          where: { id: matchId },
+          select: { ttrState: true, ttrParams: true }
+        });
+
+        if (!currentMatch?.ttrState) return;
+
+        const state = currentMatch.ttrState as unknown as TTRState;
+        const params = currentMatch.ttrParams as unknown as TTRParams;
+        let stateChanged = false;
+
+        for (const solve of newSolves) {
+          // Find which problem was solved in the market
+          const marketIdx = state.market.findIndex(p => p.contestId === solve.contestId && p.index === solve.index);
+
+          if (marketIdx !== -1) {
+            const problem = state.market[marketIdx];
+            const playerTeam = solve.team;
+
+            // Award coins
+            const row = problem.row; // 0, 1, 2, 3
+            const coins = row === 0 ? 2 : row === 1 ? 3 : row === 2 ? 4 : 5;
+
+            if (state.players[playerTeam]) {
+              state.players[playerTeam].coins += coins;
+              state.players[playerTeam].score += 10;
+            }
+
+            // Remove from market
+            state.market.splice(marketIdx, 1);
+
+            // Replenish
+            const levelMin = row === 0 ? params.level1.min : row === 1 ? params.level2.min : row === 2 ? params.level3.min : params.level4?.min ?? 1500;
+            const levelMax = row === 0 ? params.level1.max : row === 1 ? params.level2.max : row === 2 ? params.level3.max : params.level4?.max ?? 3500;
+
+            const allHandles = match.teams.flatMap(t => t.members).map(m => m.handle);
+            try {
+              const replacement = await fetchReplacementProblem(
+                state.market.map(p => `${p.contestId}-${p.index}`),
+                levelMin,
+                levelMax,
+                allHandles
+              );
+
+              if (replacement) {
+                state.market.push({
+                  ...replacement,
+                  row: row,
+                  col: 0,
+                  points: 0,
+                  type: 'PROGRAMMING'
+                });
+              }
+            } catch (e) {
+              console.error("Failed to replenish TTR market", e);
+            }
+
+            stateChanged = true;
+          }
+        }
+
+        if (stateChanged) {
+          await tx.match.update({
+            where: { id: matchId },
+            data: { ttrState: state as any }
+          });
+        }
+      });
     }
 
     const updatedMatch = await prisma.match.findUnique({

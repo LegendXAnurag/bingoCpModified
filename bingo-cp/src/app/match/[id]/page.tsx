@@ -9,6 +9,7 @@ import { ProblemCell } from '../../types/match'
 // import { MatchStatus } from "./MatchStatus";
 // import MatchCreationForm from '../../MatchCreationForm';
 import TugOfWarDisplay from '../../TugOfWarDisplay';
+import TTRGameDisplay from '../../ttr-mode/TTRGameDisplay';
 import { Match } from '../../types/match';
 // import TeamsForm from '@/app/TeamsForm';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -665,6 +666,8 @@ export default function Home() {
                 showRatings={showRatings}
                 teamColors={teamColors}
               />
+            ) : match.mode === 'ttr' ? (
+              <TTRGameDisplay match={match} currentTeam={currentTeam} setCurrentTeam={setCurrentTeam} />
             ) : (
               <div className={`grid ${gridClasses[gridSize]} px-2 sm:px-4 w-full`}>
                 {problems.map((problem, idx) => {

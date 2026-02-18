@@ -11,7 +11,11 @@ export async function getServerMatch(id: string) {
           problem: true
         }
       },
-      teams: true,
+      teams: {
+        include: {
+          members: true
+        }
+      },
     }
   });
 }

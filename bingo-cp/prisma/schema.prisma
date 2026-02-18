@@ -18,6 +18,7 @@ enum MatchMode {
   classic
   ioi
   tug
+  ttr
 }
 
 model Match {
@@ -38,6 +39,8 @@ model Match {
   tugThreshold Int?    // Tug of War: threshold to win (default 2000)
   tugType String?      // Tug of War: "grid" or "single"
   tugCount Int?        // Tug of War: current count (starts at 0)
+  ttrState Json?       // ticket to ride state
+  ttrParams Json?      // ticket to ride params
 }
 
 model Problem {
