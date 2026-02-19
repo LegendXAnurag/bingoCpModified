@@ -8,9 +8,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    const { matchId, team, cityId } = req.body;
+    const { matchId, team, trackId } = req.body;
 
-    if (!matchId || !team || !cityId) {
+    if (!matchId || !team || !trackId) {
         return res.status(400).json({ message: 'Missing parameters' });
     }
 
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             const ttrState = match.ttrState as unknown as TTRState;
-            const newState = buildStation(ttrState, team, cityId);
+            const newState = buildStation(ttrState, team, trackId);
 
             if (!newState) {
                 throw new Error('Failed to build station (validation failed)');

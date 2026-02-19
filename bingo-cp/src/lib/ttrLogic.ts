@@ -62,7 +62,7 @@ export function buildTrack(state: TTRState, teamColor: string, trackId: string):
 
     // Claim track
     if (!state.tracks[trackId]) {
-        state.tracks[trackId] = { id: trackId, claimedBy: null };
+        state.tracks[trackId] = { id: trackId, claimedBy: null, stationedBy: [] };
     }
     state.tracks[trackId].claimedBy = teamColor;
 
@@ -72,11 +72,27 @@ export function buildTrack(state: TTRState, teamColor: string, trackId: string):
     return state;
 }
 
-export function canBuildStation(state: TTRState, player: TTRPlayerState, cityId: string): { possible: boolean; reason?: string } {
+export function canBuildStation(state: TTRState, player: TTRPlayerState, trackId: string): { possible: boolean; reason?: string } {
     if (!player) return { possible: false, reason: "Player not found" };
 
-    if (state.stations[cityId]) {
-        return { possible: false, reason: "Station already exists in this city" };
+    const track = findTrack(state, trackId);
+    if (!track) return { possible: false, reason: "Track invalid" };
+
+    const trackState = state.tracks[trackId];
+
+    // Must be claimed by someone to build a station (allows sharing)
+    if (!trackState || !trackState.claimedBy) {
+        return { possible: false, reason: "Track must be claimed to build a station" };
+    }
+
+    // Cannot build station if you already claimed the track (you already use it)
+    if (trackState.claimedBy === player.team) {
+        return { possible: false, reason: "You already own this track" };
+    }
+
+    // Check if player already has a station here
+    if (trackState.stationedBy && trackState.stationedBy.includes(player.team)) {
+        return { possible: false, reason: "You already have a station on this track" };
     }
 
     if (player.stationsLeft <= 0) {
@@ -84,10 +100,6 @@ export function canBuildStation(state: TTRState, player: TTRPlayerState, cityId:
     }
 
     // Cost: 4 - stationsLeft (1st costs 1, 2nd costs 2, 3rd costs 3)
-    // Standard rules: 1st is 1, 2nd is 2, 3rd is 3.
-    // If stationsLeft is 3, valid. Cost 1.
-    // If stationsLeft is 2, valid. Cost 2.
-    // If stationsLeft is 1, valid. Cost 3.
     const cost = 4 - player.stationsLeft;
 
     if (player.coins < cost) {
@@ -97,18 +109,27 @@ export function canBuildStation(state: TTRState, player: TTRPlayerState, cityId:
     return { possible: true };
 }
 
-export function buildStation(state: TTRState, teamColor: string, cityId: string): TTRState | null {
+export function buildStation(state: TTRState, teamColor: string, trackId: string): TTRState | null {
     const player = state.players[teamColor];
     if (!player) return null;
 
-    const check = canBuildStation(state, player, cityId);
+    const check = canBuildStation(state, player, trackId);
     if (!check.possible) return null;
 
     const cost = 4 - player.stationsLeft;
     player.coins -= cost;
     player.stationsLeft -= 1;
 
-    state.stations[cityId] = teamColor;
+    if (!state.tracks[trackId]) {
+        // Should exist if claimed, but for safety
+        state.tracks[trackId] = { id: trackId, claimedBy: null, stationedBy: [] };
+    }
+
+    if (!state.tracks[trackId].stationedBy) {
+        state.tracks[trackId].stationedBy = [];
+    }
+
+    state.tracks[trackId].stationedBy!.push(teamColor);
 
     return state;
 }

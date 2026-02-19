@@ -27,20 +27,51 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
     const [scale, setScale] = useState(1);
     const containerRef = useRef<HTMLDivElement>(null);
     const [confirmTrack, setConfirmTrack] = useState<Track | null>(null);
-    const [confirmCity, setConfirmCity] = useState<City | null>(null);
+    const [confirmStationTrack, setConfirmStationTrack] = useState<Track | null>(null);
 
     const handleTrackClick = (track: Track) => {
         if (readOnly) return;
         const player = state.players[currentTeam];
         if (!player) return;
 
-        const check = canBuildTrack(state, player, track.id);
-        if (!check.possible) {
-            alert(check.reason); // Could ideally replace this with toast
-            return;
-        }
+        // check if track is claimed
+        const trackState = state.tracks[track.id];
 
-        setConfirmTrack(track);
+        // If claimed by someone else, or by us but we want to put a station (wait, logic says we can't put station if we own it)
+        // Logic: 
+        // 1. If unclaimed -> Build Track dialog
+        // 2. If claimed by OTHER -> Build Station dialog
+        // 3. If claimed by US -> Do nothing (or show info)
+
+        if (!trackState || !trackState.claimedBy) {
+            const check = canBuildTrack(state, player, track.id);
+            if (!check.possible) {
+                alert(check.reason);
+                return;
+            }
+            setConfirmTrack(track);
+        } else {
+            // Claimed. Check if we can build station.
+            const check = canBuildStation(state, player, track.id);
+            if (check.possible) {
+                setConfirmStationTrack(track);
+            } else {
+                // If it's owned by opponent and we can't build station, maybe show why?
+                // But if it's owned by us, canBuildStation returns "You already own this track" which is fine to alert or ignore.
+
+                // If we already have a station, ignore
+                if (trackState.stationedBy?.includes(currentTeam)) {
+                    return;
+                }
+
+                // If we own it, ignore
+                if (trackState.claimedBy === currentTeam) {
+                    return;
+                }
+
+                alert(check.reason);
+            }
+        }
     };
 
     const confirmBuildTrack = async () => {
@@ -70,28 +101,17 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
         }
     };
 
-    const handleCityClick = (city: City) => {
-        if (readOnly) return;
-        const player = state.players[currentTeam];
-        const check = canBuildStation(state, player, city.id);
-        if (!check.possible) {
-            alert(check.reason);
-            return;
-        }
-        setConfirmCity(city);
-    };
-
     const confirmBuildStation = async () => {
-        if (!confirmCity) return;
+        if (!confirmStationTrack) return;
 
-        const cityId = confirmCity.id;
-        setConfirmCity(null);
+        const trackId = confirmStationTrack.id;
+        setConfirmStationTrack(null);
 
         try {
             const res = await fetch('/api/ttr/buildStation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matchId, team: currentTeam, cityId })
+                body: JSON.stringify({ matchId, team: currentTeam, trackId })
             });
 
             if (!res.ok) {
@@ -179,18 +199,37 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                             return (
                                 <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto ${readOnly ? '' : 'cursor-pointer'} group`}>
                                     {track.units.map((unit: any, idx: number) => (
-                                        <rect
-                                            key={idx}
-                                            x={unit.x - (unit.width || 20) / 2}
-                                            y={unit.y - (unit.height || 8) / 2}
-                                            width={unit.width || 20}
-                                            height={unit.height || 8}
-                                            fill={isClaimed ? ownerColor : (track.color || 'gray')}
-                                            stroke="black"
-                                            strokeWidth="1"
-                                            transform={`rotate(${unit.rotation}, ${unit.x}, ${unit.y})`}
-                                            className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''}`}
-                                        />
+                                        <g key={idx}>
+                                            <rect
+                                                x={unit.x - (unit.width || 20) / 2}
+                                                y={unit.y - (unit.height || 8) / 2}
+                                                width={unit.width || 20}
+                                                height={unit.height || 8}
+                                                fill={isClaimed ? ownerColor : (track.color || 'gray')}
+                                                stroke="black"
+                                                strokeWidth="1"
+                                                transform={`rotate(${unit.rotation}, ${unit.x}, ${unit.y})`}
+                                                className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''}`}
+                                            />
+                                            {/* Station Indicators: Perpendicular Rectangles */}
+                                            {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
+                                                trackState.stationedBy.map((stationTeam, sIdx) => (
+                                                    <rect
+                                                        key={`station-${sIdx}`}
+                                                        x={unit.x - 4} // Width 8 centered
+                                                        y={unit.y - 12} // Length 24 centered (slightly longer than track width 20)
+                                                        width={8}
+                                                        height={24}
+                                                        fill={stationTeam}
+                                                        stroke="white"
+                                                        strokeWidth="1"
+                                                        // Rotate perpendicular to unit (unit.rotation + 90)
+                                                        transform={`rotate(${unit.rotation + 90}, ${unit.x}, ${unit.y})`}
+                                                        className="pointer-events-none"
+                                                    />
+                                                ))
+                                            )}
+                                        </g>
                                     ))}
                                     {/* Helper click area for units? simplified to just clicking units for now */}
                                 </g>
@@ -243,15 +282,35 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                                     strokeDasharray={isClaimed ? "none" : "12, 4"}
                                     className={`transition-all group-hover:stroke-[10px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''}`}
                                 />
+                                {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
+                                    trackState.stationedBy.map((stationTeam, idx) => {
+                                        const midX = (x1 + x2) / 2 + offsetX;
+                                        const midY = (y1 + y2) / 2 + offsetY;
+                                        const dx = x2 - x1;
+                                        const dy = y2 - y1;
+                                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+                                        // Perpendicular rect
+                                        return (
+                                            <rect
+                                                key={idx}
+                                                x={midX - 4}
+                                                y={midY - 12}
+                                                width={8}
+                                                height={24}
+                                                fill={stationTeam}
+                                                stroke="white"
+                                                strokeWidth="1"
+                                                transform={`rotate(${angle + 90}, ${midX}, ${midY})`}
+                                            />
+                                        );
+                                    })
+                                )}
                             </g>
                         );
                     })}
                     {(state.mapData ? state.mapData.cities : CITIES).map(city => {
-                        const stationOwner = state.stations[city.id];
-                        // Use raw coordinates if mapData exists (Editor uses raw). 
-                        // If legacy, we might need to convert % to px if we move to SVG?
-                        // Legacy cities have x, y in % (0-100).
-                        // Legacy width 1200, height 800.
+                        // Removed stationOwner logic from here
 
                         let cx = city.x;
                         let cy = city.y;
@@ -266,22 +325,15 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                             <g
                                 key={city.id}
                                 transform={`translate(${cx}, ${cy})`}
-                                onClick={() => handleCityClick(city)}
-                                className={`${readOnly ? '' : 'cursor-pointer'} group pointer-events-auto`}
+                                className={`pointer-events-auto group`}
                             >
                                 {/* City Marker */}
                                 <circle
                                     r={6}
-                                    fill={stationOwner ? stationOwner : (state.mapData ? "red" : "#333")}
+                                    fill={(state.mapData ? "red" : "#333")}
                                     stroke="white"
                                     strokeWidth="2"
-                                    className="transition-transform group-hover:scale-125"
                                 />
-
-                                {/* Station Indicator */}
-                                {stationOwner && (
-                                    <circle r={3} fill="white" stroke="gray" strokeWidth="1" />
-                                )}
 
                                 {/* City Name */}
                                 <text
@@ -314,12 +366,14 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <AlertDialog open={!!confirmCity} onOpenChange={(o) => !o && setConfirmCity(null)}>
+                <AlertDialog open={!!confirmStationTrack} onOpenChange={(o) => !o && setConfirmStationTrack(null)}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Build Station?</AlertDialogTitle>
+                            <AlertDialogTitle>Build Station on Track?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Build a station in {confirmCity?.name}?
+                                Build a station on the track from {confirmStationTrack && CITIES.find(c => c.id === confirmStationTrack.city1)?.name} to {confirmStationTrack && CITIES.find(c => c.id === confirmStationTrack.city2)?.name}?
+                                <br />
+                                This allows you to use this track for one of your routes.
                                 <br />
                                 Cost: <strong>{state.players[currentTeam] ? 4 - state.players[currentTeam].stationsLeft : 0} coins</strong>
                             </AlertDialogDescription>
