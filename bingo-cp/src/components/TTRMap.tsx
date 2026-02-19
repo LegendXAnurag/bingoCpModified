@@ -20,15 +20,17 @@ interface TTRMapProps {
     state: TTRState;
     currentTeam: string;
     onUpdate?: (newState: TTRState) => void;
+    readOnly?: boolean;
 }
 
-export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMapProps) {
+export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly }: TTRMapProps) {
     const [scale, setScale] = useState(1);
     const containerRef = useRef<HTMLDivElement>(null);
     const [confirmTrack, setConfirmTrack] = useState<Track | null>(null);
     const [confirmCity, setConfirmCity] = useState<City | null>(null);
 
     const handleTrackClick = (track: Track) => {
+        if (readOnly) return;
         const player = state.players[currentTeam];
         if (!player) return;
 
@@ -69,6 +71,7 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
     };
 
     const handleCityClick = (city: City) => {
+        if (readOnly) return;
         const player = state.players[currentTeam];
         const check = canBuildStation(state, player, city.id);
         if (!check.possible) {
@@ -174,7 +177,7 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                         // Custom Map Rendering with Units
                         if (track.units && track.units.length > 0) {
                             return (
-                                <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto cursor-pointer group`}>
+                                <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto ${readOnly ? '' : 'cursor-pointer'} group`}>
                                     {track.units.map((unit: any, idx: number) => (
                                         <rect
                                             key={idx}
@@ -221,7 +224,7 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                         }
 
                         return (
-                            <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto cursor-pointer group`}>
+                            <g key={track.id} onClick={() => handleTrackClick(track)} className={`pointer-events-auto ${readOnly ? '' : 'cursor-pointer'} group`}>
                                 <line
                                     x1={x1 + offsetX}
                                     y1={y1 + offsetY}
@@ -264,7 +267,7 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate }: TTRMap
                                 key={city.id}
                                 transform={`translate(${cx}, ${cy})`}
                                 onClick={() => handleCityClick(city)}
-                                className="cursor-pointer group pointer-events-auto"
+                                className={`${readOnly ? '' : 'cursor-pointer'} group pointer-events-auto`}
                             >
                                 {/* City Marker */}
                                 <circle

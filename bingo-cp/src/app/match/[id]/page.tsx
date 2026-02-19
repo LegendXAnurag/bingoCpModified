@@ -286,9 +286,11 @@ export default function Home() {
           (matchObj.solveLog ?? []).forEach((entry: SolveLog) => {
             const key = `${entry.contestId}-${entry.index}`;
             const { displayName, teamKey } = resolveTeamDisplayAndKey(entry.team, teamsFromServer);
-            solvedMap[entry.problem.position] = {
-              team: teamKey,
-            };
+            if (entry.problem && typeof entry.problem.position === 'number') {
+              solvedMap[entry.problem.position] = {
+                team: teamKey,
+              };
+            }
             if (entry.problem && typeof entry.problem.position === 'number') {
               posOwners[entry.problem.position] = teamKey;
             }
@@ -654,8 +656,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* Show problem grid always during or after match */}
-          {matchHasStarted ? (
+          {/* Show problem grid always during or after match, or always for TTR to allow joining */}
+          {(matchHasStarted || match.mode === 'ttr') ? (
             loading ? (
               <Loading />
             ) : match.mode === 'tug' ? (
@@ -668,7 +670,7 @@ export default function Home() {
                 teamColors={teamColors}
               />
             ) : match.mode === 'ttr' ? (
-              <TTRGameDisplay match={match} currentTeam={currentTeam} setCurrentTeam={setCurrentTeam} />
+              <TTRGameDisplay match={match} currentTeam={currentTeam} setCurrentTeam={setCurrentTeam} hasStarted={matchHasStarted} />
             ) : (
               <div className={`grid ${gridClasses[gridSize]} px-2 sm:px-4 w-full`}>
                 {problems.map((problem, idx) => {

@@ -18,9 +18,16 @@ export interface Match {
 }
 
 export interface Team {
+  id: number;
   name: string;
   color: string;
-  members: string[];
+  members: Member[];
+}
+
+export interface Member {
+  id: number;
+  handle: string;
+  claimed?: boolean;
 }
 
 export interface ProblemCell {

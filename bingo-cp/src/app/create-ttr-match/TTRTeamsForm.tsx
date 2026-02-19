@@ -12,10 +12,11 @@ interface TeamInput {
 }
 
 interface TTRTeamsFormProps {
+    teams: TeamInput[];
     onTeamsChange: (teams: TeamInput[]) => void;
 }
 
-export default function TTRTeamsForm({ onTeamsChange }: TTRTeamsFormProps) {
+export default function TTRTeamsForm({ teams, onTeamsChange }: TTRTeamsFormProps) {
     type ColorOption = "red" | "black" | "blue" | "yellow" | "green" | "pink";
 
     const COLOR_OPTIONS: ColorOption[] = [
@@ -31,16 +32,10 @@ export default function TTRTeamsForm({ onTeamsChange }: TTRTeamsFormProps) {
         pink: { bg: "bg-pink-600", text: "text-white", border: "border-pink-800" },
     };
 
-    // Start with 2 teams by default
-    const [teams, setTeams] = useState<TeamInput[]>([
-        { name: "Team Red", color: "red", members: [""] },
-        { name: "Team Blue", color: "blue", members: [""] },
-    ]);
-
-    // Notify parent component of initial teams on mount and updates
-    useEffect(() => {
-        onTeamsChange(teams);
-    }, [teams, onTeamsChange]);
+    // Helper to notify parent of updates
+    const updateTeams = (newTeams: TeamInput[]) => {
+        onTeamsChange(newTeams);
+    };
 
     const updateTeam = <K extends keyof TeamInput>(
         index: number,
@@ -49,7 +44,7 @@ export default function TTRTeamsForm({ onTeamsChange }: TTRTeamsFormProps) {
     ) => {
         const newTeams = [...teams];
         newTeams[index][key] = value;
-        setTeams(newTeams);
+        updateTeams(newTeams);
     };
 
     const addTeam = () => {
@@ -58,7 +53,7 @@ export default function TTRTeamsForm({ onTeamsChange }: TTRTeamsFormProps) {
             const usedColors = teams.map(t => t.color);
             const nextColor = COLOR_OPTIONS.find(c => !usedColors.includes(c)) || "red";
 
-            setTeams([...teams, {
+            updateTeams([...teams, {
                 name: `Team ${nextColor.charAt(0).toUpperCase() + nextColor.slice(1)}`,
                 color: nextColor,
                 members: [""]
@@ -69,28 +64,28 @@ export default function TTRTeamsForm({ onTeamsChange }: TTRTeamsFormProps) {
     const removeTeam = (index: number) => {
         if (teams.length > 2) {
             const newTeams = teams.filter((_, i) => i !== index);
-            setTeams(newTeams);
+            updateTeams(newTeams);
         }
     };
 
     const updateMember = (teamIndex: number, memberIndex: number, value: string) => {
         const newTeams = [...teams];
         newTeams[teamIndex].members[memberIndex] = value;
-        setTeams(newTeams);
+        updateTeams(newTeams);
     };
 
     const addMember = (teamIndex: number) => {
         const newTeams = [...teams];
         if (newTeams[teamIndex].members.length < 16) {
             newTeams[teamIndex].members.push("");
-            setTeams(newTeams);
+            updateTeams(newTeams);
         }
     };
 
     const removeMember = (teamIndex: number, memberIndex: number) => {
         const newTeams = [...teams];
         newTeams[teamIndex].members.splice(memberIndex, 1);
-        setTeams(newTeams);
+        updateTeams(newTeams);
     };
 
     return (

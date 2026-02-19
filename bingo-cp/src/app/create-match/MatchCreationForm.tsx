@@ -16,7 +16,10 @@ type MatchCreationFormProps = {
 
 const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
   const router = useRouter();
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<any[]>([
+    { name: "Team Red", color: "red", members: [""] },
+    { name: "Team Blue", color: "blue", members: [""] },
+  ]);
 
   const [date, setDate] = useState(() => {
     const now = new Date();
@@ -311,7 +314,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
               <CardDescription>At least 2 teams required</CardDescription>
             </CardHeader>
             <CardContent>
-              <TeamsForm onTeamsChange={setTeams} />
+              <TeamsForm teams={teams} onTeamsChange={setTeams} />
             </CardContent>
           </Card>
         </TabsContent>

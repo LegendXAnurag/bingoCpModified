@@ -70,10 +70,13 @@ model Team {
 }
 
 model Member {
-  id     Int    @id @default(autoincrement())
-  handle String
-  team   Team   @relation(fields: [teamId], references: [id])
-  teamId Int
+  id           Int      @id @default(autoincrement())
+  handle       String
+  team         Team     @relation(fields: [teamId], references: [id])
+  teamId       Int
+  claimed      Boolean  @default(false)
+  secret       String?
+  lastPolledAt DateTime @default(now())
 }
 
 model SolveLog {

@@ -34,7 +34,10 @@ export default function CreateTTRMatch() {
     const [level3, setLevel3] = useState({ min: 1200, max: 1400, count: 5, coins: 4 });
     const [level4, setLevel4] = useState({ min: 1500, max: 3500, count: 5, coins: 5 });
 
-    const [teams, setTeams] = useState<any[]>([]);
+    const [teams, setTeams] = useState<any[]>([
+        { name: "Team Red", color: "red", members: [""] },
+        { name: "Team Blue", color: "blue", members: [""] },
+    ]);
     const [maps, setMaps] = useState<any[]>([]);
     const [selectedMapId, setSelectedMapId] = useState<string>("");
 
@@ -256,7 +259,7 @@ export default function CreateTTRMatch() {
                             <CardDescription>Add teams and members (Max 6 teams).</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <TTRTeamsForm onTeamsChange={setTeams} />
+                            <TTRTeamsForm teams={teams} onTeamsChange={setTeams} />
                         </CardContent>
                     </Card>
                 </TabsContent>

@@ -16,7 +16,10 @@ type TugMatchCreationFormProps = {
 
 const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
     const router = useRouter();
-    const [teams, setTeams] = useState<Team[]>([]);
+    const [teams, setTeams] = useState<any[]>([
+        { name: "Team Red", color: "red", members: [""] },
+        { name: "Team Blue", color: "blue", members: [""] },
+    ]);
 
     const [date, setDate] = useState(() => {
         const now = new Date();
@@ -381,7 +384,7 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
                             <CardDescription>Exactly 2 teams required</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <TugTeamsForm onTeamsChange={setTeams} />
+                            <TugTeamsForm teams={teams} onTeamsChange={setTeams} />
                         </CardContent>
                     </Card>
                 </TabsContent>

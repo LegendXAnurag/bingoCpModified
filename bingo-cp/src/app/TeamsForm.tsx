@@ -11,10 +11,11 @@ interface TeamInput {
 }
 
 interface TeamsFormProps {
+  teams: TeamInput[];
   onTeamsChange: (teams: TeamInput[]) => void;
 }
 
-export default function TeamsForm({ onTeamsChange }: TeamsFormProps) {
+export default function TeamsForm({ teams, onTeamsChange }: TeamsFormProps) {
   type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "yellow" | "teal";
 
   const COLOR_OPTIONS: ColorOption[] = [
@@ -32,15 +33,9 @@ export default function TeamsForm({ onTeamsChange }: TeamsFormProps) {
     teal: { bg: "bg-teal-600", text: "text-white", border: "border-teal-500" },
   };
 
-  const [teams, setTeams] = useState<TeamInput[]>([
-    { name: "Team Red", color: "red", members: [""] },
-    { name: "Team Blue", color: "blue", members: [""] },
-  ]);
-
-  // Notify parent component of initial teams on mount
-  useEffect(() => {
-    onTeamsChange(teams);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const updateTeams = (updated: TeamInput[]) => {
+    onTeamsChange(updated);
+  };
 
 
   const removeTeam = (index: number) => {
@@ -63,12 +58,6 @@ export default function TeamsForm({ onTeamsChange }: TeamsFormProps) {
     const newTeams = [...teams];
     newTeams[teamIndex].members.splice(memberIndex, 1);
     updateTeams(newTeams);
-  };
-
-
-  const updateTeams = (updated: TeamInput[]) => {
-    setTeams(updated);
-    onTeamsChange(updated);
   };
 
   const addTeam = () => {

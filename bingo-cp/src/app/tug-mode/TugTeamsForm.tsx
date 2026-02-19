@@ -12,10 +12,11 @@ interface TeamInput {
 }
 
 interface TugTeamsFormProps {
+    teams: TeamInput[];
     onTeamsChange: (teams: TeamInput[]) => void;
 }
 
-export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
+export default function TugTeamsForm({ teams, onTeamsChange }: TugTeamsFormProps) {
     type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "yellow" | "teal";
 
     const COLOR_OPTIONS: ColorOption[] = [
@@ -33,16 +34,9 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
         teal: { bg: "bg-teal-600", text: "text-white", border: "border-teal-500" },
     };
 
-    // Start with 2 teams by default
-    const [teams, setTeams] = useState<TeamInput[]>([
-        { name: "Team Red", color: "red", members: [""] },
-        { name: "Team Blue", color: "blue", members: [""] },
-    ]);
-
-    // Notify parent component of initial teams on mount
-    useEffect(() => {
-        onTeamsChange(teams);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const updateTeams = (updated: TeamInput[]) => {
+        onTeamsChange(updated);
+    };
 
     const updateTeam = <K extends keyof TeamInput>(
         index: number,
@@ -52,11 +46,6 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
         const newTeams = [...teams];
         newTeams[index][key] = value;
         updateTeams(newTeams);
-    };
-
-    const updateTeams = (updated: TeamInput[]) => {
-        setTeams(updated);
-        onTeamsChange(updated);
     };
 
     const updateMember = (teamIndex: number, memberIndex: number, value: string) => {
@@ -86,8 +75,8 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
                     <div
                         key={i}
                         className={`p-4 rounded-lg border-2 space-y-4 shadow-sm ${team.color && COLOR_CLASSES[team.color as ColorOption]
-                                ? `${COLOR_CLASSES[team.color as ColorOption].bg} bg-opacity-10 dark:bg-opacity-20 ${COLOR_CLASSES[team.color as ColorOption].border}`
-                                : "bg-muted/50"
+                            ? `${COLOR_CLASSES[team.color as ColorOption].bg} bg-opacity-10 dark:bg-opacity-20 ${COLOR_CLASSES[team.color as ColorOption].border}`
+                            : "bg-muted/50"
                             }`}
                     >
                         <div className="flex justify-between items-center">
