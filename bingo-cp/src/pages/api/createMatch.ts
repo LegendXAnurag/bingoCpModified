@@ -59,6 +59,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Tug of War mode requires exactly 2 teams' });
   }
 
+  // Validate teams have members
+  for (const team of teams) {
+    const validMembers = team.members.filter((m) => typeof m === 'string' && m.trim() !== '');
+    if (validMembers.length === 0) {
+      return res.status(400).json({ error: `Team "${team.name}" must have at least one member` });
+    }
+  }
+
   const Cmode = mode;
 
   const allHandles = teams.flatMap((team) => team.members);

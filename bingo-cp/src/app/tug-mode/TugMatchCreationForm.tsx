@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type TugMatchCreationFormProps = {
     onMatchCreated: (match: Match) => void;
@@ -17,10 +18,16 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
     const router = useRouter();
     const [teams, setTeams] = useState<Team[]>([]);
 
-    const today = new Date().toISOString().split("T")[0];
-
-    const [date, setDate] = useState(today);
-    const [time, setTime] = useState("13:00");
+    const [date, setDate] = useState(() => {
+        const now = new Date();
+        const future = new Date(now.getTime() + 2 * 60000);
+        return future.getFullYear() + '-' + String(future.getMonth() + 1).padStart(2, '0') + '-' + String(future.getDate()).padStart(2, '0');
+    });
+    const [time, setTime] = useState(() => {
+        const now = new Date();
+        const future = new Date(now.getTime() + 2 * 60000);
+        return String(future.getHours()).padStart(2, '0') + ':' + String(future.getMinutes()).padStart(2, '0');
+    });
     const [duration, setDuration] = useState("1:00");
     const [minRating, setMinRating] = useState(800);
     const [maxRating, setMaxRating] = useState(1600);
@@ -31,8 +38,8 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
     const [timeoutMinutes, setTimeoutMinutes] = useState("0:00");
     const [showRatings, setShowRatings] = useState<boolean>(true);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
 
         // Tug mode requires exactly 2 teams
         if (teams.length !== 2) {
@@ -191,29 +198,47 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
     };
 
     return (
-        <Card className="w-full max-w-7xl mx-auto">
-            <CardHeader>
-                <CardTitle className="text-2xl font-bold text-center">Create Tug of War Match</CardTitle>
-                <CardDescription className="text-center">Configure teams and match settings</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit} id="tug-match-form">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                        {/* Teams Section */}
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between border-b pb-2">
-                                <h3 className="text-xl font-semibold">Teams</h3>
-                                <p className="text-sm text-muted-foreground">Exactly 2 teams required</p>
-                            </div>
-                            <TugTeamsForm onTeamsChange={setTeams} />
-                        </div>
+        <div className="w-full max-w-4xl mx-auto space-y-6">
+            <div className="flex justify-between items-start">
+                <div className="flex flex-col space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Create Tug of War Match</h1>
+                    <p className="text-muted-foreground">
+                        Configure teams and match settings.
+                    </p>
+                </div>
+                <Button
+                    onClick={() => handleSubmit()}
+                    disabled={isSubmitting}
+                    className="w-auto"
+                    size="lg"
+                >
+                    {isSubmitting ? (
+                        <span className="flex items-center">
+                            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            Creating...
+                        </span>
+                    ) : (
+                        'Create Match'
+                    )}
+                </Button>
+            </div>
 
-                        {/* Match Options Section */}
-                        <div className="space-y-6 border-l pl-12">
-                            <div className="border-b pb-2">
-                                <h3 className="text-xl font-semibold">Match Options</h3>
-                            </div>
+            <Tabs defaultValue="settings" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="settings">Game Settings</TabsTrigger>
+                    <TabsTrigger value="teams">Teams</TabsTrigger>
+                </TabsList>
 
+                <TabsContent value="settings">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Match Options</CardTitle>
+                            <CardDescription>Configure schedule and game rules.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Date</Label>
@@ -345,30 +370,25 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
                                     required
                                 />
                             </div>
-                        </div>
-                    </div>
-                </form>
-            </CardContent>
-            <CardFooter className="flex justify-end pt-6">
-                <Button
-                    type="submit"
-                    form="tug-match-form"
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? (
-                        <span className="flex items-center">
-                            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                            </svg>
-                            Creating...
-                        </span>
-                    ) : (
-                        'Create Match'
-                    )}
-                </Button>
-            </CardFooter>
-        </Card>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="teams">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Teams</CardTitle>
+                            <CardDescription>Exactly 2 teams required</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <TugTeamsForm onTeamsChange={setTeams} />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+
+
+        </div>
     );
 };
 

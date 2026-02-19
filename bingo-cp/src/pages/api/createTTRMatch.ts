@@ -15,6 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ message: 'At least 2 teams required' });
         }
 
+        // Validate teams have members
+        for (const team of teams) {
+            const validMembers = team.members.filter((m: any) => typeof m === 'string' && m.trim() !== '');
+            if (validMembers.length === 0) {
+                return res.status(400).json({ message: `Team "${team.name}" must have at least one member` });
+            }
+        }
+
         // Fetch problems from Codeforces
         const cfRes = await fetch('https://codeforces.com/api/problemset.problems');
         const cfData = await cfRes.json();
@@ -29,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const marketProblems: ProblemCell[] = [];
         const allProbs: ProblemCell[] = [];
 
-        const pickProblems = (min: number, max: number, count: number, row: number) => {
+        const pickProblems = (min: number, max: number, count: number, coins: number, row: number) => {
             const candidates = allProblems.filter(p => p.rating >= min && p.rating <= max);
 
             for (let i = candidates.length - 1; i > 0; i--) {
@@ -43,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 name: p.name,
                 rating: p.rating,
                 type: 'PROGRAMMING',
-                points: 0,
+                points: coins,
                 row: row,
                 col: 0
             } as ProblemCell));
@@ -51,8 +59,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         levels.forEach((level, idx) => {
             if (!level || level.count === 0) return;
-            const poolSize = 30;
-            const picked = pickProblems(level.min, level.max, poolSize, idx);
+            const poolSize = 30; // Fetch more candidates than needed for rotation possibilities
+            // Use level.coins if available, fallback to defaults based on index
+            const defaultCoins = idx === 0 ? 2 : idx === 1 ? 3 : idx === 2 ? 4 : 5;
+            const coins = level.coins !== undefined ? level.coins : defaultCoins;
+
+            const picked = pickProblems(level.min, level.max, poolSize, coins, idx);
             allProbs.push(...picked);
             marketProblems.push(...picked.slice(0, level.count));
         });
@@ -118,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             mapData = {
                 cities: _cities,
                 tracks: _tracks,
-                imageUrl: data.imageUrl || map.imageUrl || "",
+                imageUrl: data.imageUrl || "",
                 width: map.width,
                 height: map.height,
                 tickets: _tickets

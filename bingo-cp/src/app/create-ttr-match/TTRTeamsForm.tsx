@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 
 interface TeamInput {
     name: string;
@@ -11,26 +11,24 @@ interface TeamInput {
     members: string[];
 }
 
-interface TugTeamsFormProps {
+interface TTRTeamsFormProps {
     onTeamsChange: (teams: TeamInput[]) => void;
 }
 
-export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
-    type ColorOption = "red" | "blue" | "green" | "purple" | "orange" | "pink" | "yellow" | "teal";
+export default function TTRTeamsForm({ onTeamsChange }: TTRTeamsFormProps) {
+    type ColorOption = "red" | "black" | "blue" | "yellow" | "green" | "pink";
 
     const COLOR_OPTIONS: ColorOption[] = [
-        "red", "blue", "green", "purple", "orange", "pink", "yellow", "teal"
+        "red", "black", "blue", "yellow", "green", "pink"
     ];
 
     const COLOR_CLASSES: Record<ColorOption, { bg: string; text: string; border: string }> = {
-        red: { bg: "bg-red-600", text: "text-white", border: "border-red-500" },
-        blue: { bg: "bg-blue-600", text: "text-white", border: "border-blue-500" },
-        green: { bg: "bg-green-600", text: "text-white", border: "border-green-500" },
-        purple: { bg: "bg-purple-600", text: "text-white", border: "border-purple-500" },
-        orange: { bg: "bg-orange-500", text: "text-white", border: "border-orange-500" },
-        pink: { bg: "bg-pink-600", text: "text-white", border: "border-pink-500" },
-        yellow: { bg: "bg-yellow-500", text: "text-black", border: "border-yellow-500" },
-        teal: { bg: "bg-teal-600", text: "text-white", border: "border-teal-500" },
+        red: { bg: "bg-red-600", text: "text-white", border: "border-red-800" },
+        black: { bg: "bg-black", text: "text-white", border: "border-gray-800" },
+        blue: { bg: "bg-blue-600", text: "text-white", border: "border-blue-800" },
+        yellow: { bg: "bg-yellow-500", text: "text-black", border: "border-yellow-700" },
+        green: { bg: "bg-green-600", text: "text-white", border: "border-green-800" },
+        pink: { bg: "bg-pink-600", text: "text-white", border: "border-pink-800" },
     };
 
     // Start with 2 teams by default
@@ -39,10 +37,10 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
         { name: "Team Blue", color: "blue", members: [""] },
     ]);
 
-    // Notify parent component of initial teams on mount
+    // Notify parent component of initial teams on mount and updates
     useEffect(() => {
         onTeamsChange(teams);
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [teams, onTeamsChange]);
 
     const updateTeam = <K extends keyof TeamInput>(
         index: number,
@@ -51,57 +49,88 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
     ) => {
         const newTeams = [...teams];
         newTeams[index][key] = value;
-        updateTeams(newTeams);
+        setTeams(newTeams);
     };
 
-    const updateTeams = (updated: TeamInput[]) => {
-        setTeams(updated);
-        onTeamsChange(updated);
+    const addTeam = () => {
+        if (teams.length < 6) {
+            // Find first unused color
+            const usedColors = teams.map(t => t.color);
+            const nextColor = COLOR_OPTIONS.find(c => !usedColors.includes(c)) || "red";
+
+            setTeams([...teams, {
+                name: `Team ${nextColor.charAt(0).toUpperCase() + nextColor.slice(1)}`,
+                color: nextColor,
+                members: [""]
+            }]);
+        }
+    };
+
+    const removeTeam = (index: number) => {
+        if (teams.length > 2) {
+            const newTeams = teams.filter((_, i) => i !== index);
+            setTeams(newTeams);
+        }
     };
 
     const updateMember = (teamIndex: number, memberIndex: number, value: string) => {
         const newTeams = [...teams];
         newTeams[teamIndex].members[memberIndex] = value;
-        updateTeams(newTeams);
+        setTeams(newTeams);
     };
 
     const addMember = (teamIndex: number) => {
         const newTeams = [...teams];
         if (newTeams[teamIndex].members.length < 16) {
             newTeams[teamIndex].members.push("");
-            updateTeams(newTeams);
+            setTeams(newTeams);
         }
     };
 
     const removeMember = (teamIndex: number, memberIndex: number) => {
         const newTeams = [...teams];
         newTeams[teamIndex].members.splice(memberIndex, 1);
-        updateTeams(newTeams);
+        setTeams(newTeams);
     };
 
     return (
         <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Teams ({teams.length}/6)</h3>
+                {teams.length < 6 && (
+                    <Button onClick={addTeam} size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Plus className="w-4 h-4 mr-2" /> Add Team
+                    </Button>
+                )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {teams.map((team, i) => (
-                    <div
-                        key={i}
-                        className={`p-4 rounded-lg border-2 space-y-4 shadow-sm ${team.color && COLOR_CLASSES[team.color as ColorOption]
-                                ? `${COLOR_CLASSES[team.color as ColorOption].bg} bg-opacity-10 dark:bg-opacity-20 ${COLOR_CLASSES[team.color as ColorOption].border}`
-                                : "bg-muted/50"
-                            }`}
-                    >
+                    <div key={i} className={`p-4 rounded-lg border-2 space-y-4 shadow-sm ${team.color && COLOR_CLASSES[team.color as ColorOption]
+                        ? `${COLOR_CLASSES[team.color as ColorOption].bg} bg-opacity-10 border-${team.color}-200 dark:bg-opacity-20`
+                        : "bg-muted/50"
+                        }`}>
                         <div className="flex justify-between items-center">
                             <h4 className="font-bold flex items-center gap-2">
                                 <span className={`w-3 h-3 rounded-full ${team.color && COLOR_CLASSES[team.color as ColorOption]?.bg}`}></span>
                                 Team {i + 1}
                             </h4>
+                            {teams.length > 2 && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeTeam(i)}
+                                    className="h-8 w-8 text-red-500 hover:text-red-700 bg-white hover:bg-gray-200 shadow-sm"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
                         </div>
 
                         <div className="space-y-3">
                             <div>
-                                <Label htmlFor={`team-name-${i}`} className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Team Name</Label>
+                                <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Team Name</Label>
                                 <Input
-                                    id={`team-name-${i}`}
                                     type="text"
                                     placeholder="Enter team name"
                                     value={team.name}
@@ -111,14 +140,12 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
                             </div>
 
                             <div>
-                                <Label htmlFor={`team-color-${i}`} className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Team Color</Label>
+                                <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Color</Label>
                                 <select
-                                    id={`team-color-${i}`}
-                                    className="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-white dark:bg-gray-950"
+                                    className={`flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-white dark:bg-gray-950`}
                                     value={team.color}
                                     onChange={(e) => updateTeam(i, "color", e.target.value)}
                                 >
-                                    <option value="">Select Color</option>
                                     {COLOR_OPTIONS.filter((c) =>
                                         c === team.color || !teams.some((t) => t.color === c)
                                     ).map((color) => (
@@ -135,7 +162,6 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
                                     {team.members.map((member, j) => (
                                         <div key={j} className="flex gap-2">
                                             <Input
-                                                type="text"
                                                 placeholder={`Handle ${j + 1}`}
                                                 value={member}
                                                 onChange={(e) => updateMember(i, j, e.target.value)}
@@ -149,7 +175,7 @@ export default function TugTeamsForm({ onTeamsChange }: TugTeamsFormProps) {
                                                     onClick={() => removeMember(i, j)}
                                                     className="h-8 w-8 text-gray-500 hover:text-red-500"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    &times;
                                                 </Button>
                                             )}
                                         </div>

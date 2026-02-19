@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type MatchCreationFormProps = {
   onMatchCreated: (match: Match) => void;
@@ -17,10 +18,16 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
   const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
 
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-
-  const [date, setDate] = useState(today);
-  const [time, setTime] = useState("13:00"); // 24-hour format
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    const future = new Date(now.getTime() + 2 * 60000);
+    return future.getFullYear() + '-' + String(future.getMonth() + 1).padStart(2, '0') + '-' + String(future.getDate()).padStart(2, '0');
+  });
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    const future = new Date(now.getTime() + 2 * 60000);
+    return String(future.getHours()).padStart(2, '0') + ':' + String(future.getMinutes()).padStart(2, '0');
+  });
   const [duration, setDuration] = useState("1:00");
   const [minRating, setMinRating] = useState(800);
   const [maxRating, setMaxRating] = useState(1600);
@@ -32,13 +39,14 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
   const [showRatings, setShowRatings] = useState<boolean>(true);
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     if (teams.length < 2) {
       alert("At least 2 teams are required.");
       return;
     }
+
     const usedColors = new Set();
     for (const team of teams) {
       if (!team.name.trim()) {
@@ -51,199 +59,116 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
       }
       usedColors.add(team.color);
 
-      if (team.members.length < 1 || team.members.length > 16) {
-        alert("Each team must have 1 to 16 members.");
+      if (team.members.length < 1) {
+        alert(`Team "${team.name}" must have at least one member.`);
         return;
       }
       if (team.members.some(m => !m.trim())) {
         alert("All member handles must be filled.");
         return;
       }
-      for (const member of team.members) {
-        const submissionsRes = await fetch(
-          `https://codeforces.com/api/user.info?handles=${member}`
-        )
-        const submissionsData = await submissionsRes.json()
-
-        if (submissionsData.status !== 'OK') {
-          alert("All member handles must be valid");
-          return;
-        }
-      }
     }
-    const allHandles = teams.flatMap((team) =>
-      team.members.map((h) => h.trim().toLowerCase())
-    );
-    const uniqueHandles = new Set(allHandles);
-    if (uniqueHandles.size !== allHandles.length) {
-      alert("Each Codeforces handle must be unique across all teams.");
-      return;
-    }
-
-    const teamNames = teams.map((t) => t.name.trim().toLowerCase());
-    const uniqueNames = new Set(teamNames);
-    if (uniqueNames.size !== teamNames.length) {
-      alert("Each team must have a unique name.");
-      return;
-    }
-
 
     const [hours, minutes] = duration.split(":").map(Number);
     if (isNaN(hours) || isNaN(minutes)) {
       alert("Invalid duration format. Please use hh:mm.");
       return;
     }
-    const [hoursT, minutesT] = timeoutMinutes.split(":").map(Number);
-    if (isNaN(hoursT) || isNaN(minutesT)) {
-      alert("Invalid timeout format. Please use hh:mm.");
-      return;
-    }
-    const timeoutMinutesValue = timeoutMinutes === '' ? null : (hoursT * 60 + minutesT);
-    if (isNaN(minRating)) {
-      alert("Invalid minimum Rating format.");
-      return;
-    }
-    if (isNaN(maxRating)) {
-      alert("Invalid maximum Rating format.");
-      return;
-    }
-    if (isNaN(replaceIncrement)) {
-      alert("Invalid replace value");
-      return;
-    }
-    if (!Number.isInteger(minRating)) {
-      alert("Minimum rating must be an integer.");
-      return;
-    }
-    if (!Number.isInteger(maxRating)) {
-      alert("Maximum rating must be an integer.");
-      return;
-    }
-    if (!Number.isInteger(replaceIncrement)) {
-      alert("Replace value must be an integer.");
-      return;
-    }
-    if (maxRating < 800 || maxRating > 3500) {
-      alert("Maximum rating should be in the range of [800,3500].");
-      return;
-    }
-    if (minRating < 800 || minRating > 3500) {
-      alert("Minimum rating should be in the range of [800,3500].");
-      return;
-    }
-    if (replaceIncrement < 100 || replaceIncrement > 2700) {
-      alert("Replace value should be in the range of [100,2700].");
-      return;
-    }
-    if (minRating % 100 != 0) {
-      alert("Minimum rating must be in increments of 100 (e.g., 800, 900, 1000).");
-      return;
-    }
-    if (maxRating % 100 != 0) {
-      alert("Maximum rating must be in increments of 100 (e.g., 800, 900, 1000).");
-      return;
-    }
-    if (replaceIncrement % 100 != 0) {
-      alert("Replace value must be in increments of 100 (e.g., 800, 900, 1000).");
-      return;
-    }
-
-
-
     const durationMinutes = hours * 60 + minutes;
-    if (durationMinutes > 420) {
-      alert("Duration cannot exceed 7 hours (420 minutes).");
-      return;
-    }
-    if (maxRating < minRating) {
-      alert("Maximum rating should be greater than minimum rating")
-      return;
-    }
 
+    let timeoutMinutesValue = null;
+    if (timeoutMinutes) {
+      const [th, tm] = timeoutMinutes.split(":").map(Number);
+      if (!isNaN(th) && !isNaN(tm)) {
+        timeoutMinutesValue = th * 60 + tm;
+      }
+    }
 
     const startTime = new Date(`${date}T${time}`);
     if (isNaN(startTime.getTime())) {
       alert("Invalid start time.");
       return;
     }
-    if (startTime.getTime() < Date.now()) {
-      alert("Match cannot start before the current time.");
-      return;
-    }
 
-    const matchData = {
-      startTime: startTime.toISOString(),
-      durationMinutes,
-      minRating,
-      maxRating,
-      mode: selectedMode,
-      gridSize: selectedGridSize,
-      replaceIncrement: selectedMode == 'replace' ? replaceIncrement : undefined,
-      teams: teams,
-      timeoutMinutes: timeoutMinutesValue,
-      problems: [],
-      solveLog: [],
-      showRatings,
-    };
     setIsSubmitting(true);
+
     try {
-      // console.time("matchCreation")
-      const res = await fetch("../../api/createMatch", {
+      const matchData = {
+        startTime: startTime.toISOString(),
+        durationMinutes,
+        minRating,
+        maxRating,
+        mode: selectedMode,
+        gridSize: selectedGridSize,
+        replaceIncrement: selectedMode === 'replace' ? replaceIncrement : undefined,
+        timeoutMinutes: timeoutMinutesValue,
+        showRatings,
+        teams,
+      };
+
+      const res = await fetch("/api/createMatch", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(matchData),
       });
-      // console.timeEnd("matchCreation");
 
       if (!res.ok) {
-        const errorText = await res.text(); // Read the error body
-        console.error("Failed to create match:", errorText);
-        alert("Failed to create match: " + errorText);
-        setIsSubmitting(false);
-        return;
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to create match");
       }
-      const created = await res.json();
-      const newMatchId = created?.id ?? created?.match?.id ?? created?.id;
-      if (!newMatchId) {
-        alert("Could not create match, no id returned");
-        setIsSubmitting(false);
-        return;
-      }
-      router.push(`/match/${newMatchId}`);
-    } catch (err) {
-      console.error("Error creating match", err);
-      alert("Error creating match");
+
+      const data = await res.json();
+      router.push(`/match/${data.id}`);
+    } catch (err: any) {
+      console.error("Error creating match:", err);
+      alert(err.message || "Error creating match");
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-
   return (
-    <Card className="w-full max-w-7xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Create Bingo Match</CardTitle>
-        <CardDescription className="text-center">Configure teams and match settings</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} id="create-match-form">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Teams Section */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-xl font-semibold">Teams</h3>
-                <p className="text-sm text-muted-foreground">At least 2 teams required</p>
-              </div>
-              <TeamsForm onTeamsChange={setTeams} />
-            </div>
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      <div className="flex justify-between items-start">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Create Bingo Match</h1>
+          <p className="text-muted-foreground">
+            Configure teams and match settings.
+          </p>
+        </div>
+        <Button
+          onClick={() => handleSubmit()}
+          disabled={isSubmitting}
+          className="w-auto"
+          size="lg"
+        >
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              Creating...
+            </span>
+          ) : (
+            'Create Match'
+          )}
+        </Button>
+      </div>
 
-            {/* Match Options Section */}
-            <div className="space-y-6 border-l pl-12">
-              <div className="border-b pb-2">
-                <h3 className="text-xl font-semibold">Match Options</h3>
-              </div>
+      <Tabs defaultValue="settings" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="settings">Game Settings</TabsTrigger>
+          <TabsTrigger value="teams">Teams</TabsTrigger>
+        </TabsList>
 
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Match Options</CardTitle>
+              <CardDescription>Configure schedule and game rules.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Date</Label>
@@ -375,31 +300,23 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
                   required
                 />
               </div>
-            </div>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-end pt-6">
-        <Button
-          type="submit"
-          form="create-match-form"
-          disabled={isSubmitting}
-          className="w-full sm:w-auto"
-        >
-          {isSubmitting ? (
-            <span className="flex items-center">
-              <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-              </svg>
-              Creating...
-            </span>
-          ) : (
-            'Create Match'
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="teams">
+          <Card>
+            <CardHeader>
+              <CardTitle>Teams</CardTitle>
+              <CardDescription>At least 2 teams required</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TeamsForm onTeamsChange={setTeams} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

@@ -696,7 +696,7 @@ export default function Home() {
                       onMouseLeave={(e) => {
                         e.currentTarget.classList.remove('scale-[1.04]', 'shadow-md');
                       }}
-                      className={`w-full aspect-[4/3] min-h-[5rem] p-1 sm:p-2 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
+                      className={`w-full aspect-[4/3] min-h-[3rem] p-0.5 sm:p-1 flex flex-col justify-center items-center text-center rounded shadow cursor-pointer transition duration-200
                       ${teamColor} ${ownerTeam ? 'text-white' : ''} ${isWinningCell ? ' ring-4 ring-yellow-400 scale-[1.06]' : ''}`}
                     >
                       {showRatings ? (

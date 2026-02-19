@@ -210,10 +210,7 @@ export default function Home() {
   if (!match) {
     return (
       <main className="min-h-screen bg-white pt-8 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-        {/* Title */}
-        <div className="text-center mt-8">
-          <h2 className="text-3xl font-bold mb-6">Create Bingo Match</h2>
-        </div>
+
 
         {/* Match creation UI */}
         <div className="flex justify-center mt-4">

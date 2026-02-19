@@ -5,6 +5,7 @@ const links: Record<string, string> = {
     "Home": '/',
     "Bingo": '/create-match',
     "Tug of War": '/tug-mode',
+    "Ticket to Ride": '/create-ttr-match',
     "Help": '/help',
 };
 

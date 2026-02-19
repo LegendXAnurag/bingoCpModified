@@ -35,6 +35,7 @@ export interface ProblemCell {
   solvedBy?: string;
   active?: boolean;
   position?: number;
+  points?: number;
 }
 
 export interface SolveEntry {
@@ -48,11 +49,12 @@ export interface SolveEntry {
 }
 
 export interface TTRParams {
-  level1: { min: number; max: number; count: number };
-  level2: { min: number; max: number; count: number };
-  level3: { min: number; max: number; count: number };
-  level4?: { min: number; max: number; count: number };
+  level1: { min: number; max: number; count: number; coins: number };
+  level2: { min: number; max: number; count: number; coins: number };
+  level3: { min: number; max: number; count: number; coins: number };
+  level4?: { min: number; max: number; count: number; coins: number };
   gameDurationMinutes: number;
+  mapId?: string;
 }
 
 export interface TTRState {

@@ -323,7 +323,7 @@ export default function MapEditor({ initialMap, onSave }: MapEditorProps) {
                         Save Changes
                     </button>
                 </div>
-                <div className="flex gap-2 text-sm">
+                <div className="flex gap-2 text-sm ">
                     <button
                         className={`px-3 py-1 rounded ${selectedTool === 'select' ? 'bg-blue-600' : 'bg-gray-600'}`}
                         onClick={() => setSelectedTool('select')}
@@ -351,7 +351,7 @@ export default function MapEditor({ initialMap, onSave }: MapEditorProps) {
                 </div>
             </div>
 
-            <div className="flex-grow relative overflow-auto bg-gray-100 flex justify-center p-10">
+            <div className="flex-grow relative overflow-auto bg-gray-900 flex justify-center p-10">
                 <svg
                     ref={svgRef}
                     width={map.width}

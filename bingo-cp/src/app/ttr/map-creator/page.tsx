@@ -122,7 +122,7 @@ export default function MapCreatorPage() {
     }
 
     return (
-        <div className="min-h-screen p-8 bg-gray-100">
+        <div className="min-h-screen p-8 bg-green-900">
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold text-gray-800">Ticket to Ride - Map Creator</h1>
@@ -144,14 +144,14 @@ export default function MapCreatorPage() {
                 {loading ? (
                     <p>Loading maps...</p>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-green-900 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {maps.map(map => (
                             <div
                                 key={map.id}
-                                className="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer"
+                                className="bg-green-900 p-4 rounded shadow hover:shadow-md transition cursor-pointer"
                                 onClick={() => setCurrentMap(map)}
                             >
-                                <div className="h-32 bg-gray-200 mb-4 flex items-center justify-center rounded text-gray-400 overflow-hidden relative">
+                                <div className="h-32 bg-gray-800 mb-4 flex items-center justify-center rounded text-gray-400 overflow-hidden relative">
                                     {map.data.imageUrl ? (
                                         <img src={map.data.imageUrl} alt="Map" className="w-full h-full object-cover opacity-50" />
                                     ) : "Preview"}

@@ -33,7 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Match not found' })
     }
     const now = new Date();
-    const cutoff = new Date(now.getTime() - 60 * 1000);
+    const cooldownSeconds = Number(process.env.POLLING_COOLDOWN_SECONDS) || 60;
+    const cutoff = new Date(now.getTime() - cooldownSeconds * 1000);
     const updateResult = await prisma.match.updateMany({
       where: {
         id: matchId,
