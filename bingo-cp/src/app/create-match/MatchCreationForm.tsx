@@ -16,7 +16,13 @@ type MatchCreationFormProps = {
 
 const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
   const router = useRouter();
-  const [teams, setTeams] = useState<any[]>([
+  type TeamInput = {
+    name: string;
+    color: string;
+    members: string[];
+  };
+
+  const [teams, setTeams] = useState<TeamInput[]>([
     { name: "Team Red", color: "red", members: [""] },
     { name: "Team Blue", color: "blue", members: [""] },
   ]);

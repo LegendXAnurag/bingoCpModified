@@ -16,7 +16,13 @@ type TugMatchCreationFormProps = {
 
 const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
     const router = useRouter();
-    const [teams, setTeams] = useState<any[]>([
+    type TeamInput = {
+        name: string;
+        color: string;
+        members: string[];
+    };
+
+    const [teams, setTeams] = useState<TeamInput[]>([
         { name: "Team Red", color: "red", members: [""] },
         { name: "Team Blue", color: "blue", members: [""] },
     ]);

@@ -419,10 +419,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               if (replacement) {
                 state.market.push({
                   ...replacement,
+                  rating: replacement.rating ?? 0,
                   row: row,
                   col: 0,
                   points: 0,
-                  type: 'PROGRAMMING'
                 });
               }
             } catch (e) {

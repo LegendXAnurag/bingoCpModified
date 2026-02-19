@@ -50,7 +50,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 index: p.index,
                 name: p.name,
                 rating: p.rating,
-                type: 'PROGRAMMING',
                 points: coins,
                 row: row,
                 col: 0
