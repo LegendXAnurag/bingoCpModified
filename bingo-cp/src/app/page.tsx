@@ -1,246 +1,131 @@
 // app/page.tsx
 "use client";
-import React, { useMemo } from "react";
+import React from "react";
 import { motion } from "framer-motion";
+import Link from 'next/link';
+import { ArrowRight, Grid3x3, Swords, TrainFront } from "lucide-react";
 
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function HomePage(): React.JSX.Element {
-  const sampleGrid = useMemo(() => {
-    return Array.from({ length: 25 }).map((_, i) => ({
-      id: i + 1,
-      rating: randomInt(8, 16) * 100,
-      label: String.fromCharCode(65 + randomInt(0, 4)),
-      name: `Problem ${i + 1}`,
-    }));
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-      {/* Hero */}
-      <header className="max-w-6xl mx-auto px-6 pt-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-              Competitive programming — turned into a social, party-ready game.
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-              Pick a grid, invite friends or teammates, and race to claim squares by solving real
-              competitive programming problems. First line wins — or in special modes, highest score
-              claims the square. Fast, fair, and surprisingly addictive.
-            </p>
+    <div className="min-h-screen pt-24 pb-12 px-6 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Ambient Background Effects */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="/create-match"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
-              >
-                Play Bingo Mode
-              </a>
-              <a
-                href="/tug-mode"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
-              >
-                Play Tug of War
-              </a>
-              <a
-                href="/create-ttr-match"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-400 text-white font-semibold shadow-lg hover:shadow-xl transition"
-              >
-                Play Ticket to Ride
-              </a>
-              <a
-                href="#how"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
-              >
-                How it works
-              </a>
-            </div>
+      <motion.div
+        initial="initial"
+        animate="animate"
+        variants={staggerContainer}
+        className="text-center max-w-4xl mx-auto z-10"
+      >
+        <motion.h1
+          variants={fadeInUp}
+          className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+        >
+          Competitive Programming <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 text-glow">Evolved</span>
+        </motion.h1>
 
-          </motion.div>
+        <motion.p
+          variants={fadeInUp}
+          className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed"
+        >
+          Turn your practice sessions into high-stakes battles.
+          Real-time multiplayer games powered by Codeforces problems.
+        </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="flex justify-center"
-          >
-            <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-4">
-              <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-                Sample 5×5 Match
+        <motion.div
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto"
+        >
+          {/* Bingo Card */}
+          <Link href="/create-match" className="group">
+            <motion.div
+              variants={fadeInUp}
+              className="h-full p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 relative overflow-hidden group-hover:-translate-y-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Grid3x3 className="w-6 h-6 text-cyan-400" />
               </div>
-              <div className="grid grid-cols-5 gap-3">
-                {sampleGrid.map((p) => (
-                  <div
-                    key={p.id}
-                    className="h-20 rounded-lg flex flex-col items-center justify-center text-center text-xs font-semibold border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-850 dark:to-gray-900 hover:scale-105 transition-transform"
-                  >
-                    <div className="text-[10px] text-gray-500 dark:text-gray-400">{p.rating}</div>
-                    <div className="mt-1 text-sm">{p.label}</div>
-                    <div className="text-[10px] text-gray-400 mt-1">{p.name}</div>
-                  </div>
-                ))}
+
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">Bingo Mode</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                Classic 5x5 grid. Solve problems to claim tiles. First to get a line wins. Fast-paced and chaotic.
+              </p>
+
+              <div className="flex items-center text-cyan-400 text-sm font-semibold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                Create Match <ArrowRight className="w-4 h-4 ml-2" />
               </div>
-              <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                Squares are claimed automatically when a team member submits a successful solution.
-                First line (row/col/diag) wins the match.
+            </motion.div>
+          </Link>
+
+          {/* Tug of War Card */}
+          <Link href="/tug-mode" className="group">
+            <motion.div
+              variants={fadeInUp}
+              className="h-full p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-red-500/50 hover:shadow-[0_0_30px_rgba(239,68,68,0.2)] transition-all duration-300 relative overflow-hidden group-hover:-translate-y-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Swords className="w-6 h-6 text-red-400" />
               </div>
-            </div>
-          </motion.div>
-        </div>
-      </header>
 
-      {/* Features + How To */}
-      <main className="max-w-6xl mx-auto px-6 py-12" id="how">
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
-          >
-            <h3 className="font-semibold text-lg mb-2">Fast Matches</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Create matches with a custom grid (3×3 to 6×6), invite teams, and set the duration —
-              perfect for warmups or tournaments.
-            </p>
-          </motion.article>
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors">Tug of War</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                1v1 or Team vs Team. Solve harder problems to pull the rope. Push the opponent off the edge.
+              </p>
 
-          <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.05 }}
-            className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
-          >
-            <h3 className="font-semibold text-lg mb-2">Fair Play</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Problems are selected so that no participant has attempted them before. Automatic
-              submission polling detects the first correct or highest scoring submission.
-            </p>
-          </motion.article>
-
-          <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
-          >
-            <h3 className="font-semibold text-lg mb-2">Multiple Modes</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Classic mode (first AC claims) is available now. IOI-style scoring will appear soon —
-              announced right on the match page.
-            </p>
-            <div className="mt-4 space-y-3">
-              <div>
-                <strong>Replace mode:</strong>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  When a square is claimed, it is instantly replaced with a fresh problem so play
-                  continues with a full board. You can configure a rating increment (e.g. +100) so
-                  replacement problems grow harder over time. Problems chosen for replacement are
-                  filtered so no current participant has attempted them before — keeping the match
-                  fair and fast-paced.
-                </p>
+              <div className="flex items-center text-red-400 text-sm font-semibold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                Enter Arena <ArrowRight className="w-4 h-4 ml-2" />
               </div>
-              <div>
-                <strong>Classic mode:</strong>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  First accepted solution (AC) claims the square. Simple and competitive — perfect
-                  for short matches and party play.
-                </p>
+            </motion.div>
+          </Link>
+
+          {/* TTR Card */}
+          <Link href="/create-ttr-match" className="group">
+            <motion.div
+              variants={fadeInUp}
+              className="h-full p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/50 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-300 relative overflow-hidden group-hover:-translate-y-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <TrainFront className="w-6 h-6 text-emerald-400" />
               </div>
-              <div>
-                <strong>IOI mode (coming soon):</strong>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  Tiles are decided by highest score (ties broken by earliest submission). This mode
-                  is ideal for tasks with partial scoring.
-                </p>
+
+              <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">Ticket to Ride</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                Build routes across Europe by solving problems. Strategy meets algorithms in this board game adaptation.
+              </p>
+
+              <div className="flex items-center text-emerald-400 text-sm font-semibold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                Start Journey <ArrowRight className="w-4 h-4 ml-2" />
               </div>
-            </div>
-          </motion.article>
-        </section>
+            </motion.div>
+          </Link>
+        </motion.div>
 
-        <section className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md"
-          >
-            <h3 className="text-xl font-bold mb-3">How to play</h3>
-            <ol className="list-decimal list-inside space-y-3 text-sm text-gray-700 dark:text-gray-300">
-              <li>
-                <strong>Create a match:</strong> choose grid size, teams, and start time.
-              </li>
-              <li>
-                <strong>Invite teammates:</strong> each team can have 1–4 handles (unique across the
-                match).
-              </li>
-              <li>
-                <strong>Start the match:</strong> problems appear — teams race to solve them on the
-                original judge.
-              </li>
-              <li>
-                <strong>Claim squares:</strong> the player who submits the winning solution (first AC
-                in Classic) claims the square for their team.
-              </li>
-              <li>
-                <strong>Win:</strong> complete a full row, column, or diagonal — or be highest in IOI
-                mode when enabled.
-              </li>
-            </ol>
-
-            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-              Built for speed and fairness. Matches are tracked with solve logs and visual celebrate
-              effects when someone wins.
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-md"
-          >
-            <h3 className="text-xl font-bold mb-3">Why Bingo CP?</h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              It turns routine practice into a shared event. Run practice sessions, friendly
-              competitions, or rapid warm-ups. The UI is designed to be clear at a glance — problem
-              ratings, indices, and claim status are visible on each tile.
-            </p>
-
-            <div className="mt-4 flex gap-3">
-              <a href="/create-match" className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold">
-                Get started
-              </a>
-              <a href="/help" className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
-                Learn more
-              </a>
-            </div>
-          </motion.div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-100 dark:border-gray-700 mt-8 py-6">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            © {new Date().getFullYear()} Bingo CP — built for competitive programmers.
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <a href="/help" className="text-gray-600 dark:text-gray-400 hover:underline">
-              Help
-            </a>
-          </div>
-        </div>
-      </footer>
+        <motion.div variants={fadeInUp} className="mt-16 text-gray-500 text-sm">
+          <p>More modes coming soon • Codeforces account required to play</p>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

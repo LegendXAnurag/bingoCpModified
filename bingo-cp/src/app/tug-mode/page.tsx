@@ -12,7 +12,7 @@ export default function TugModePage() {
     }
 
     return (
-        <main className="min-h-screen bg-white pt-8 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 p-4">
+        <main className="min-h-screen pt-24 p-4 transition-colors duration-300">
             <div className="flex justify-center">
                 <TugMatchCreationForm onMatchCreated={setMatch} />
             </div>

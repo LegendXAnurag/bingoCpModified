@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CP Games",
-  description: "Games for learning and practising CP",
+  description: "Level Up Your Competitive Programming Skills",
 };
 
 export default function RootLayout({

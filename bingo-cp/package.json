@@ -1,5 +1,6 @@
 {
-  "name": "bingo-cp",
+  "name": "cp-games",
+  "description": "Premium Competitive Programming Games Platform",
   "version": "0.1.0",
   "private": true,
   "scripts": {

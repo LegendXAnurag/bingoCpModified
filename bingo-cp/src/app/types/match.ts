@@ -67,6 +67,7 @@ export interface TTRParams {
 export interface TTRState {
   players: Record<string, TTRPlayerState>;
   tracks: Record<string, TTRTrackState>;
+  stations: Record<string, string>; // cityId -> teamColor
   market: ProblemCell[];
   allProbs: ProblemCell[];
   ticketDeck: string[]; // IDs of tickets remaining in deck

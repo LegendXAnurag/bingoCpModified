@@ -11,6 +11,8 @@ const mockState: TTRState = {
     tracks: {},
     market: [],
     allProbs: [],
+
+    stations: {},
     ticketDeck: []
 };
 
