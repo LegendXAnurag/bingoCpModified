@@ -7,7 +7,6 @@ import {
   ArrowRight, Grid3x3, Swords, TrainFront,
   Zap, ShieldCheck, BarChart3,
 } from 'lucide-react';
-import SpotlightAurora from '@/components/SpotlightAurora';
 import GameModeCard from '@/components/GameModeCard';
 import FeatureCard from '@/components/FeatureCard';
 
@@ -88,10 +87,7 @@ const FEATURES = [
 
 export default function HomePage(): React.JSX.Element {
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#050505' }}>
-
-      {/* ── Fluid Aurora & Spotlight Background ────────── */}
-      <SpotlightAurora />
+    <div className="relative min-h-screen overflow-x-hidden">
 
       {/* ── Page content ──────────────────────────────── */}
       <div className="relative z-10">

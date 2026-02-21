@@ -16,7 +16,7 @@ export default function SpotlightAurora() {
     }, []);
 
     return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
             {/* 1. Base Dark Grid */}
             <div
                 className="absolute inset-0 opacity-[0.1]"

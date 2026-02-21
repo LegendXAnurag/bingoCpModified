@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Geist, Geist_Mono, DM_Serif_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "./components/NavBar";
+import SpotlightAurora from "@/components/SpotlightAurora";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,8 +55,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${dmSerif.variable} ${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable} antialiased dark`}
       >
+        <SpotlightAurora />
         <NavBar />
-        {children}
+        <div className="relative z-0">
+          {children}
+        </div>
         <SpeedInsights />
       </body>
     </html>
