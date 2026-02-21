@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, TrainFront } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import TTRTeamsForm from "./TTRTeamsForm";
 
@@ -44,17 +44,25 @@ export default function CreateTTRMatch() {
     useEffect(() => {
         console.log("Fetching maps in CreateTTRMatch...");
         fetch('/api/ttr/maps')
-            .then(res => res.json())
+            .then(async res => {
+                if (!res.ok) throw new Error("Failed to fetch maps");
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error("Invalid JSON from maps API:", text.substring(0, 100));
+                    throw new Error("Invalid server response");
+                }
+            })
             .then(data => {
                 console.log("Maps fetched:", data);
                 if (Array.isArray(data)) {
                     setMaps(data);
                 } else if (data && Array.isArray(data.data)) {
-                    // Handle case where API returns { data: [...] }
                     setMaps(data.data);
                 } else {
                     console.error("Maps data is not an array:", data);
-                    setMaps([]); // Fallback to empty
+                    setMaps([]);
                 }
             })
             .catch(err => console.error("Error fetching maps:", err));
@@ -96,8 +104,14 @@ export default function CreateTTRMatch() {
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || 'Failed to create match');
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    throw new Error(data.message || 'Failed to create match');
+                } catch (e) {
+                    console.error("Create match error response:", text.substring(0, 100));
+                    throw new Error(`Server error (${res.status}): ${res.statusText}`);
+                }
             }
 
             const data = await res.json();
@@ -112,17 +126,40 @@ export default function CreateTTRMatch() {
 
     return (
         <div className="w-full max-w-4xl mx-auto space-y-6">
-            <div className="flex justify-between items-start">
-                <div className="flex flex-col space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Create Ticket to Ride Math</h1>
-                    <p className="text-muted-foreground">
-                        Configure game settings, problem levels, and teams.
-                    </p>
+            {/* ── Branded Hero ── */}
+            <div className="text-center space-y-4 pb-4">
+                <div
+                    className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3"
+                    style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', boxShadow: '0 0 30px rgba(16,185,129,0.1)' }}
+                >
+                    <TrainFront className="w-7 h-7 text-emerald-400" />
                 </div>
-                <Button className="w-auto" size="lg" onClick={handleSubmit} disabled={loading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Match
-                </Button>
+                <h1 className="text-4xl md:text-5xl font-serif italic text-white">
+                    Ticket to Ride{" "}
+                    <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #10b981, #06b6d4)' }}>
+                        Match Setup
+                    </span>
+                </h1>
+                <p className="text-[#a3a3a3] max-w-md mx-auto font-body">
+                    Configure your map, levels, and teams. Earn coins. Claim routes. Win.
+                </p>
+            </div>
+
+            {/* CTA at top right on desktop */}
+            <div className="flex justify-end">
+                <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-heading"
+                    style={{
+                        background: loading ? 'rgba(16,185,129,0.3)' : 'linear-gradient(135deg, #10b981, #06b6d4)',
+                        boxShadow: loading ? 'none' : '0 0 20px rgba(16,185,129,0.25)',
+                        color: '#fff',
+                    }}
+                >
+                    {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {loading ? 'Creating...' : 'Create Match'}
+                </button>
             </div>
 
             {error && (
@@ -180,11 +217,21 @@ export default function CreateTTRMatch() {
                             </div>
                             <div className="space-y-2">
                                 <Label>Duration (Minutes)</Label>
-                                <Input
-                                    type="number"
-                                    value={gameDuration}
-                                    onChange={(e) => setGameDuration(e.target.value)}
-                                />
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        min="30" max="360" step="15"
+                                        value={gameDuration}
+                                        onChange={(e) => setGameDuration(e.target.value)}
+                                        className="flex-1 accent-emerald-500"
+                                    />
+                                    <span
+                                        className="w-16 text-center text-sm font-bold font-mono tabular-nums px-2 py-1 rounded-lg font-mono"
+                                        style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: '#10b981' }}
+                                    >
+                                        {gameDuration}m
+                                    </span>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -215,38 +262,60 @@ export default function CreateTTRMatch() {
                             {[1, 2, 3, 4].map(l => {
                                 const level = l === 1 ? level1 : l === 2 ? level2 : l === 3 ? level3 : level4;
                                 const setLevel = l === 1 ? setLevel1 : l === 2 ? setLevel2 : l === 3 ? setLevel3 : setLevel4;
+                                const LEVEL_COLORS = [
+                                    { color: '#22c55e', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.2)', label: 'Easy' },
+                                    { color: '#eab308', bg: 'rgba(234,179,8,0.08)', border: 'rgba(234,179,8,0.2)', label: 'Medium' },
+                                    { color: '#f97316', bg: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.2)', label: 'Hard' },
+                                    { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', label: 'Expert' },
+                                ];
+                                const lc = LEVEL_COLORS[l - 1];
 
                                 return (
-                                    <div key={l} className="space-y-2">
-                                        <h4 className="font-semibold text-primary">Level {l} Configuration</h4>
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div>
-                                                <Label>Min Rating</Label>
+                                    <div
+                                        key={l}
+                                        className="rounded-xl p-4 space-y-3"
+                                        style={{ background: lc.bg, borderTop: `2px solid ${lc.color}50`, border: `1px solid ${lc.border}` }}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full font-heading"
+                                                style={{ color: lc.color, background: `${lc.color}15`, border: `1px solid ${lc.border}` }}
+                                            >
+                                                L{l} · {lc.label}
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-[#a3a3a3]">Min Rating</Label>
                                                 <Input
                                                     type="number"
                                                     value={level.min}
                                                     onChange={(e) => setLevel({ ...level, min: parseInt(e.target.value) })}
+                                                    className="h-8 text-sm"
                                                 />
                                             </div>
-                                            <div>
-                                                <Label>Max Rating</Label>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-[#a3a3a3]">Max Rating</Label>
                                                 <Input
                                                     type="number"
                                                     value={level.max}
                                                     onChange={(e) => setLevel({ ...level, max: parseInt(e.target.value) })}
+                                                    className="h-8 text-sm"
                                                 />
                                             </div>
-                                            <div>
-                                                <Label>Coins Reward</Label>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-[#a3a3a3]">Coins Reward</Label>
                                                 <Input
                                                     type="number"
                                                     value={level.coins}
                                                     onChange={(e) => setLevel({ ...level, coins: parseInt(e.target.value) })}
+                                                    className="h-8 text-sm"
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                 );
+
                             })}
                         </CardContent>
                     </Card>
@@ -264,6 +333,22 @@ export default function CreateTTRMatch() {
                     </Card>
                 </TabsContent>
             </Tabs>
-        </div >
+
+            {/* How TTR Works */}
+            <details className="glass rounded-2xl border border-white/5 p-6 group mt-4">
+                <summary className="flex items-center justify-between cursor-pointer list-none">
+                    <span className="text-sm font-bold uppercase tracking-widest text-emerald-400 font-heading">How Ticket to Ride Works</span>
+                    <svg className="w-4 h-4 text-[#a3a3a3] transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div className="mt-4 space-y-2 text-sm text-[#a3a3a3] font-body">
+                    <p><span className="text-white font-semibold">Solve problems</span> to earn coins — harder problems = more coins per solve.</p>
+                    <p><span className="text-white font-semibold">Spend coins</span> to claim train routes on the map. Each route has a coin cost equal to its length.</p>
+                    <p><span className="text-white font-semibold">Destination tickets</span> give bonus points when you complete a route between two cities.</p>
+                    <p><span className="text-white font-semibold">Win condition:</span> The team with the most points when time expires wins.</p>
+                </div>
+            </details>
+        </div>
     );
 }

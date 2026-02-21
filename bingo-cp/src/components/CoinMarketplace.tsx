@@ -1,68 +1,86 @@
 "use client";
 
-import { TTRState, ProblemCell } from "../app/types/match";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { TTRState } from "../app/types/match";
+import { ExternalLink } from "lucide-react";
 
 interface CoinMarketplaceProps {
     state: TTRState;
 }
 
+const LEVEL_CONFIG = [
+    { label: "Easy", coins: 2, color: "#22c55e", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.2)", hover: "rgba(34,197,94,0.12)" },
+    { label: "Medium", coins: 3, color: "#eab308", bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.2)", hover: "rgba(234,179,8,0.12)" },
+    { label: "Hard", coins: 4, color: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.2)", hover: "rgba(249,115,22,0.12)" },
+    { label: "Expert", coins: 5, color: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)", hover: "rgba(239,68,68,0.12)" },
+];
+
 export default function CoinMarketplace({ state }: CoinMarketplaceProps) {
     const { market } = state;
 
-    // Group by level
     const byLevel = [0, 1, 2, 3].map(level => ({
         level,
-        problems: market.filter(p => p.row === level)
+        config: LEVEL_CONFIG[level],
+        problems: market.filter(p => p.row === level),
     }));
 
-    // Coins per level:
-    // 0 -> 2 coins
-    // 1 -> 3 coins
-    // 2 -> 4 coins
-    // 3 -> 5 coins
-    const coinsReward = [2, 3, 4, 5];
-
-    const levelColors = [
-        "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700", // Level 1 (2 coins)
-        "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700",     // Level 2 (3 coins)
-        "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-700", // Level 3 (4 coins)
-        "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-700"        // Level 4 (5 coins)
-    ];
-
     return (
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {byLevel.map(({ level, problems }) => (
-                <Card key={level} className={`backdrop-blur border-2 ${levelColors[level]}`}>
-                    <CardContent className="p-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-lg">Level {level + 1}</h3>
-                            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                                {coinsReward[level]} Coins
-                            </Badge>
-                        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-white/5">
+            {byLevel.map(({ level, config, problems }) => (
+                <div key={level} className="p-4 flex flex-col gap-2">
+                    {/* Level header */}
+                    <div className="flex items-center justify-between mb-2">
+                        <span
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest font-heading"
+                            style={{ color: config.color, background: config.bg, border: `1px solid ${config.border}` }}
+                        >
+                            L{level + 1} {config.label}
+                        </span>
+                        <span
+                            className="text-[10px] font-bold font-mono tabular-nums font-mono"
+                            style={{ color: config.color }}
+                        >
+                            +{config.coins} coins
+                        </span>
+                    </div>
 
-                        <div className="space-y-2">
-                            {problems.length === 0 && <div className="text-gray-500 text-sm italic">No problems available</div>}
+                    {/* Problem rows */}
+                    {problems.length === 0 ? (
+                        <p className="text-[11px] text-[#4b5563] italic py-2 font-body">No problems</p>
+                    ) : (
+                        <div className="flex flex-col gap-1">
                             {problems.map(p => (
                                 <a
                                     key={p.contestId + p.index}
                                     href={`https://codeforces.com/problemset/problem/${p.contestId}/${p.index}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block p-3 rounded-lg bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition border hover:border-blue-400"
+                                    className="group flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg transition-all duration-150"
+                                    style={{
+                                        background: 'rgba(10,10,10,0.6)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                    }}
+                                    onMouseEnter={e => {
+                                        (e.currentTarget as HTMLElement).style.background = config.hover;
+                                        (e.currentTarget as HTMLElement).style.borderColor = config.border;
+                                    }}
+                                    onMouseLeave={e => {
+                                        (e.currentTarget as HTMLElement).style.background = 'rgba(10,10,10,0.6)';
+                                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)';
+                                    }}
                                 >
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-mono text-sm">{p.index}</span>
-                                        <span className="text-xs text-gray-500">{p.rating}</span>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] font-mono font-bold font-mono" style={{ color: config.color }}>{p.index}</span>
+                                            <span className="text-[9px] text-[#4b5563] font-mono font-mono tabular-nums">{p.rating}</span>
+                                        </div>
+                                        <p className="text-[11px] text-[#d1d5db] truncate mt-0.5 leading-tight font-body">{p.name}</p>
                                     </div>
-                                    <div className="font-medium mt-1 leading-tight" title={p.name}>{p.name}</div>
+                                    <ExternalLink className="w-3 h-3 shrink-0 text-[#4b5563] group-hover:text-white/60 transition-colors" />
                                 </a>
                             ))}
                         </div>
-                    </CardContent>
-                </Card>
+                    )}
+                </div>
             ))}
         </div>
     );

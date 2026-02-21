@@ -37,7 +37,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
     const future = new Date(now.getTime() + 2 * 60000);
     return String(future.getHours()).padStart(2, '0') + ':' + String(future.getMinutes()).padStart(2, '0');
   });
-  const [duration, setDuration] = useState("1:00");
+  const [durationMins, setDurationMins] = useState(60);
   const [minRating, setMinRating] = useState(800);
   const [maxRating, setMaxRating] = useState(1600);
   const [selectedMode, setSelectedMode] = useState<"classic" | "replace">("classic");
@@ -78,12 +78,7 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
       }
     }
 
-    const [hours, minutes] = duration.split(":").map(Number);
-    if (isNaN(hours) || isNaN(minutes)) {
-      alert("Invalid duration format. Please use hh:mm.");
-      return;
-    }
-    const durationMinutes = hours * 60 + minutes;
+    const durationMinutes = durationMins;
 
     let timeoutMinutesValue = null;
     if (timeoutMinutes) {
@@ -199,15 +194,27 @@ const MatchCreationForm: React.FC<MatchCreationFormProps> = ({ }) => {
               </div>
 
               <div className="space-y-2">
-                <Label>Duration (hh:mm)</Label>
-                <Input
-                  type="text"
-                  placeholder="e.g. 1:30"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  pattern="^\d+:\d{2}$"
-                  required
+                <div className="flex items-center justify-between">
+                  <Label>Duration</Label>
+                  <span
+                    className="text-xs font-bold font-mono px-2.5 py-1 rounded-full"
+                    style={{ background: 'rgba(6,182,212,0.1)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.2)' }}
+                  >
+                    {Math.floor(durationMins / 60)}h {durationMins % 60 > 0 ? `${durationMins % 60}m` : ''}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={30}
+                  max={420}
+                  step={15}
+                  value={durationMins}
+                  onChange={(e) => setDurationMins(Number(e.target.value))}
+                  className="w-full accent-cyan-500 cursor-pointer"
                 />
+                <div className="flex justify-between text-[10px] text-[#6b7280]">
+                  <span>30m</span><span>2h</span><span>4h</span><span>7h</span>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

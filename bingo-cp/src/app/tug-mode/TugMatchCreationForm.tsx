@@ -37,7 +37,7 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
         const future = new Date(now.getTime() + 2 * 60000);
         return String(future.getHours()).padStart(2, '0') + ':' + String(future.getMinutes()).padStart(2, '0');
     });
-    const [duration, setDuration] = useState("1:00");
+    const [durationMins, setDurationMins] = useState(60);
     const [minRating, setMinRating] = useState(800);
     const [maxRating, setMaxRating] = useState(1600);
     const [tugThreshold, setTugThreshold] = useState<number>(2000);
@@ -105,9 +105,9 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
             return;
         }
 
-        const [hours, minutes] = duration.split(":").map(Number);
-        if (isNaN(hours) || isNaN(minutes)) {
-            alert("Invalid duration format. Please use hh:mm.");
+        const durationMinutes = durationMins;
+        if (durationMinutes > 420) {
+            alert("Duration cannot exceed 7 hours (420 minutes).");
             return;
         }
         const [hoursT, minutesT] = timeoutMinutes.split(":").map(Number);
@@ -138,11 +138,6 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
             return;
         }
 
-        const durationMinutes = hours * 60 + minutes;
-        if (durationMinutes > 420) {
-            alert("Duration cannot exceed 7 hours (420 minutes).");
-            return;
-        }
         if (maxRating < minRating) {
             alert("Maximum rating should be greater than minimum rating");
             return;
@@ -269,15 +264,27 @@ const TugMatchCreationForm: React.FC<TugMatchCreationFormProps> = ({ }) => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Duration (hh:mm)</Label>
-                                <Input
-                                    type="text"
-                                    placeholder="e.g. 1:30"
-                                    value={duration}
-                                    onChange={(e) => setDuration(e.target.value)}
-                                    pattern="^\d+:\d{2}$"
-                                    required
+                                <div className="flex items-center justify-between">
+                                    <Label>Duration</Label>
+                                    <span
+                                        className="text-xs font-bold font-mono px-2.5 py-1 rounded-full"
+                                        style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
+                                    >
+                                        {Math.floor(durationMins / 60)}h {durationMins % 60 > 0 ? `${durationMins % 60}m` : ''}
+                                    </span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min={30}
+                                    max={420}
+                                    step={15}
+                                    value={durationMins}
+                                    onChange={(e) => setDurationMins(Number(e.target.value))}
+                                    className="w-full accent-red-500 cursor-pointer"
                                 />
+                                <div className="flex justify-between text-[10px] text-[#6b7280]">
+                                    <span>30m</span><span>2h</span><span>4h</span><span>7h</span>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

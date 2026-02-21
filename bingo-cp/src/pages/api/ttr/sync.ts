@@ -142,30 +142,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                                         if (currentMatchWithState?.ttrState) {
                                             const state = currentMatchWithState.ttrState as unknown as TtrState;
-                                            const marketIdx = state.market.findIndex((p: any) => p.contestId === solve.contestId && p.index === solve.index);
 
-                                            if (marketIdx !== -1) {
-                                                // Award coins
-                                                const problem = state.market[marketIdx];
-                                                const row = problem.row ?? 0;
-                                                const coins = row === 0 ? 2 : row === 1 ? 3 : row === 2 ? 4 : 5; // Simplified
+                                            if (state.market && Array.isArray(state.market)) {
+                                                const marketIdx = state.market.findIndex((p: any) => p.contestId === solve.contestId && p.index === solve.index);
 
-                                                if (state.players[solve.team]) {
-                                                    state.players[solve.team].coins += coins;
-                                                    state.players[solve.team].score += 10;
+                                                if (marketIdx !== -1) {
+                                                    // Award coins
+                                                    const problem = state.market[marketIdx];
+                                                    const row = problem.row ?? 0;
+                                                    const coins = row === 0 ? 2 : row === 1 ? 3 : row === 2 ? 4 : 5; // Simplified
+
+                                                    if (state.players && state.players[solve.team]) {
+                                                        state.players[solve.team].coins += coins;
+                                                        state.players[solve.team].score += 10;
+                                                    }
+
+                                                    // Remove from market
+                                                    state.market.splice(marketIdx, 1);
+
+                                                    await tx.match.update({
+                                                        where: { id: matchId },
+                                                        data: { ttrState: state as any }
+                                                    });
                                                 }
-
-                                                // Remove and Replenish (Simplified for now - just remove or mark as solved)
-                                                // Fully replenishing requires fetching a NEW problem which is slow.
-                                                // Strategy: Mark as "needs replenishment" or just remove and let the global poller fill it?
-                                                // Better: User gets coins, problem removed from market. We can try to replenish if fast, or leave potential gap.
-                                                // Let's just remove for now.
-                                                state.market.splice(marketIdx, 1);
-
-                                                await tx.match.update({
-                                                    where: { id: matchId },
-                                                    data: { ttrState: state as any }
-                                                });
                                             }
                                         }
                                     }

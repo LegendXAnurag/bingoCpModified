@@ -87,8 +87,14 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                 body: JSON.stringify({ matchId, team: currentTeam, trackId: originalTrack.id })
             });
             if (!res.ok) {
-                const data = await res.json();
-                alert(data.message || "Failed to build track");
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    alert(data.message || "Failed to build track");
+                } catch (e) {
+                    console.error("Non-JSON error:", text);
+                    alert("Server error: " + (res.statusText || "Unknown error"));
+                }
             } else {
                 const data = await res.json();
                 if (data.newState && onUpdate) {
@@ -115,8 +121,14 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                alert(data.message || "Failed to build station");
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    alert(data.message || "Failed to build station");
+                } catch (e) {
+                    console.error("Non-JSON error:", text);
+                    alert("Server error: " + (res.statusText || "Unknown error"));
+                }
             } else {
                 const data = await res.json();
                 if (data.newState && onUpdate) {
@@ -161,10 +173,10 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
     // ... (handlers)
 
     return (
-        <div className="relative w-full h-full overflow-hidden bg-blue-100 flex justify-center items-center">
+        <div className="relative w-full h-full overflow-hidden bg-transparent flex justify-center items-center">
             <div
                 ref={containerRef}
-                className="relative bg-white shadow-xl origin-center transition-transform duration-200"
+                className="relative bg-black/20 shadow-xl origin-center transition-transform duration-200"
                 style={{
                     width: state.mapData ? `${state.mapData.width}px` : '1200px',
                     height: state.mapData ? `${state.mapData.height}px` : '800px',

@@ -209,14 +209,53 @@ export default function Home() {
 
   if (!match) {
     return (
-      <main className="min-h-screen bg-white pt-8 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <main className="min-h-screen pt-24 pb-16">
+        {/* Ambient glow behind hero */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+          <div className="absolute top-[-5%] left-[30%] w-[600px] h-[400px] bg-cyan-500/5 rounded-full blur-[140px]" />
+        </div>
 
+        {/* Branded Hero */}
+        <div className="text-center mb-10 px-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+            style={{ background: 'rgba(0,240,255,0.1)', border: '1px solid rgba(0,240,255,0.25)', boxShadow: '0 0 30px rgba(0,240,255,0.1)' }}>
+            <svg className="w-7 h-7 text-[#00f0ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-3">
+            Bingo{" "}
+            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #00f0ff, #7000ff)' }}>
+              Match Setup
+            </span>
+          </h1>
+          <p className="text-[#a3a3a3] text-base max-w-md mx-auto font-body">
+            Configure your 5×5 battlefield. The first team to complete a line wins.
+          </p>
+        </div>
 
-        {/* Match creation UI */}
-        <div className="flex justify-center mt-4">
+        {/* Form container */}
+        <div className="flex justify-center px-4">
           <MatchCreationForm onMatchCreated={setMatch} />
         </div>
-        <p className="text-center mt-10">Create a match to start playing</p>
+
+        {/* How Bingo Works */}
+        <div className="max-w-2xl mx-auto mt-16 px-4">
+          <details className="glass rounded-2xl border border-white/5 p-6 group">
+            <summary className="flex items-center justify-between cursor-pointer list-none">
+              <span className="text-sm font-bold uppercase tracking-widest text-[#00f0ff] font-heading">How Bingo Works</span>
+              <svg className="w-4 h-4 text-[#a3a3a3] transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div className="mt-4 space-y-3 text-sm text-[#a3a3a3] font-body">
+              <p><span className="text-white font-semibold">Classic mode:</span> Solve a problem → tile is permanently claimed for your team. Grid stays fixed.</p>
+              <p><span className="text-white font-semibold">Replace mode:</span> Solved tiles are instantly replaced with a new problem — the board stays full.</p>
+              <p><span className="text-white font-semibold">Win condition:</span> First team to complete a full row, column, or diagonal wins.</p>
+              <p><span className="text-[#a3a3a3]">Tile detection is automatic — just solve on Codeforces with your registered handle.</span></p>
+            </div>
+          </details>
+        </div>
       </main>
     );
   }
@@ -231,21 +270,38 @@ export default function Home() {
 
   return (
     <main className="min-h-screen pt-20 pb-8 px-4 transition-colors duration-300">
-      {/* Header */}
 
+      {/* Slim status HUD */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <span
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest font-heading"
+          style={{ background: 'rgba(0,240,255,0.1)', border: '1px solid rgba(0,240,255,0.25)', color: '#00f0ff' }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-pulse" />
+          BINGO
+        </span>
 
-      {/* Show time info */}
-      <div className="text-center mt-4">
+        {/* Team legend */}
+        {match.teams.map((t: { name: string; color: string }) => (
+          <span key={t.name} className="inline-flex items-center gap-1.5 text-xs font-semibold font-body" style={{ color: '#a3a3a3' }}>
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: t.color }} />
+            {t.name}
+          </span>
+        ))}
+
+        {/* Status */}
         {!matchHasStarted && (
-          <CountdownToStart startTime={matchStart} />
+          <span className="text-xs font-mono text-yellow-400">
+            Starts in {formatCountdown(matchStart.getTime() - now.getTime())}
+          </span>
         )}
         {matchHasEnded && (
-          <p className="text-red-500">Match has ended.</p>
+          <span className="text-xs font-mono text-red-400">MATCH ENDED</span>
         )}
-        {matchOngoing && match && (
-          <p className="text-green-500">
-            Match ends in {formatDuration(matchEnd.getTime() - Date.now())}
-          </p>
+        {matchOngoing && (
+          <span className="text-xs font-mono text-emerald-400">
+            {formatDuration(matchEnd.getTime() - now.getTime())} left
+          </span>
         )}
       </div>
 
@@ -293,20 +349,29 @@ export default function Home() {
 
       {/* Log Panel */}
       {showLog && (
-        <div className="fixed bottom-4 left-1 w-72 max-h-[80vh] overflow-y-auto border rounded p-3 bg-white dark:bg-gray-900 shadow z-30">
-          <h2 className="text-xl font-semibold mb-2">Solve Log</h2>
+        <div
+          className="fixed bottom-4 left-3 w-72 max-h-[70vh] overflow-y-auto rounded-2xl z-30 flex flex-col"
+          style={{ background: 'rgba(6,6,10,0.92)', border: '1px solid rgba(0,240,255,0.12)', backdropFilter: 'blur(16px)' }}
+        >
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
+            <div className="w-1 h-4 rounded-full bg-[#00f0ff]" />
+            <h2 className="text-xs font-bold uppercase tracking-widest text-[#00f0ff] font-heading">Solve Log</h2>
+          </div>
           {log.length === 0 ? (
-            <p className="text-sm text-gray-500">No solves yet</p>
+            <p className="text-xs text-[#4b5563] text-center py-6 font-body">No solves yet</p>
           ) : (
-            <ul className="text-sm space-y-2">
+            <ul className="text-xs space-y-0 divide-y divide-white/5 overflow-y-auto">
               {log.map((entry, idx) => {
-                const bgColor = teamColors[entry.team] || 'bg-gray-200 dark:bg-gray-700';
+                const colorMap: Record<string, string> = {
+                  red: '#ef4444', blue: '#3b82f6', green: '#22c55e',
+                  purple: '#a855f7', orange: '#f97316', pink: '#ec4899',
+                  yellow: '#eab308', teal: '#14b8a6',
+                };
+                const c = colorMap[entry.team] || '#6b7280';
                 return (
-                  <li
-                    key={idx}
-                    className={`${bgColor} text-white px-3 py-2 rounded shadow-sm`}
-                  >
-                    {entry.message}
+                  <li key={idx} className="flex items-start gap-2 px-3 py-2.5 hover:bg-white/[0.03] transition-colors">
+                    <div className="w-0.5 shrink-0 self-stretch rounded-full mt-0.5" style={{ backgroundColor: c }} />
+                    <span className="text-[#a3a3a3] leading-relaxed font-body">{entry.message}</span>
                   </li>
                 );
               })}
@@ -315,10 +380,11 @@ export default function Home() {
         </div>
       )}
 
-      {/* Toggle Button (above log) */}
+      {/* Toggle Button */}
       <button
         onClick={() => setShowLog(prev => !prev)}
-        className="cursor-pointer fixed bottom-[calc(4rem+76vh)] left-4 px-3 py-1 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600 transition z-40"
+        className="cursor-pointer fixed bottom-4 left-[calc(1.5rem+288px+0.5rem)] px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all z-40 font-heading"
+        style={{ background: 'rgba(0,240,255,0.1)', border: '1px solid rgba(0,240,255,0.2)', color: '#00f0ff' }}
       >
         {showLog ? 'Hide Log' : 'Show Log'}
       </button>

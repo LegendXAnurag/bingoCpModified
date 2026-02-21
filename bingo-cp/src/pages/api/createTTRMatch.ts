@@ -25,9 +25,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Fetch problems from Codeforces
         const cfRes = await fetch('https://codeforces.com/api/problemset.problems');
-        const cfData = await cfRes.json();
+        if (!cfRes.ok) {
+            const text = await cfRes.text();
+            console.error("Codeforces API error:", cfRes.status, text.substring(0, 200));
+            throw new Error(`Codeforces API unreachable (Status ${cfRes.status})`);
+        }
+
+        let cfData;
+        try {
+            cfData = await cfRes.json();
+        } catch (e) {
+            const text = await cfRes.text();
+            console.error("Codeforces returned non-JSON:", text.substring(0, 200));
+            throw new Error("Codeforces API returned invalid data");
+        }
+
         if (cfData.status !== 'OK') {
-            throw new Error('Failed to fetch problems from Codeforces');
+            throw new Error('Failed to fetch problems from Codeforces: ' + (cfData.comment || 'Unknown error'));
         }
 
         const allProblems = cfData.result.problems as any[];

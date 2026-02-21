@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../app/lib/prisma';
-import { buildStation } from '../../../lib/ttrLogic';
-import { Match, TTRState } from '../../../app/types/match';
+import { prisma } from '@/app/lib/prisma';
+import { buildStation } from '@/lib/ttrLogic';
+import { Match, TTRState } from '@/app/types/match';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {

@@ -43,35 +43,35 @@ body {
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -82,7 +82,7 @@ body {
 :root {
   /* Default to Dark/Cinematic Theme values even in root */
   --radius: 0.5rem;
-  
+
   /* Deep Black Background */
   --background: #050505;
   --foreground: #ffffff;
@@ -145,4 +145,149 @@ body {
   --border: #262626;
   --input: #262626;
   --ring: #00f0ff;
+}
+
+/* ─── Typography System ──────────────────────────────────── */
+body {
+  font-family: var(--font-body, var(--font-geist-sans), system-ui, sans-serif);
+}
+
+h1 {
+  font-family: var(--font-serif, var(--font-geist-sans), serif);
+  letter-spacing: -0.02em;
+}
+
+h2,
+h3 {
+  font-family: var(--font-heading, var(--font-geist-sans), sans-serif);
+}
+
+.font-serif {
+  font-family: var(--font-serif, serif);
+}
+
+.font-heading {
+  font-family: var(--font-heading, sans-serif);
+}
+
+.font-body {
+  font-family: var(--font-body, sans-serif);
+}
+
+.font-mono {
+  font-family: var(--font-mono, monospace);
+}
+
+/* ─── Scanline depth overlay ─────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.022) 2px,
+      rgba(0, 0, 0, 0.022) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── Keyframe Animations ────────────────────────────────── */
+
+/* Grid/tug cell ownership burst */
+@keyframes cellClaim {
+  0% {
+    transform: scale(1.08);
+  }
+
+  60% {
+    transform: scale(0.97);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* VS puck pulse on score change */
+@keyframes vsPulse {
+  0% {
+    transform: translateX(-50%) scale(1.45);
+  }
+
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+/* Hero particle float */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Cell solve ripple */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.55;
+  }
+
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Gold shimmer for winning cells */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Blinking cursor for hero text */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ─── Utility Classes ─────────────────────────────────────── */
+.animate-cell-claim {
+  animation: cellClaim 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 1.2s step-end infinite;
+}
+
+.winning-shimmer {
+  background: linear-gradient(90deg,
+      rgba(250, 204, 21, 0.0) 0%,
+      rgba(250, 204, 21, 0.35) 50%,
+      rgba(250, 204, 21, 0.0) 100%);
+  background-size: 200% auto;
+  animation: shimmer 2.5s linear infinite;
 }

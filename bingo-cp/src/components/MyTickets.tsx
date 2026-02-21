@@ -49,9 +49,9 @@ export default function MyTickets({ matchId, state, currentTeam, onUpdate }: MyT
     // For now just list them
 
     return (
-        <Card className="h-full flex flex-col">
-            <CardHeader className="py-3 px-4 border-b flex flex-row items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
+        <Card className="h-full flex flex-col bg-transparent border-0 shadow-none">
+            <CardHeader className="py-3 px-4 border-b border-white/5 flex flex-row items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2 text-white">
                     <TicketIcon className="w-5 h-5" />
                     My Tickets
                 </CardTitle>
@@ -62,7 +62,7 @@ export default function MyTickets({ matchId, state, currentTeam, onUpdate }: MyT
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {myTickets.map(ticket => (
-                            <div key={ticket.id} className="p-3 border rounded bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-all flex flex-col justify-between h-full">
+                            <div key={ticket.id} className="p-3 border border-white/10 rounded bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col justify-between h-full">
                                 <div className="font-bold text-center mb-2">{getCityName(ticket.city1)} <br />↓<br /> {getCityName(ticket.city2)}</div>
                                 <div className="text-center">
                                     <span className="text-green-600 bg-green-100 px-2 py-1 rounded text-sm font-bold inline-block">{ticket.points} pts</span>

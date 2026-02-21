@@ -47,8 +47,22 @@ export async function fetchUserSubmissions(handle: string) {
     try {
       await throttle(); // Ensure we don't spam the API
       console.log(`[Codeforces] Fetching submissions for ${handle}...`);
-      const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=50`); // Increased count slightly to be safe
-      const data = await res.json();
+      const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=50`);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.warn(`[Codeforces] API error for ${handle}: ${res.status}`, text.substring(0, 100));
+        throw new Error(`API error ${res.status}`);
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        const text = await res.text();
+        console.error(`[Codeforces] Non-JSON response for ${handle}:`, text.substring(0, 100));
+        throw new Error("Invalid API response format");
+      }
 
       const result = data.status === "OK" ? data.result : [];
       console.log(`[Codeforces] Fetched ${result.length} submissions for ${handle}`);

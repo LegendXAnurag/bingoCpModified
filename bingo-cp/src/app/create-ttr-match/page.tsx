@@ -2,8 +2,8 @@ import CreateTTRMatch from './CreateTTRMatch';
 
 export default function CreateTTRMatchPage() {
     return (
-        <div className="min-h-screen pt-20 p-8 flex items-center justify-center">
+        <main className="min-h-screen pt-24 pb-16 px-4">
             <CreateTTRMatch />
-        </div>
+        </main>
     );
 }
