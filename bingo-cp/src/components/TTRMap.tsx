@@ -4,16 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { TTRState, City, Track } from "../app/types/match";
 import { CITIES, TRACKS } from "../lib/ttrData";
 import { canBuildTrack, canBuildStation, getTrackCost } from "../lib/ttrLogic";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { X, TrainFront, MapPin, GripHorizontal } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface TTRMapProps {
     matchId: string;
@@ -44,33 +36,20 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
         // 3. If claimed by US -> Do nothing (or show info)
 
         if (!trackState || !trackState.claimedBy) {
-            const check = canBuildTrack(state, player, track.id);
-            if (!check.possible) {
-                alert(check.reason);
-                return;
-            }
             setConfirmTrack(track);
         } else {
             // Claimed. Check if we can build station.
-            const check = canBuildStation(state, player, track.id);
-            if (check.possible) {
-                setConfirmStationTrack(track);
-            } else {
-                // If it's owned by opponent and we can't build station, maybe show why?
-                // But if it's owned by us, canBuildStation returns "You already own this track" which is fine to alert or ignore.
-
-                // If we already have a station, ignore
-                if (trackState.stationedBy?.includes(currentTeam)) {
-                    return;
-                }
-
-                // If we own it, ignore
-                if (trackState.claimedBy === currentTeam) {
-                    return;
-                }
-
-                alert(check.reason);
+            // If we already have a station, ignore
+            if (trackState.stationedBy?.includes(currentTeam)) {
+                return;
             }
+
+            // If we own it, ignore
+            if (trackState.claimedBy === currentTeam) {
+                return;
+            }
+
+            setConfirmStationTrack(track);
         }
     };
 
@@ -171,6 +150,9 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
     }, []);
 
     // ... (handlers)
+    const player = state.players[currentTeam];
+    const trackCheck = confirmTrack && player ? canBuildTrack(state, player, confirmTrack.id) : { possible: true, reason: "" };
+    const stationCheck = confirmStationTrack && player ? canBuildStation(state, player, confirmStationTrack.id) : { possible: true, reason: "" };
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-transparent flex justify-center items-center">
@@ -218,10 +200,10 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                                                 width={unit.width || 20}
                                                 height={unit.height || 8}
                                                 fill={isClaimed ? ownerColor : (track.color || 'gray')}
-                                                stroke="black"
-                                                strokeWidth="1"
+                                                stroke={confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : "black"}
+                                                strokeWidth={confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "3" : "1"}
                                                 transform={`rotate(${unit.rotation}, ${unit.x}, ${unit.y})`}
-                                                className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''}`}
+                                                className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''} ${confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse" : ""}`}
                                             />
                                             {/* Station Indicators: Perpendicular Rectangles */}
                                             {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
@@ -289,10 +271,10 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                                     y1={y1 + offsetY}
                                     x2={x2 + offsetX}
                                     y2={y2 + offsetY}
-                                    stroke={isClaimed ? ownerColor : 'rgba(0,0,0,0.5)'}
+                                    stroke={confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : isClaimed ? ownerColor : 'rgba(0,0,0,0.5)'}
                                     strokeWidth="8"
                                     strokeDasharray={isClaimed ? "none" : "12, 4"}
-                                    className={`transition-all group-hover:stroke-[10px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''}`}
+                                    className={`transition-all group-hover:stroke-[10px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''} ${confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse stroke-[10px]" : ""}`}
                                 />
                                 {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
                                     trackState.stationedBy.map((stationTeam, idx) => {
@@ -361,41 +343,99 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                     })}
                 </svg>
 
-                <AlertDialog open={!!confirmTrack} onOpenChange={(o) => !o && setConfirmTrack(null)}>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Claim Track?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Are you sure you want to claim the track from {confirmTrack && CITIES.find(c => c.id === confirmTrack.city1)?.name} to {confirmTrack && CITIES.find(c => c.id === confirmTrack.city2)?.name}?
-                                <br />
-                                Cost: <strong>{confirmTrack ? getTrackCost(confirmTrack) : 0} coins</strong>
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={confirmBuildTrack}>Build Track</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                {/* Draggable Action Panel */}
+                {(confirmTrack || confirmStationTrack) && (
+                    <motion.div
+                        drag
+                        dragConstraints={containerRef}
+                        dragMomentum={false}
+                        initial={{ opacity: 0, y: 50, x: "-50%" }}
+                        animate={{ opacity: 1, y: 0, x: "-50%" }}
+                        exit={{ opacity: 0, y: 20, x: "-50%" }}
+                        className="absolute bottom-8 left-1/2 w-full max-w-sm bg-black/90 border border-white/20 shadow-2xl rounded-2xl p-4 backdrop-blur-xl z-50 flex flex-col gap-4 cursor-grab active:cursor-grabbing"
+                    >
+                        {/* Drag Handle & Close */}
+                        <div className="flex items-center justify-between w-full border-b border-white/10 pb-2 mb-1">
+                            <div className="flex items-center gap-2 text-white/50">
+                                <GripHorizontal className="w-4 h-4" />
+                                <span className="text-[10px] uppercase font-bold tracking-widest font-heading">Drag to move</span>
+                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmTrack(null); setConfirmStationTrack(null); }}
+                                className="p-1 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
-                <AlertDialog open={!!confirmStationTrack} onOpenChange={(o) => !o && setConfirmStationTrack(null)}>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Build Station on Track?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Build a station on the track from {confirmStationTrack && CITIES.find(c => c.id === confirmStationTrack.city1)?.name} to {confirmStationTrack && CITIES.find(c => c.id === confirmStationTrack.city2)?.name}?
-                                <br />
-                                This allows you to use this track for one of your routes.
-                                <br />
-                                Cost: <strong>{state.players[currentTeam] ? 4 - state.players[currentTeam].stationsLeft : 0} coins</strong>
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={confirmBuildStation}>Build Station</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                        <div className="flex-1 min-w-0 pointer-events-none">
+                            {confirmTrack ? (
+                                <>
+                                    <h3 className="text-xs font-bold uppercase tracking-widest text-[#00f0ff] mb-2 font-heading flex items-center gap-1.5">
+                                        <TrainFront className="w-3.5 h-3.5" />
+                                        Claim Route
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm font-bold text-white mb-2 truncate">
+                                        <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-emerald-400" /> <span className="truncate max-w-[120px]">{(state.mapData?.cities || CITIES).find(c => c.id === confirmTrack.city1)?.name}</span></div>
+                                        <span className="text-white/40 font-light">&rarr;</span>
+                                        <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-emerald-400" /> <span className="truncate max-w-[120px]">{(state.mapData?.cities || CITIES).find(c => c.id === confirmTrack.city2)?.name}</span></div>
+                                    </div>
+                                    <div className="text-xs text-[#a3a3a3] font-body bg-white/5 p-2 rounded-lg border border-white/5">
+                                        <p className="flex justify-between items-center mb-1">
+                                            <span>Route Cost:</span> <strong className="text-yellow-400">{getTrackCost(confirmTrack)} coins</strong>
+                                        </p>
+                                        <p className="flex justify-between items-center">
+                                            <span>Your Coins:</span> <strong className="text-white">{state.players[currentTeam]?.coins || 0} coins</strong>
+                                        </p>
+                                        {!trackCheck.possible && (
+                                            <p className="mt-2 text-red-400 font-bold border-t border-red-500/20 pt-2">{trackCheck.reason}</p>
+                                        )}
+                                    </div>
+                                </>
+                            ) : confirmStationTrack ? (
+                                <>
+                                    <h3 className="text-xs font-bold uppercase tracking-widest text-purple-400 mb-2 font-heading flex items-center gap-1.5">
+                                        <TrainFront className="w-3.5 h-3.5" />
+                                        Build Station
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm font-bold text-white mb-2 truncate">
+                                        <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-purple-400" /> <span className="truncate max-w-[120px]">{(state.mapData?.cities || CITIES).find(c => c.id === confirmStationTrack.city1)?.name}</span></div>
+                                        <span className="text-white/40 font-light">&rarr;</span>
+                                        <div className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-purple-400" /> <span className="truncate max-w-[120px]">{(state.mapData?.cities || CITIES).find(c => c.id === confirmStationTrack.city2)?.name}</span></div>
+                                    </div>
+                                    <div className="text-xs text-[#a3a3a3] font-body bg-white/5 p-2 rounded-lg border border-white/5">
+                                        <p className="mb-1 text-[10px] leading-tight flex flex-col">
+                                            <span>Owned by <strong className="text-white capitalize">{state.tracks[confirmStationTrack.id]?.claimedBy}</strong>.</span>
+                                            <span className="text-white/50">Stations let you bypass their track.</span>
+                                        </p>
+                                        <p className="flex justify-between items-center mt-2 pt-2 border-t border-white/10">
+                                            <span>Station Cost:</span> <strong className="text-yellow-400">{4 - (state.players[currentTeam]?.stationsLeft || 0)} coins</strong>
+                                        </p>
+                                        {!stationCheck.possible && (
+                                            <p className="mt-2 text-red-400 font-bold border-t border-red-500/20 pt-2">{stationCheck.reason}</p>
+                                        )}
+                                    </div>
+                                </>
+                            ) : null}
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-2 w-full mt-1">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmTrack(null); setConfirmStationTrack(null); }}
+                                className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold border border-white/20 hover:bg-white/5 transition-colors font-body text-white"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                disabled={confirmTrack ? !trackCheck.possible : !stationCheck.possible}
+                                onClick={(e) => { e.stopPropagation(); confirmTrack ? confirmBuildTrack() : confirmBuildStation(); }}
+                                className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all font-heading ${(confirmTrack ? !trackCheck.possible : !stationCheck.possible) ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5" : "bg-[#00f0ff] hover:bg-[#00f0ff]/80 text-black shadow-[0_0_15px_rgba(0,240,255,0.4)]"}`}
+                            >
+                                {confirmTrack ? "Claim" : "Build"}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
             </div>
         </div>
     );
