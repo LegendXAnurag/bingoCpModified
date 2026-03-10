@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../app/lib/prisma';
 import { TTRParams, TTRState, ProblemCell, TTRPlayerState, TTRTrackState } from '../../app/types/match';
-import { TRACKS, TICKETS } from '../../lib/ttrData';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -95,10 +94,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             };
         });
 
+        if (!ttrParams.mapId) {
+            return res.status(400).json({ message: 'Map selection is required' });
+        }
+
         // Initialize collections
-        let _tracks: any[] = TRACKS;
-        let _cities: any[] = []; // Default doesn't need cities in state, only custom
-        let _tickets: any[] = TICKETS;
+        let _tracks: any[] = [];
+        let _cities: any[] = [];
+        let _tickets: any[] = [];
         let mapData = undefined;
 
         if (ttrParams.mapId) {

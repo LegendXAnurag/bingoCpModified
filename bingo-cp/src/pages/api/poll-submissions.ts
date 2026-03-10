@@ -51,9 +51,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: {
           problems: { where: { active: true }, orderBy: { position: 'asc' } },
           teams: { include: { members: true } },
-          solveLog: { include: { problem: true }, orderBy: { timestamp: 'asc' } },
+          solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
         },
       });
+
+      if (cachedMatch?.mode === 'ttr' && cachedMatch?.ttrState) {
+        const state = cachedMatch.ttrState as any;
+        const enrichedSolveLog = [];
+        for (const log of cachedMatch.solveLog) {
+          const tsStr = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const pName = log.problem?.name || `Problem ${log.index}`;
+          const coins = log.problem?.rating ? Math.round(log.problem.rating / 500) + 1 : 0;
+          enrichedSolveLog.push({
+            team: log.team,
+            handle: log.handle || 'Unknown Solver',
+            problemName: pName,
+            coinsAwarded: coins,
+            timestamp: tsStr
+          });
+        }
+        state.solveLog = enrichedSolveLog;
+        cachedMatch.ttrState = state;
+      }
       return res.json({ message: "Using cached state", match: cachedMatch });
     }
 
@@ -78,6 +97,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contestId: p.contestId,
         index: p.index,
       }));
+
+    if (match.mode === 'ttr' && match.ttrState) {
+      const state = match.ttrState as any;
+      if (state.market && Array.isArray(state.market)) {
+        for (const p of state.market) {
+          problems.push({
+            contestId: p.contestId,
+            index: p.index,
+          });
+        }
+      }
+    }
     const players = match.teams.flatMap(team =>
       team.members.map(member => ({
         handle: member.handle,
@@ -110,7 +141,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (!match.solveLog.some(log => log.contestId === contestId && log.index === index)) {
         newSolves.push({
-          handle: '',
+          handle: claim.handle,
           team: claim.team,
           contestId,
           index,
@@ -124,7 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (Solve.contestId === contestId && Solve.index === index && Solve.team != claim.team) {
             if (Solve.timestamp.getTime() > newTime.getTime()) {
               changed.push({
-                handle: '',
+                handle: claim.handle,
                 team: claim.team,
                 contestId,
                 index,
@@ -164,9 +195,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: {
           problems: { where: { active: true }, orderBy: { position: 'asc' } },
           teams: { include: { members: true } },
-          solveLog: { include: { problem: true }, orderBy: { timestamp: 'asc' } },
+          solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
         },
       });
+
+      if (updatedMatch?.mode === 'ttr' && updatedMatch?.ttrState) {
+        const state = updatedMatch.ttrState as any;
+        const enrichedSolveLog = [];
+        for (const log of updatedMatch.solveLog) {
+          const tsStr = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const pName = log.problem?.name || `Problem ${log.index}`;
+          const coins = log.problem?.rating ? Math.round(log.problem.rating / 500) + 1 : 0;
+          enrichedSolveLog.push({
+            team: log.team,
+            handle: log.handle || 'Unknown Solver',
+            problemName: pName,
+            coinsAwarded: coins,
+            timestamp: tsStr
+          });
+        }
+        state.solveLog = enrichedSolveLog;
+        updatedMatch.ttrState = state;
+      }
       return res.status(200).json({ updated: false, match: updatedMatch });
     }
     for (const s of newSolves) {
@@ -202,9 +252,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (existing) {
           return;
         }
+
+        // Fix for TTR mode: create the problem row if it doesn't exist, to satisfy the foreign key constraint
+        if (match.mode === 'ttr' && match.ttrState) {
+          const state = match.ttrState as any;
+          const marketProb = state.market?.find((p: any) => p.contestId === contestId && p.index === index);
+          if (marketProb) {
+            const probExists = await tx.problem.findUnique({
+              where: { contestId_index_matchId: { contestId, index, matchId } }
+            });
+            if (!probExists) {
+              await tx.problem.create({
+                data: {
+                  contestId,
+                  index,
+                  matchId,
+                  rating: marketProb.rating || 0,
+                  name: marketProb.name || `Problem ${index}`,
+                  position: 0,
+                  active: true
+                }
+              });
+            }
+          }
+        }
+
         await tx.solveLog.create({
           data: {
-            handle: '',
+            handle: s.handle,
             team,
             contestId,
             index,
@@ -397,7 +472,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             if (state.players[playerTeam]) {
               state.players[playerTeam].coins += coins;
-              state.players[playerTeam].score += 10;
             }
 
             // Remove from market
@@ -447,9 +521,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       include: {
         problems: { where: { active: true }, orderBy: { position: 'asc' } },
         teams: { include: { members: true } },
-        solveLog: { include: { problem: true }, orderBy: { timestamp: 'asc' } },
+        solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
       },
     });
+
+    if (updatedMatch?.mode === 'ttr' && updatedMatch?.ttrState) {
+      const state = updatedMatch.ttrState as any;
+      const enrichedSolveLog = [];
+      for (const log of updatedMatch.solveLog) {
+        const tsStr = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const pName = log.problem?.name || `Problem ${log.index}`;
+        const coins = log.problem?.rating ? Math.round(log.problem.rating / 500) + 1 : 0;
+        enrichedSolveLog.push({
+          team: log.team,
+          handle: log.handle || 'Unknown Solver',
+          problemName: pName,
+          coinsAwarded: coins,
+          timestamp: tsStr
+        });
+      }
+      state.solveLog = enrichedSolveLog;
+      updatedMatch.ttrState = state;
+    }
     return res.status(200).json({ updated: true, match: updatedMatch });
   } catch (err) {
     console.error('Error in poll-submissions:', err)

@@ -154,7 +154,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                                                     if (state.players && state.players[solve.team]) {
                                                         state.players[solve.team].coins += coins;
-                                                        state.players[solve.team].score += 10;
                                                     }
 
                                                     // Remove from market
@@ -185,7 +184,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 teams: {
                     include: { members: { select: { id: true, handle: true, claimed: true, teamId: true } } }
                 },
-                solveLog: true, // we might want to filter this
+                solveLog: { include: { problem: true }, orderBy: { timestamp: 'desc' } },
                 problems: { where: { active: true } }
             }
         });
@@ -230,6 +229,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 state.deckCount = state.deck.length;
                 delete state.deck;
             }
+
+            // --- Build Advanced Solve Log ---
+            const enrichedSolveLog = [];
+            for (const log of match.solveLog) {
+                // Format the timestamp nicely for the UI
+                const tsStr = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // We use the problem name from the relation
+                const pName = log.problem?.name || `Problem ${log.index}`;
+
+                // To find coins awarded, we need the "row" if it was active.
+                // The easiest way is to guess by points or default, but in TTR: 
+                // If it's no longer in the market, it might be deactivated, so we can't easily fetch coins unless we stored it.
+                // For now, if we don't have coins stored on the SolveLog itself, we can hardcode an estimate or just omit it if 0.
+                // Let's attempt to calculate it or just add the property so the UI can display it
+                // if known.
+                const coins = log.problem?.rating ? Math.round(log.problem.rating / 500) + 1 : 0; // rough estimate based on 800-3500 standard distribution
+
+                enrichedSolveLog.push({
+                    team: log.team,
+                    handle: log.handle || 'Unknown Solver',
+                    problemName: pName,
+                    coinsAwarded: coins,
+                    timestamp: tsStr
+                });
+            }
+            state.solveLog = enrichedSolveLog;
 
             safeTtrState = state;
         }

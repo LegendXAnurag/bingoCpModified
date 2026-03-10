@@ -12,6 +12,7 @@ export type Player = {
 
 export type Claim = {
     team: string;
+    handle: string;
     time: number;
     id: number
 }
@@ -23,7 +24,7 @@ import { fetchUserSubmissions } from '@/app/lib/codeforces'
 export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
     const problemKey = (p: Problem) => `${p.contestId}-${p.index}`
     const trackedProblems = new Set(problems.map(problemKey))
-    const claims: Record<string, { team: string; time: number; id: number }> = {}
+    const claims: Record<string, { team: string; handle: string; time: number; id: number }> = {}
 
     // Process players in parallel to take advantage of our new coalescing/throttling
     await Promise.all(players.map(async (player) => {
@@ -52,6 +53,7 @@ export async function checkSolvesLogic(problems: Problem[], players: Player[]) {
                 ) {
                     claims[key] = {
                         team: player.team,
+                        handle: player.handle,
                         time: sub.creationTimeSeconds,
                         id: sub.id,
                     }

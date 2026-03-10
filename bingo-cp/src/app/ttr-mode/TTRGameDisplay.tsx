@@ -35,6 +35,7 @@ interface SolveEntry {
     team: string;
     handle: string;
     problemName: string;
+    coinsAwarded?: number;
     timestamp: string;
 }
 
@@ -398,11 +399,25 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                                         <div className="w-0.5 shrink-0 self-stretch rounded-full opacity-80 mt-1" style={{ backgroundColor: c }} />
                                         <div className="min-w-0 flex-1">
                                             <p className="text-xs text-white font-semibold font-body truncate">{entry.problemName}</p>
-                                            <p className="text-[10px] text-[#6b7280] font-body mt-0.5">
-                                                <span style={{ color: c }}>{entry.team}</span>
-                                                {entry.handle ? ` · ${entry.handle}` : ''}
+                                            <p className="text-[10px] text-[#6b7280] font-body mt-0.5 flex flex-wrap gap-1 items-center">
+                                                <span className="font-bold tracking-wider uppercase font-heading" style={{ color: c }}>{entry.team}</span>
+                                                {entry.handle && (
+                                                    <>
+                                                        <span className="text-white/40">·</span>
+                                                        <span className="text-[#a3a3a3]">{entry.handle}</span>
+                                                    </>
+                                                )}
+                                                {entry.coinsAwarded ? (
+                                                    <>
+                                                        <span className="text-white/40">·</span>
+                                                        <span className="text-yellow-400 font-mono text-[9px]">+{entry.coinsAwarded}🪙</span>
+                                                    </>
+                                                ) : null}
                                                 {entry.timestamp && (
-                                                    <span className="ml-1 font-mono text-[9px] font-mono">{entry.timestamp}</span>
+                                                    <>
+                                                        <span className="text-white/40">·</span>
+                                                        <span className="font-mono text-[9px] text-[#6b7280]">{entry.timestamp}</span>
+                                                    </>
                                                 )}
                                             </p>
                                         </div>

@@ -79,6 +79,11 @@ export default function CreateTTRMatch() {
             return;
         }
 
+        if (!selectedMapId) {
+            setError("Please select a map");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -209,7 +214,7 @@ export default function CreateTTRMatch() {
                                     value={selectedMapId}
                                     onChange={(e) => setSelectedMapId(e.target.value)}
                                 >
-                                    <option value="">Default (Europe)</option>
+                                    <option value="" disabled>Select a Map...</option>
                                     {maps.map(m => (
                                         <option key={m.id} value={m.id}>{m.name}</option>
                                     ))}
