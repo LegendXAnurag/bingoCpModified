@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Match, TTRState } from "@/app/types/match";
+import { Match, TTRState, Ticket } from "@/app/types/match";
 import TTRMap from "@/components/TTRMap";
 import CoinMarketplace from "@/components/CoinMarketplace";
 import MyTickets from "@/components/MyTickets";
+import { calculateTotalScore } from "../../lib/ttrLogic";
 import { AuthProvider, useTtrAuth } from "../ttr/AuthContext";
 import JoinScreen from "../ttr/JoinScreen";
 import { TrainFront } from "lucide-react";
@@ -45,6 +46,7 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
     const [lastSync, setLastSync] = useState<Date>(new Date());
     const [solveLog, setSolveLog] = useState<SolveEntry[]>([]);
     const [now, setNow] = useState(new Date());
+    const [focusedTicket, setFocusedTicket] = useState<Ticket | null>(null);
 
     // Clock tick
     useEffect(() => {
@@ -184,7 +186,10 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
     const timerColor = matchEnded ? '#ef4444' : msLeft < 5 * 60 * 1000 ? '#ef4444' : '#00f0ff';
 
     // ─── Scorecard — sort by score descending ──────────────────────────────
-    const players = Object.values(ttrState.players).sort((a: any, b: any) => b.score - a.score);
+    const players = Object.values(ttrState.players).map(p => ({
+        ...p,
+        displayScore: calculateTotalScore(ttrState, p.team)
+    })).sort((a: any, b: any) => b.displayScore - a.displayScore);
     const scorecardH = players.length * 52 + 8; // approx height for calc
 
     // ─── Navbar height = 64px, header row = 56px, scorecard depends on teams
@@ -317,7 +322,7 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                                 style={{ background: `${color}20`, border: `1px solid ${color}50` }}
                             >
                                 <span className="text-sm font-black font-mono tabular-nums font-mono" style={{ color }}>
-                                    {player.score}
+                                    {player.displayScore}
                                 </span>
                                 <span className="text-[10px] text-white/50 font-heading">pts</span>
                             </div>
@@ -359,6 +364,8 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                     currentTeam={currentTeam}
                     onUpdate={handleStateUpdate}
                     readOnly={isSpectator}
+                    focusedTicket={focusedTicket}
+                    setFocusedTicket={setFocusedTicket}
                 />
             </div>
 
@@ -444,6 +451,8 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                             state={ttrState}
                             currentTeam={currentTeam}
                             onUpdate={handleStateUpdate}
+                            focusedTicket={focusedTicket}
+                            setFocusedTicket={setFocusedTicket}
                         />
                     </div>
                 </div>

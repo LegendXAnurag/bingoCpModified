@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { TTRState, City, Track } from "../app/types/match";
+import { TTRState, City, Track, Ticket } from "../app/types/match";
 import { CITIES, TRACKS } from "../lib/ttrData";
-import { canBuildTrack, canBuildStation, getTrackCost } from "../lib/ttrLogic";
+import { canBuildTrack, canBuildStation, getTrackCost, getCompletedRoute } from "../lib/ttrLogic";
 import { X, TrainFront, MapPin, GripHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -13,9 +13,11 @@ interface TTRMapProps {
     currentTeam: string;
     onUpdate?: (newState: TTRState) => void;
     readOnly?: boolean;
+    focusedTicket?: Ticket | null;
+    setFocusedTicket?: (t: Ticket | null) => void;
 }
 
-export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly }: TTRMapProps) {
+export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly, focusedTicket, setFocusedTicket }: TTRMapProps) {
     const [scale, setScale] = useState(1);
     const containerRef = useRef<HTMLDivElement>(null);
     const [confirmTrack, setConfirmTrack] = useState<Track | null>(null);
@@ -154,6 +156,9 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
     const trackCheck = confirmTrack && player ? canBuildTrack(state, player, confirmTrack.id) : { possible: true, reason: "" };
     const stationCheck = confirmStationTrack && player ? canBuildStation(state, player, confirmStationTrack.id) : { possible: true, reason: "" };
 
+    const completedRoute = focusedTicket ? getCompletedRoute(state, currentTeam, focusedTicket.city1, focusedTicket.city2) : null;
+    const completedTrackIds = new Set(completedRoute?.map(t => t.id) || []);
+
     return (
         <div className="relative w-full h-full overflow-hidden bg-transparent flex justify-center items-center">
             <div
@@ -200,10 +205,10 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                                                 width={unit.width || 20}
                                                 height={unit.height || 8}
                                                 fill={isClaimed ? ownerColor : (track.color || 'gray')}
-                                                stroke={confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : "black"}
-                                                strokeWidth={confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "3" : "1"}
+                                                stroke={completedTrackIds.has(track.id) ? "white" : confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : "black"}
+                                                strokeWidth={completedTrackIds.has(track.id) ? "3" : confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "3" : "1"}
                                                 transform={`rotate(${unit.rotation}, ${unit.x}, ${unit.y})`}
-                                                className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''} ${confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse" : ""}`}
+                                                className={`transition-all ${!isClaimed ? 'hover:fill-yellow-500 hover:opacity-80' : ''} ${completedTrackIds.has(track.id) || confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse" : ""}`}
                                             />
                                             {/* Station Indicators: Perpendicular Rectangles */}
                                             {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
@@ -271,10 +276,10 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                                     y1={y1 + offsetY}
                                     x2={x2 + offsetX}
                                     y2={y2 + offsetY}
-                                    stroke={confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : isClaimed ? ownerColor : 'rgba(0,0,0,0.5)'}
-                                    strokeWidth="8"
+                                    stroke={completedTrackIds.has(track.id) ? "white" : confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : isClaimed ? ownerColor : 'rgba(0,0,0,0.5)'}
+                                    strokeWidth={completedTrackIds.has(track.id) ? "12" : "8"}
                                     strokeDasharray={isClaimed ? "none" : "12, 4"}
-                                    className={`transition-all group-hover:stroke-[10px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''} ${confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse stroke-[10px]" : ""}`}
+                                    className={`transition-all group-hover:stroke-[10px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''} ${completedTrackIds.has(track.id) || confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse stroke-[10px]" : ""}`}
                                 />
                                 {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
                                     trackState.stationedBy.map((stationTeam, idx) => {
@@ -315,6 +320,8 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                             cy = (city.y / 100) * 800;
                         }
 
+                        const isFocusedCity = focusedTicket && (focusedTicket.city1 === city.id || focusedTicket.city2 === city.id);
+
                         return (
                             <g
                                 key={city.id}
@@ -323,10 +330,11 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                             >
                                 {/* City Marker */}
                                 <circle
-                                    r={6}
+                                    r={isFocusedCity ? 14 : 6}
                                     fill={(state.mapData ? "red" : "#333")}
-                                    stroke="white"
-                                    strokeWidth="2"
+                                    stroke={isFocusedCity ? "#00f0ff" : "white"}
+                                    strokeWidth={isFocusedCity ? "4" : "2"}
+                                    className={isFocusedCity ? "animate-pulse" : ""}
                                 />
 
                                 {/* City Name */}
@@ -342,6 +350,18 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                         );
                     })}
                 </svg>
+
+                {/* Clear Focus Button */}
+                {focusedTicket && setFocusedTicket && (
+                    <div className="absolute top-4 right-4 z-50">
+                        <button
+                            onClick={() => setFocusedTicket(null)}
+                            className="bg-black/80 backdrop-blur border border-[#00f0ff]/50 text-[#00f0ff] px-4 py-2 rounded-full font-bold text-xs font-heading tracking-widest uppercase hover:bg-[#00f0ff]/20 transition-colors shadow-[0_0_15px_rgba(0,240,255,0.2)] flex items-center gap-2"
+                        >
+                            <X className="w-4 h-4" /> Clear Focus
+                        </button>
+                    </div>
+                )}
 
                 {/* Draggable Action Panel */}
                 {(confirmTrack || confirmStationTrack) && (

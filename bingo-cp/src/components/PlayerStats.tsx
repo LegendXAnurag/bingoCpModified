@@ -2,6 +2,7 @@
 
 import { TTRState } from "../app/types/match";
 import { Train, Coins, Home } from "lucide-react";
+import { calculateTotalScore } from "../lib/ttrLogic";
 
 interface PlayerStatsProps {
     state: TTRState;
@@ -19,7 +20,10 @@ const COLOR_HEX: Record<string, string> = {
 };
 
 export default function PlayerStats({ state }: PlayerStatsProps) {
-    const players = Object.values(state.players);
+    const players = Object.values(state.players).map(p => ({
+        ...p,
+        displayScore: calculateTotalScore(state, p.team)
+    })).sort((a: any, b: any) => b.displayScore - a.displayScore);
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
@@ -61,7 +65,7 @@ export default function PlayerStats({ state }: PlayerStatsProps) {
                                     border: `1px solid ${color}30`,
                                 }}
                             >
-                                {player.score} pts
+                                {player.displayScore} pts
                             </div>
                         </div>
 

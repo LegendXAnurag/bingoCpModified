@@ -1,5 +1,5 @@
-import { TTRState, TTRPlayerState, Track, City } from '@/app/types/match';
-import { TRACKS } from './ttrData';
+import { TTRState, TTRPlayerState, Track, City, Ticket } from '@/app/types/match';
+import { TRACKS, TICKETS } from './ttrData';
 
 export function getTrackCost(track: Track): number {
     return track.length;
@@ -135,3 +135,78 @@ export function buildStation(state: TTRState, teamColor: string, trackId: string
 }
 
 // Longest path DFS logic can be added later if needed for scoring
+
+export function getCompletedRoute(state: TTRState, teamColor: string, city1: string, city2: string): Track[] | null {
+    const validTracks: Track[] = [];
+    const adj = new Map<string, { neighbor: string; track: Track }[]>();
+
+    for (const trackId of Object.keys(state.tracks)) {
+        const tState = state.tracks[trackId];
+        if (tState.claimedBy === teamColor || (tState.stationedBy && tState.stationedBy.includes(teamColor))) {
+            const track = findTrack(state, trackId);
+            if (track) {
+                validTracks.push(track);
+            }
+        }
+    }
+
+    for (const track of validTracks) {
+        const c1 = track.city1;
+        const c2 = track.city2;
+        if (!adj.has(c1)) adj.set(c1, []);
+        if (!adj.has(c2)) adj.set(c2, []);
+        adj.get(c1)!.push({ neighbor: c2, track });
+        adj.get(c2)!.push({ neighbor: c1, track });
+    }
+
+    if (!adj.has(city1) || !adj.has(city2)) return null;
+
+    const queue: { city: string; path: Track[] }[] = [{ city: city1, path: [] }];
+    const visited = new Set<string>();
+    visited.add(city1);
+
+    while (queue.length > 0) {
+        const { city, path } = queue.shift()!;
+
+        if (city === city2) {
+            return path;
+        }
+
+        const neighbors = adj.get(city) || [];
+        for (const { neighbor, track } of neighbors) {
+            if (!visited.has(neighbor)) {
+                visited.add(neighbor);
+                queue.push({ city: neighbor, path: [...path, track] });
+            }
+        }
+    }
+
+    return null;
+}
+
+export function getTicket(state: TTRState, ticketId: string): Ticket | undefined {
+    if (state.mapData && state.mapData.tickets) {
+        return state.mapData.tickets.find(t => t.id === ticketId);
+    }
+    return TICKETS.find(t => t.id === ticketId);
+}
+
+export function calculateTotalScore(state: TTRState, teamColor: string): number {
+    const player = state.players[teamColor];
+    if (!player) return 0;
+
+    let totalScore = player.score;
+
+    for (const ticketId of player.destinations) {
+        if (ticketId === 'optimistic_draw') continue;
+        const ticket = getTicket(state, ticketId);
+        if (ticket) {
+            const completed = getCompletedRoute(state, teamColor, ticket.city1, ticket.city2);
+            if (completed) {
+                totalScore += ticket.points;
+            }
+        }
+    }
+
+    return totalScore;
+}
