@@ -7,6 +7,7 @@ const links = [
     { label: "Bingo", href: '/create-match' },
     { label: "Tug of War", href: '/tug-mode' },
     { label: "Ticket to Ride", href: '/create-ttr-match' },
+    { label: "How to Play", href: '/how-to-play' },
 ];
 
 export default function NavBar() {
@@ -35,8 +36,8 @@ export default function NavBar() {
                         return (
                             <Link key={link.href} href={link.href}>
                                 <div className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
-                                        ? 'text-white bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.1)]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    ? 'text-white bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.1)]'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}>
                                     {link.label}
                                     {isActive && (
