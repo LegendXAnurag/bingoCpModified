@@ -177,16 +177,14 @@ export default function HomePage(): React.JSX.Element {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, type: 'spring', damping: 20 }}
-            className="relative rounded-3xl px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden group"
+            className="relative rounded-3xl px-10 py-12 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden group bg-white/5 backdrop-blur-md"
           >
             {/* Animated Background */}
             <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#00f0ff]/10 to-[#7000ff]/10 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="absolute inset-0 z-0 border border-white/5 rounded-3xl group-hover:border-white/10 transition-colors duration-500" />
 
             <div className="relative z-10 w-full md:w-auto text-center md:text-left">
-              <h2 className="text-3xl md:text-4xl font-black text-white font-heading mb-3 tracking-tight group-hover:text-transparent group-hover:bg-clip-text transition-colors duration-500"
-                style={{ backgroundImage: 'linear-gradient(90deg, #fff, #00f0ff)' }}
-              >
+              <h2 className="text-3xl md:text-4xl font-black text-white font-heading mb-3 tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[#00f0ff] group-hover:to-[#7000ff] transition-all duration-500">
                 Ready to compete?
               </h2>
               <p className="text-[15px] font-body text-gray-400 group-hover:text-gray-300 transition-colors duration-500">
@@ -196,7 +194,7 @@ export default function HomePage(): React.JSX.Element {
 
             <Link href="/create-match" className="shrink-0 relative z-10 w-full md:w-auto">
               <button
-                className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-[15px] font-bold uppercase tracking-wider hover:scale-105 transition-all duration-300 font-heading bg-white text-black hover:bg-transparent hover:text-white border-[2px] border-transparent hover:border-[#00f0ff]"
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-[15px] font-bold uppercase tracking-wider hover:scale-105 transition-all duration-300 font-heading bg-white text-black hover:bg-[#00f0ff]/10 hover:text-white border-[2px] border-transparent hover:border-[#00f0ff]"
                 style={{
                   boxShadow: '0 0 40px rgba(0,240,255,0.2)',
                 }}
