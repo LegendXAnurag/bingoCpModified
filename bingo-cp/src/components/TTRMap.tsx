@@ -269,39 +269,43 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                                     x2={x2 + offsetX}
                                     y2={y2 + offsetY}
                                     stroke="transparent"
-                                    strokeWidth="20"
+                                    strokeWidth="24"
                                 />
+                                {/* Glowing claimed route */}
+                                {isClaimed && (
+                                    <line
+                                        x1={x1 + offsetX}
+                                        y1={y1 + offsetY}
+                                        x2={x2 + offsetX}
+                                        y2={y2 + offsetY}
+                                        stroke={ownerColor}
+                                        strokeWidth="16"
+                                        strokeOpacity="0.4"
+                                        style={{ filter: "blur(4px)" }}
+                                    />
+                                )}
                                 <line
                                     x1={x1 + offsetX}
                                     y1={y1 + offsetY}
                                     x2={x2 + offsetX}
                                     y2={y2 + offsetY}
                                     stroke={completedTrackIds.has(track.id) ? "white" : confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "yellow" : isClaimed ? ownerColor : 'rgba(0,0,0,0.5)'}
-                                    strokeWidth={completedTrackIds.has(track.id) ? "12" : "8"}
-                                    strokeDasharray={isClaimed ? "none" : "12, 4"}
-                                    className={`transition-all group-hover:stroke-[10px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''} ${completedTrackIds.has(track.id) || confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse stroke-[10px]" : ""}`}
+                                    strokeWidth={completedTrackIds.has(track.id) ? "10" : "8"}
+                                    strokeDasharray={isClaimed ? "none" : "12, 6"}
+                                    className={`transition-all duration-300 group-hover:stroke-[12px] ${!isClaimed ? 'group-hover:stroke-white group-hover:opacity-80' : ''} ${completedTrackIds.has(track.id) || confirmTrack?.id === track.id || confirmStationTrack?.id === track.id ? "animate-pulse" : ""}`}
                                 />
                                 {trackState && trackState.stationedBy && trackState.stationedBy.length > 0 && (
                                     trackState.stationedBy.map((stationTeam, idx) => {
                                         const midX = (x1 + x2) / 2 + offsetX;
                                         const midY = (y1 + y2) / 2 + offsetY;
-                                        const dx = x2 - x1;
-                                        const dy = y2 - y1;
-                                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
-                                        // Perpendicular rect
                                         return (
-                                            <rect
-                                                key={idx}
-                                                x={midX - 4}
-                                                y={midY - 12}
-                                                width={8}
-                                                height={24}
-                                                fill={stationTeam}
-                                                stroke="white"
-                                                strokeWidth="1"
-                                                transform={`rotate(${angle + 90}, ${midX}, ${midY})`}
-                                            />
+                                            <g key={idx} transform={`translate(${midX},${midY})`}>
+                                                <circle r="14" fill={stationTeam} opacity="0.4" style={{ filter: "blur(4px)" }} />
+                                                <circle r="10" fill="#222" stroke="white" strokeWidth="2" />
+                                                <circle r="6" fill={stationTeam} />
+                                                <path d="M-4,1 L0,-3 L4,1 L4,4 L-4,4 Z" fill="white" />
+                                            </g>
                                         );
                                     })
                                 )}
@@ -326,23 +330,34 @@ export default function TTRMap({ matchId, state, currentTeam, onUpdate, readOnly
                             <g
                                 key={city.id}
                                 transform={`translate(${cx}, ${cy})`}
-                                className={`pointer-events-auto group`}
+                                className={`pointer-events-auto group cursor-pointer`}
                             >
+                                {/* Active focused ring */}
+                                {isFocusedCity && (
+                                    <circle r="20" fill="none" stroke="#00f0ff" strokeWidth="2" strokeOpacity="0.8" className="animate-ping" />
+                                )}
+
+                                <circle r="12" fill={state.mapData ? "red" : "#111"} opacity="0.4" style={{ filter: "blur(3px)" }} />
                                 {/* City Marker */}
                                 <circle
-                                    r={isFocusedCity ? 14 : 6}
-                                    fill={(state.mapData ? "red" : "#333")}
+                                    r={isFocusedCity ? 12 : 7}
+                                    fill={state.mapData ? "red" : "#222"}
                                     stroke={isFocusedCity ? "#00f0ff" : "white"}
-                                    strokeWidth={isFocusedCity ? "4" : "2"}
-                                    className={isFocusedCity ? "animate-pulse" : ""}
+                                    strokeWidth={isFocusedCity ? "3" : "2"}
+                                    className={`transition-all duration-300 ${isFocusedCity ? "animate-pulse" : "group-hover:stroke-[#00f0ff] group-hover:r-8"}`}
                                 />
+                                <circle r="3" fill="red" opacity={state.mapData ? 0 : 0.8} />
 
                                 {/* City Name */}
                                 <text
-                                    y={-15}
+                                    y={-16}
                                     textAnchor="middle"
-                                    className="text-xs font-bold pointer-events-none select-none fill-black transition-all group-hover:font-extrabold"
-                                    style={{ textShadow: "0px 0px 2px white" }} // Outline for readability
+                                    className="text-[13px] font-extrabold focus:outline-none select-none transition-all group-hover:fill-white"
+                                    style={{
+                                        fill: "#000",
+                                        textShadow: "1.5px 1.5px 0 #fff, -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 0px 3px 6px rgba(0,0,0,0.6)",
+                                        fontFamily: "'Courier New', Courier, monospace"
+                                    }}
                                 >
                                     {city.name}
                                 </text>

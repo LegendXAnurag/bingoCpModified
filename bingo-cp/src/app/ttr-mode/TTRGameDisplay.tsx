@@ -348,85 +348,109 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
             </div>
 
             {/* ╔══════════════════════════════════════════════
-                    MAP — fills all remaining viewport height
+                    MAIN CONTENT — Map + Tickets Sidebar
                 ══════════════════════════════════════════════╗ */}
             <div
-                className="w-full relative overflow-hidden shrink-0"
+                className="flex flex-col xl:flex-row w-full shrink-0"
                 style={{
                     height: mapHeight,
-                    minHeight: '350px',
+                    minHeight: '400px',
                     borderTop: '1px solid rgba(0,240,255,0.04)',
                 }}
             >
-                <TTRMap
-                    matchId={match.id}
-                    state={ttrState}
-                    currentTeam={currentTeam}
-                    onUpdate={handleStateUpdate}
-                    readOnly={isSpectator}
-                    focusedTicket={focusedTicket}
-                    setFocusedTicket={setFocusedTicket}
-                />
+                {/* LEFT: Map */}
+                <div className="flex-1 relative overflow-hidden bg-[#000] p-4 lg:p-6 lg:pb-0 xl:pr-0">
+                    <div className="w-full h-full relative rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-white/5 bg-[#0a0a0a]">
+                        <TTRMap
+                            matchId={match.id}
+                            state={ttrState}
+                            currentTeam={currentTeam}
+                            onUpdate={handleStateUpdate}
+                            readOnly={isSpectator}
+                            focusedTicket={focusedTicket}
+                            setFocusedTicket={setFocusedTicket}
+                        />
+                    </div>
+                </div>
+
+                {/* RIGHT: Tickets Sidebar */}
+                {!isSpectator && (
+                    <div className="w-full xl:w-[280px] shrink-0 flex flex-col bg-[#050505] xl:border-l border-white/5 p-4 lg:p-6 pb-0 overflow-hidden" style={{ maxHeight: '100%' }}>
+                        <div className="flex items-center gap-2 px-4 py-3 border border-white/10 rounded-xl mb-4 bg-white/[0.02]">
+                            <div className="w-1.5 h-4 rounded-full" style={{ backgroundColor: '#a87fff', boxShadow: '0 0 8px #a87fff' }} />
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-[#a87fff] font-heading">My Tickets</h3>
+                        </div>
+                        <div className="flex-1 overflow-hidden pb-4 flex flex-col min-h-0">
+                            <MyTickets
+                                matchId={match.id}
+                                state={ttrState}
+                                currentTeam={currentTeam}
+                                onUpdate={handleStateUpdate}
+                                focusedTicket={focusedTicket}
+                                setFocusedTicket={setFocusedTicket}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ╔══════════════════════════════════════════════
                     BELOW MAP — Marketplace (3x) + Solve Log (1x)
                 ══════════════════════════════════════════════╗ */}
             <div
-                className="border-t border-white/5"
-                style={{ display: 'grid', gridTemplateColumns: '3fr 1fr' }}
+                className="border-t border-white/5 bg-[#030303]"
+                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
             >
-
-                {/* LEFT: Coin Marketplace */}
-                <div className="border-r border-white/5">
-                    <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
-                        <div className="w-1 h-4 rounded-full bg-yellow-400" />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-yellow-400 font-heading">Coin Marketplace</h3>
+                {/* Marketplace */}
+                <div className="border-r border-white/5 xl:col-span-3">
+                    <div className="flex items-center gap-2 px-5 py-4 border-b border-white/5 bg-white/[0.01]">
+                        <div className="w-1.5 h-4 rounded-full" style={{ backgroundColor: '#eab308', boxShadow: '0 0 8px #eab308' }} />
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-yellow-500 font-heading">Coin Marketplace</h3>
                     </div>
-                    <CoinMarketplace state={ttrState} />
+                    <div className="p-4 lg:p-6">
+                        <CoinMarketplace state={ttrState} />
+                    </div>
                 </div>
 
-                {/* RIGHT: Solve Log */}
-                <div className="flex flex-col min-h-[200px]">
-                    <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
-                        <div className="w-1 h-4 rounded-full bg-[#00f0ff]" />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-[#00f0ff] font-heading">Solve Log</h3>
+                {/* Solve Log */}
+                <div className="flex flex-col min-h-[250px] xl:col-span-1 border-l border-white/5 bg-[#050505]/50">
+                    <div className="flex items-center gap-2 px-5 py-4 border-b border-white/5 bg-white/[0.01]">
+                        <div className="w-1.5 h-4 rounded-full" style={{ backgroundColor: '#00f0ff', boxShadow: '0 0 8px #00f0ff' }} />
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-[#00f0ff] font-heading">Solve Log</h3>
                     </div>
                     {solveLog.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center py-10 gap-3">
-                            <div className="w-px h-8 bg-white/10 rounded-full" />
-                            <p className="text-xs text-[#4b5563] font-body">No solves yet</p>
+                        <div className="flex-1 flex flex-col items-center justify-center py-10 gap-3 opacity-60">
+                            <div className="w-px h-10 bg-gradient-to-b from-white/20 to-transparent rounded-full" />
+                            <p className="text-xs uppercase tracking-widest text-[#6b7280] font-heading">No solves yet</p>
                         </div>
                     ) : (
-                        <ul className="divide-y divide-white/5  max-h-[320px] overflow-y-auto">
-                            {solveLog.map((entry, i) => {
+                        <ul className="divide-y divide-white/5 max-h-[400px] overflow-y-auto no-scrollbar">
+                            {solveLog.slice().reverse().map((entry, i) => {
                                 const c = COLOR_HEX[entry.team?.toLowerCase()] || '#6b7280';
                                 return (
-                                    <li key={i} className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
-                                        <div className="w-0.5 shrink-0 self-stretch rounded-full opacity-80 mt-1" style={{ backgroundColor: c }} />
+                                    <li key={i} className="flex items-start gap-3 px-5 py-3.5 hover:bg-white/[0.02] transition-colors group">
+                                        <div className="w-1 shrink-0 self-stretch rounded-full opacity-60 group-hover:opacity-100 transition-opacity mt-1" style={{ backgroundColor: c, boxShadow: `0 0 5px ${c}` }} />
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-xs text-white font-semibold font-body truncate">{entry.problemName}</p>
-                                            <p className="text-[10px] text-[#6b7280] font-body mt-0.5 flex flex-wrap gap-1 items-center">
-                                                <span className="font-bold tracking-wider uppercase font-heading" style={{ color: c }}>{entry.team}</span>
+                                            <p className="text-sm text-white font-semibold font-body truncate leading-tight">{entry.problemName}</p>
+                                            <p className="text-[11px] text-[#888] font-body mt-1.5 flex flex-wrap gap-1.5 items-center">
+                                                <span className="font-bold tracking-wider uppercase font-heading px-1.5 py-0.5 rounded-sm bg-white/5" style={{ color: c }}>{entry.team}</span>
                                                 {entry.handle && (
                                                     <>
-                                                        <span className="text-white/40">·</span>
-                                                        <span className="text-[#a3a3a3]">{entry.handle}</span>
-                                                    </>
-                                                )}
-                                                {entry.coinsAwarded ? (
-                                                    <>
-                                                        <span className="text-white/40">·</span>
-                                                        <span className="text-yellow-400 font-mono text-[9px]">+{entry.coinsAwarded}🪙</span>
-                                                    </>
-                                                ) : null}
-                                                {entry.timestamp && (
-                                                    <>
-                                                        <span className="text-white/40">·</span>
-                                                        <span className="font-mono text-[9px] text-[#6b7280]">{entry.timestamp}</span>
+                                                        <span className="text-white/20">/</span>
+                                                        <span className="text-[#ccc]">{entry.handle}</span>
                                                     </>
                                                 )}
                                             </p>
+                                            {(entry.coinsAwarded || entry.timestamp) && (
+                                                <p className="text-[10px] font-mono mt-1.5 flex gap-2 items-center">
+                                                    {entry.coinsAwarded ? (
+                                                        <span className="px-1.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">+{entry.coinsAwarded}🪙</span>
+                                                    ) : null}
+                                                    {entry.timestamp && (
+                                                        <span className="text-[#555] ml-auto">{entry.timestamp}</span>
+                                                    )}
+                                                </p>
+                                            )}
                                         </div>
                                     </li>
                                 );
@@ -435,28 +459,6 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                     )}
                 </div>
             </div>
-
-            {/* ╔══════════════════════════════════════════════
-                    MY DESTINATION TICKETS — full width
-                ══════════════════════════════════════════════╗ */}
-            {!isSpectator && (
-                <div className="border-t border-white/5">
-                    <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
-                        <div className="w-1 h-4 rounded-full bg-[#a87fff]" />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-[#a87fff] font-heading">My Destination Tickets</h3>
-                    </div>
-                    <div className="p-4">
-                        <MyTickets
-                            matchId={match.id}
-                            state={ttrState}
-                            currentTeam={currentTeam}
-                            onUpdate={handleStateUpdate}
-                            focusedTicket={focusedTicket}
-                            setFocusedTicket={setFocusedTicket}
-                        />
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
