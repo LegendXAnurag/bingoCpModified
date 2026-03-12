@@ -5,7 +5,6 @@ import { TTRState, Ticket } from "../app/types/match";
 import { TICKETS, CITIES } from "../lib/ttrData";
 import { getCompletedRoute } from "../lib/ttrLogic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Ticket as TicketIcon, MapPin, CheckCircle2 } from "lucide-react";
 
 interface MyTicketsProps {
@@ -46,65 +45,75 @@ export default function MyTickets({ matchId, state, currentTeam, onUpdate, focus
                     My Tickets
                 </CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0 flex flex-col min-h-0">
+            <CardContent className="flex-1 overflow-y-auto p-0">
                 {myTickets.length === 0 ? (
                     <div className="p-4 text-center text-gray-500 font-body">No tickets yet. Draw one!</div>
                 ) : (
-                    <ScrollArea className="flex-1">
-                        <div className="flex flex-col gap-3 py-2 px-3 pr-4">
-                            {myTickets.map(ticket => {
-                                const isCompleted = getCompletedRoute(state, currentTeam, ticket.city1, ticket.city2) !== null;
-                                const isFocused = focusedTicket?.id === ticket.id;
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+                        {myTickets.map(ticket => {
+                            const isCompleted = getCompletedRoute(state, currentTeam, ticket.city1, ticket.city2) !== null;
+                            const isFocused = focusedTicket?.id === ticket.id;
 
-                                return (
-                                    <div
-                                        key={ticket.id}
-                                        className={`relative overflow-hidden p-3 rounded-xl border transition-all duration-300 flex flex-col justify-between bg-[#0a0a0a] group hover:border-[#00f0ff]/50 cursor-pointer ${isFocused ? 'border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.15)] ring-1 ring-[#00f0ff]' : 'border-white/10'}`}
-                                        onClick={() => setFocusedTicket && setFocusedTicket(isFocused ? null : ticket)}
-                                    >
-                                        {/* Ticket Perforated Edge Effect */}
-                                        <div className="absolute top-1/2 -translate-y-1/2 right-0 w-3 h-8 -mr-1.5 bg-[#050505] rounded-full border border-white/10" />
-                                        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-3 h-8 -ml-1.5 bg-[#050505] rounded-full border border-white/10" />
+                            return (
+                                <div
+                                    key={ticket.id}
+                                    className={`relative overflow-hidden p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between h-full bg-[#0a0a0a] group hover:border-[#00f0ff]/50 ${isFocused ? 'border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.15)] ring-1 ring-[#00f0ff]' : 'border-white/10'}`}
+                                >
+                                    {/* Ticket Perforated Edge Effect */}
+                                    <div className="absolute top-0 right-4 w-12 h-4 -mt-2 bg-[#050505] rounded-full border border-white/10" />
+                                    <div className="absolute bottom-0 left-4 w-12 h-4 -mb-2 bg-[#050505] rounded-full border border-white/10" />
 
-                                        {/* Content */}
-                                        <div className="flex-1 flex flex-col justify-center relative z-10 pl-2 pr-2">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="text-[9px] uppercase font-bold tracking-widest font-heading text-white/50">Route</div>
-                                                {isCompleted && (
-                                                    <div className="flex items-center gap-1 text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-emerald-400/20">
-                                                        <CheckCircle2 className="w-2.5 h-2.5" /> Done
-                                                    </div>
-                                                )}
+                                    {/* Content */}
+                                    <div className="flex-1 flex flex-col justify-center relative z-10">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="text-[10px] uppercase font-bold tracking-widest font-heading text-white/50">Destination Route</div>
+                                            {isCompleted && (
+                                                <div className="flex items-center gap-1 text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-emerald-400/20">
+                                                    <CheckCircle2 className="w-3 h-3" /> Done
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-col gap-2 mb-6">
+                                            <div className="flex items-center gap-2">
+                                                <MapPin className="w-4 h-4 text-[#00f0ff]" />
+                                                <span className="font-bold text-white text-sm truncate" title={getCityName(ticket.city1)}>{getCityName(ticket.city1)}</span>
                                             </div>
-
-                                            <div className="flex flex-col gap-1.5 mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="w-3.5 h-3.5 text-[#00f0ff] shrink-0" />
-                                                    <span className="font-bold text-white text-xs truncate" title={getCityName(ticket.city1)}>{getCityName(ticket.city1)}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 ml-1.5 border-l-2 border-white/10 pl-2.5 py-0.5" />
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="w-3.5 h-3.5 text-[#a87fff] shrink-0" />
-                                                    <span className="font-bold text-white text-xs truncate" title={getCityName(ticket.city2)}>{getCityName(ticket.city2)}</span>
-                                                </div>
+                                            <div className="flex items-center gap-2 ml-1.5 border-l-2 border-white/10 pl-3 py-1">
+                                                <div className="h-px w-2 bg-white/20" />
                                             </div>
-
-                                            <div className="flex items-center justify-between mt-1 pt-2 border-t border-white/5">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] text-[#888] font-bold tracking-widest uppercase font-heading">Reward</span>
-                                                    <span className="text-yellow-400 font-bold font-mono text-sm">{ticket.points} <span className="text-[10px] text-white/40">pts</span></span>
-                                                </div>
+                                            <div className="flex items-center gap-2">
+                                                <MapPin className="w-4 h-4 text-[#a87fff]" />
+                                                <span className="font-bold text-white text-sm truncate" title={getCityName(ticket.city2)}>{getCityName(ticket.city2)}</span>
                                             </div>
                                         </div>
-                                        {/* Decorative subtle completion glow */}
-                                        {isCompleted && (
-                                            <div className="absolute inset-0 bg-emerald-500/[0.03] pointer-events-none rounded-xl" />
-                                        )}
+
+                                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-white/40 uppercase tracking-widest font-heading">Reward</span>
+                                                <span className="text-yellow-400 font-mono font-bold align-bottom leading-none">{ticket.points} pts</span>
+                                            </div>
+
+                                            <button
+                                                onClick={() => setFocusedTicket(isFocused ? null : ticket)}
+                                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest font-heading transition-colors ${isFocused
+                                                        ? 'bg-[#00f0ff] text-black hover:bg-[#00f0ff]/80'
+                                                        : 'bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/10'
+                                                    }`}
+                                            >
+                                                {isFocused ? 'Unfocus' : 'Show Map'}
+                                            </button>
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </ScrollArea>
+
+                                    {/* Decorative subtle completion glow */}
+                                    {isCompleted && (
+                                        <div className="absolute inset-0 bg-emerald-500/[0.03] pointer-events-none rounded-xl" />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
             </CardContent>
         </Card>
