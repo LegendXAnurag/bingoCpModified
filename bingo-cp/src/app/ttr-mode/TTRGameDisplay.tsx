@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Match, TTRState, Ticket } from "@/app/types/match";
 import TTRMap from "@/components/TTRMap";
 import CoinMarketplace from "@/components/CoinMarketplace";
-import MyTickets from "@/components/MyTickets";
-import { calculateTotalScore } from "../../lib/ttrLogic";
+import { calculateTotalScore, getCompletedRoute } from "../../lib/ttrLogic";
+import { TICKETS, CITIES } from "../../lib/ttrData";
 import { AuthProvider, useTtrAuth } from "../ttr/AuthContext";
 import JoinScreen from "../ttr/JoinScreen";
-import { TrainFront } from "lucide-react";
+import { TrainFront, MapPin, CheckCircle2, Ticket as TicketIcon } from "lucide-react";
 
 interface TTRGameDisplayProps {
     match: Match;
@@ -46,13 +46,49 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
     const [lastSync, setLastSync] = useState<Date>(new Date());
     const [solveLog, setSolveLog] = useState<SolveEntry[]>([]);
     const [now, setNow] = useState(new Date());
-    const [focusedTicket, setFocusedTicket] = useState<Ticket | null>(null);
+    const [focusedTicket, setFocusedTicketRaw] = useState<Ticket | null>(null);
+    // Tracks whether the user has manually overridden the focus (so auto-focus doesn't fight them)
+    const userClearedFocusRef = useRef<boolean>(false);
+
+    // Wrapper so user clicks mark the ref
+    const setFocusedTicket = (t: Ticket | null) => {
+        userClearedFocusRef.current = (t === null); // user explicitly cleared
+        setFocusedTicketRaw(t);
+    };
 
     // Clock tick
     useEffect(() => {
         const id = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(id);
     }, []);
+
+    // Auto-highlight completed routes — only when user hasn't manually cleared focus
+    useEffect(() => {
+        if (!ttrState || !currentTeam) return;
+        if (userClearedFocusRef.current) return; // respect user's choice
+        const player = ttrState.players[currentTeam];
+        if (!player) return;
+
+        const allTickets = player.destinations.map((id: string) => {
+            if (ttrState.mapData?.tickets) return ttrState.mapData.tickets.find(t => t.id === id);
+            return TICKETS.find(t => t.id === id);
+        }).filter(Boolean) as Ticket[];
+
+        const completedTickets = allTickets.filter(t =>
+            getCompletedRoute(ttrState, currentTeam, t.city1, t.city2) !== null
+        );
+
+        // Keep the current focus if it's still a valid completed ticket
+        if (focusedTicket && completedTickets.some(t => t.id === focusedTicket.id)) return;
+
+        // Auto-focus the first completed ticket only (don't clear if none)
+        if (completedTickets.length > 0) {
+            setFocusedTicketRaw(completedTickets[0]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ttrState, currentTeam]);
+
+
 
     useEffect(() => {
         if (user) setCurrentTeam(user.teamColor);
@@ -192,8 +228,9 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
     })).sort((a: any, b: any) => b.displayScore - a.displayScore);
     const scorecardH = players.length * 52 + 8; // approx height for calc
 
-    // ─── Navbar height = 64px, header row = 56px, scorecard depends on teams
-    const mapHeight = `calc(100vh - 64px - 56px - ${scorecardH}px)`;
+    // ─── Navbar=64px, header=56px, scorecard, ticket-tab-bar≈40px (non-spectator only)
+    const ticketBarH = isSpectator ? 0 : 40;
+    const mapHeight = `calc(100vh - 64px - 56px - ${scorecardH}px - ${ticketBarH}px)`;
 
     return (
         <div className="flex flex-col bg-[#050505] min-h-screen w-full max-w-[1600px] mx-auto">
@@ -348,6 +385,88 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
             </div>
 
             {/* ╔══════════════════════════════════════════════
+                    TICKET TABS — above the map (non-spectator only)
+                ══════════════════════════════════════════════╗ */}
+            {!isSpectator && (() => {
+                const player = ttrState.players[currentTeam];
+                if (!player) return null;
+
+                const myTickets = player.destinations.map((id: string) => {
+                    if (ttrState.mapData?.tickets) {
+                        return ttrState.mapData.tickets.find(t => t.id === id);
+                    }
+                    return TICKETS.find(t => t.id === id);
+                }).filter(Boolean) as Ticket[];
+
+                if (myTickets.length === 0) return null;
+
+                const getCityName = (id: string) => {
+                    if (id === 'optimistic_draw') return '...';
+                    if (ttrState.mapData) return ttrState.mapData.cities.find(c => c.id === id)?.name || id;
+                    return CITIES.find(c => c.id === id)?.name || id;
+                };
+
+                return (
+                    <div
+                        className="shrink-0 flex items-center gap-2 px-4 py-2 overflow-x-auto"
+                        style={{
+                            borderTop: '1px solid rgba(168,127,255,0.15)',
+                            borderBottom: '1px solid rgba(168,127,255,0.1)',
+                            background: 'rgba(5,5,5,0.97)',
+                            scrollbarWidth: 'none',
+                        }}
+                    >
+                        <div className="flex items-center gap-1.5 text-[#a87fff] shrink-0 mr-1">
+                            <TicketIcon className="w-3.5 h-3.5" />
+                            <span className="text-[10px] uppercase tracking-widest font-bold font-heading">Tickets</span>
+                        </div>
+                        <div className="w-px h-4 bg-white/10 shrink-0" />
+                        <div className="flex items-center gap-2 flex-nowrap">
+                            {myTickets.map(ticket => {
+                                const isCompleted = getCompletedRoute(ttrState, currentTeam, ticket.city1, ticket.city2) !== null;
+                                const isFocused = focusedTicket?.id === ticket.id;
+                                return (
+                                    <button
+                                        key={ticket.id}
+                                        onClick={() => {
+                                            userClearedFocusRef.current = isFocused; // mark as user-cleared if deselecting
+                                            setFocusedTicketRaw(isFocused ? null : ticket);
+                                        }}
+                                        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold font-heading transition-all duration-200 whitespace-nowrap"
+                                        style={isFocused ? {
+                                            background: 'rgba(168,127,255,0.2)',
+                                            border: '1px solid rgba(168,127,255,0.6)',
+                                            color: '#c4a8ff',
+                                            boxShadow: '0 0 12px rgba(168,127,255,0.2)',
+                                        } : isCompleted ? {
+                                            background: 'rgba(16,185,129,0.08)',
+                                            border: '1px solid rgba(16,185,129,0.3)',
+                                            color: '#34d399',
+                                        } : {
+                                            background: 'rgba(255,255,255,0.04)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            color: 'rgba(255,255,255,0.6)',
+                                        }}
+                                    >
+                                        {isCompleted && <CheckCircle2 className="w-3 h-3" />}
+                                        <span>{getCityName(ticket.city1)}</span>
+                                        <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
+                                        <span>{getCityName(ticket.city2)}</span>
+                                        <span
+                                            className="ml-1 font-mono tabular-nums text-[10px]"
+                                            style={{ color: isFocused ? '#c4a8ff' : isCompleted ? '#34d399' : '#eab308', opacity: 0.9 }}
+                                        >
+                                            {ticket.points}pts
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            })()}
+
+            {/* ╔══════════════════════════════════════════════
                     MAP — fills all remaining viewport height
                 ══════════════════════════════════════════════╗ */}
             <div
@@ -367,6 +486,77 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                     focusedTicket={focusedTicket}
                     setFocusedTicket={setFocusedTicket}
                 />
+
+                {/* Ticket details overlay at bottom of map */}
+                {focusedTicket && !isSpectator && (() => {
+                    const getCityName = (id: string) => {
+                        if (id === 'optimistic_draw') return '...';
+                        if (ttrState.mapData) return ttrState.mapData.cities.find(c => c.id === id)?.name || id;
+                        return CITIES.find(c => c.id === id)?.name || id;
+                    };
+                    const isCompleted = getCompletedRoute(ttrState, currentTeam, focusedTicket.city1, focusedTicket.city2) !== null;
+                    return (
+                        <div
+                            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 px-5 py-3 rounded-2xl"
+                            style={{
+                                background: 'rgba(8,8,12,0.92)',
+                                border: isCompleted ? '1px solid rgba(16,185,129,0.4)' : '1px solid rgba(168,127,255,0.35)',
+                                backdropFilter: 'blur(16px)',
+                                boxShadow: isCompleted
+                                    ? '0 4px 32px rgba(16,185,129,0.12), 0 0 0 1px rgba(16,185,129,0.08)'
+                                    : '0 4px 32px rgba(168,127,255,0.12), 0 0 0 1px rgba(168,127,255,0.08)',
+                                minWidth: '280px',
+                                maxWidth: '90vw',
+                            }}
+                        >
+                            {/* Origin */}
+                            <div className="flex flex-col items-center gap-0.5">
+                                <MapPin className="w-4 h-4 text-[#00f0ff]" />
+                                <span className="text-xs font-bold text-white font-heading">{getCityName(focusedTicket.city1)}</span>
+                                <span className="text-[9px] text-white/40 uppercase tracking-widest font-heading">Origin</span>
+                            </div>
+
+                            {/* Arrow + points */}
+                            <div className="flex flex-col items-center gap-1 flex-1">
+                                <div className="flex items-center gap-1 text-white/20">
+                                    <div className="w-8 h-px bg-white/20" />
+                                    <span className="text-white/30 text-xs">✈</span>
+                                    <div className="w-8 h-px bg-white/20" />
+                                </div>
+                                <div
+                                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-black font-mono"
+                                    style={isCompleted ? {
+                                        background: 'rgba(16,185,129,0.12)',
+                                        color: '#34d399',
+                                        border: '1px solid rgba(16,185,129,0.3)',
+                                    } : {
+                                        background: 'rgba(234,179,8,0.1)',
+                                        color: '#eab308',
+                                        border: '1px solid rgba(234,179,8,0.25)',
+                                    }}
+                                >
+                                    {isCompleted ? <CheckCircle2 className="w-3 h-3" /> : null}
+                                    {isCompleted ? 'DONE' : `+${focusedTicket.points} pts`}
+                                </div>
+                            </div>
+
+                            {/* Destination */}
+                            <div className="flex flex-col items-center gap-0.5">
+                                <MapPin className="w-4 h-4 text-[#a87fff]" />
+                                <span className="text-xs font-bold text-white font-heading">{getCityName(focusedTicket.city2)}</span>
+                                <span className="text-[9px] text-white/40 uppercase tracking-widest font-heading">Destination</span>
+                            </div>
+
+                            {/* Close button */}
+                            <button
+                                onClick={() => setFocusedTicket(null)}
+                                className="ml-2 w-6 h-6 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    );
+                })()}
             </div>
 
             {/* ╔══════════════════════════════════════════════
@@ -436,27 +626,7 @@ function TTRGameContent({ match, currentTeam, setCurrentTeam, hasStarted = false
                 </div>
             </div>
 
-            {/* ╔══════════════════════════════════════════════
-                    MY DESTINATION TICKETS — full width
-                ══════════════════════════════════════════════╗ */}
-            {!isSpectator && (
-                <div className="border-t border-white/5">
-                    <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
-                        <div className="w-1 h-4 rounded-full bg-[#a87fff]" />
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-[#a87fff] font-heading">My Destination Tickets</h3>
-                    </div>
-                    <div className="p-4">
-                        <MyTickets
-                            matchId={match.id}
-                            state={ttrState}
-                            currentTeam={currentTeam}
-                            onUpdate={handleStateUpdate}
-                            focusedTicket={focusedTicket}
-                            setFocusedTicket={setFocusedTicket}
-                        />
-                    </div>
-                </div>
-            )}
+
         </div>
     );
 }
