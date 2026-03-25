@@ -26,9 +26,8 @@ const TUG_SECTIONS = [
 
 const TTR_SECTIONS = [
     { id: 'overview', title: 'Overview' },
-    { id: 'economy', title: 'Economy & Coins' },
-    { id: 'claiming-routes', title: 'Claiming Routes' },
-    { id: 'tickets', title: 'Tickets & Objectives' },
+    { id: 'terminology', title: 'Key Terminology' },
+    { id: 'scoring', title: 'Scoring Points' },
     { id: 'end-condition', title: 'Game End Condition' },
 ];
 

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../app/lib/prisma';
 import { TTRParams, TTRState, ProblemCell, TTRPlayerState, TTRTrackState } from '../../app/types/match';
+import { fetchUserSubmissions } from '../../app/lib/codeforces';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -50,8 +51,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const marketProblems: ProblemCell[] = [];
         const allProbs: ProblemCell[] = [];
 
+        // Fetch solved problems for all team members
+        const solvedSet = new Set<string>();
+        const allHandles: string[] = [];
+        teams.forEach((team: any) => {
+            const teamHandles = team.members
+                .map((m: any) => typeof m === 'string' ? m.trim() : m?.handle?.trim() || '')
+                .filter((m: string) => m !== '');
+            allHandles.push(...teamHandles);
+        });
+
+        await Promise.all(allHandles.map(async (handle) => {
+            try {
+                const submissions = await fetchUserSubmissions(handle);
+                if (Array.isArray(submissions)) {
+                    for (const sub of submissions as Array<any>) {
+                        if (sub.verdict === 'OK' && sub.problem) {
+                            solvedSet.add(`${sub.problem.contestId}-${sub.problem.index}`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(`Error fetching submissions for ${handle}`, e);
+            }
+        }));
+
+        const unsolvedProblems = allProblems.filter(p => !solvedSet.has(`${p.contestId}-${p.index}`));
+
         const pickProblems = (min: number, max: number, count: number, coins: number, row: number) => {
-            const candidates = allProblems.filter(p => p.rating >= min && p.rating <= max);
+            let candidates = unsolvedProblems.filter(p => p.rating >= min && p.rating <= max);
+
+            // Fallback if not enough unsolved problems found
+            if (candidates.length < count) {
+                const fallbackCandidates = allProblems.filter(p => p.rating >= min && p.rating <= max && solvedSet.has(`${p.contestId}-${p.index}`));
+                candidates = [...candidates, ...fallbackCandidates];
+            }
 
             for (let i = candidates.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
