@@ -292,7 +292,7 @@ export default function HelpPage(): React.JSX.Element {
           <p className="text-sm text-[#a3a3a3] font-body">Found a bug or want to request a feature? Reach out below.</p>
           <div className="flex flex-wrap gap-3">
             <a
-              href="mailto:bingocp.official@gmail.com"
+              href="mailto:saransh2304@gmail.com"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-105"
               style={{
                 background: "rgba(0,240,255,0.08)",
@@ -301,10 +301,10 @@ export default function HelpPage(): React.JSX.Element {
               }}
             >
               <Mail className="w-4 h-4" />
-              bingocp.official@gmail.com
+              saransh2304@gmail.com
             </a>
             <a
-              href="https://github.com/hocln"
+              href="https://github.com/legendxanurag/cp-games"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-105"
