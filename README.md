@@ -39,3 +39,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Contributing
 Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to the project.
+
+## Acknowledgements
+This project is a fork of [original-repo-link](https://github.com/hocln/bingo-cp), originally licensed under MIT.
